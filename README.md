@@ -1,36 +1,34 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Family Hair Salon & Wellness Spa
 
-## Getting Started
+Luxury website and appointment system for Family Hair Salon & Wellness Spa (Farmington, MI).
 
-First, run the development server:
+## Stack
+
+- Next.js 15 App Router
+- Cloudflare Workers via `@opennextjs/cloudflare`
+- D1, R2, KV on ConsultifyIT Cloudflare account
+
+## Local development
 
 ```bash
+npm install
+npx wrangler d1 migrations apply familysalonspa-db --local
+cp .dev.vars.example .dev.vars
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Deploy
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npx wrangler secret put SESSION_SECRET
+npm run deploy
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Credentials (seed)
 
-## Learn More
+- Admin: `admin@familysalonspa.com` / `SalonOwner2026!`
+- Staff PIN: `1234` (Sarah Chen, Maria Lopez)
 
-To learn more about Next.js, take a look at the following resources:
+## Docs
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See [docs/plans/01-master-plan.md](docs/plans/01-master-plan.md).

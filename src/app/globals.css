@@ -1,26 +1,73 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --salon-bg-main: #faf8f5;
+  --salon-bg-panel: #ffffff;
+  --salon-border: #e8e2d9;
+  --salon-text-heading: #1c1917;
+  --salon-text-body: #44403c;
+  --salon-accent: #b88e4c;
+  --salon-accent-hover: #9a7336;
+  --salon-accent-subtle: #f4ece1;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-salon-bg: var(--salon-bg-main);
+  --color-salon-panel: var(--salon-bg-panel);
+  --color-salon-border: var(--salon-border);
+  --color-salon-heading: var(--salon-text-heading);
+  --color-salon-body: var(--salon-text-body);
+  --color-salon-primary: var(--salon-accent);
+  --color-salon-hover: var(--salon-accent-hover);
+  --color-salon-light: var(--salon-accent-subtle);
+  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-jakarta);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--salon-bg-main);
+  color: var(--salon-text-body);
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+  line-height: 1.7;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-playfair), Georgia, serif;
+  color: var(--salon-text-heading);
+  line-height: 1.2;
+  font-weight: 500;
+}
+
+.fade-in {
+  animation: fadeIn 0.7s ease-out both;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gold-rule {
+  height: 1px;
+  background: var(--salon-accent);
+  opacity: 0.45;
+  border: none;
+}
+
+.editorial-panel {
+  background: var(--salon-bg-panel);
+  border: 1px solid var(--salon-border);
 }
