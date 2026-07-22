@@ -11,6 +11,10 @@ import {
   type SocialLinks,
 } from "@/lib/media";
 import {
+  DEFAULT_INSTAGRAM_FEED,
+  type InstagramFeedSettings,
+} from "@/lib/instagram";
+import {
   PALETTE_IDS,
   PALETTES,
   paletteDisplayName,
@@ -40,6 +44,7 @@ type SettingsData = {
   };
   media: MediaSettings;
   social: SocialLinks;
+  instagram_feed: InstagramFeedSettings;
 };
 
 export default function AdminSettingsPage() {
@@ -51,6 +56,8 @@ export default function AdminSettingsPage() {
   const [mapsUrlDraft, setMapsUrlDraft] = useState("");
   const [heroImageDraft, setHeroImageDraft] = useState("");
   const [socialDraft, setSocialDraft] = useState<SocialLinks>(DEFAULT_SOCIAL);
+  const [instagramDraft, setInstagramDraft] =
+    useState<InstagramFeedSettings>(DEFAULT_INSTAGRAM_FEED);
 
   useEffect(() => {
     async function load() {
@@ -62,6 +69,7 @@ export default function AdminSettingsPage() {
         setMapsUrlDraft(data.google_reviews?.maps_url || "");
         setHeroImageDraft(data.media?.hero_image || DEFAULT_MEDIA.hero_image);
         setSocialDraft(data.social || DEFAULT_SOCIAL);
+        setInstagramDraft(data.instagram_feed || DEFAULT_INSTAGRAM_FEED);
       } finally {
         setLoading(false);
       }
@@ -87,6 +95,7 @@ export default function AdminSettingsPage() {
         setMapsUrlDraft(data.google_reviews?.maps_url || "");
         setHeroImageDraft(data.media?.hero_image || DEFAULT_MEDIA.hero_image);
         setSocialDraft(data.social || DEFAULT_SOCIAL);
+        setInstagramDraft(data.instagram_feed || DEFAULT_INSTAGRAM_FEED);
       } else {
         setMessage("Failed to save settings.");
       }
@@ -104,6 +113,22 @@ export default function AdminSettingsPage() {
       setMessage(data.message || (data.ok ? "Reviews synced." : "Sync failed."));
       const refreshed = await fetch("/api/admin/settings");
       setSettings((await refreshed.json()) as SettingsData);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function syncInstagramNow() {
+    setSaving(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/instagram/sync", { method: "POST" });
+      const data = (await res.json()) as { ok?: boolean; message?: string };
+      setMessage(data.message || (data.ok ? "Instagram synced." : "Sync failed."));
+      const refreshed = await fetch("/api/admin/settings");
+      const next = (await refreshed.json()) as SettingsData;
+      setSettings(next);
+      setInstagramDraft(next.instagram_feed || DEFAULT_INSTAGRAM_FEED);
     } finally {
       setSaving(false);
     }
@@ -271,6 +296,133 @@ export default function AdminSettingsPage() {
         >
           Save social links
         </button>
+      </section>
+
+      <section className="editorial-panel mt-6 p-6">
+        <h2 className="font-serif text-lg text-salon-heading">Instagram feed</h2>
+        <p className="mt-2 text-sm text-salon-body">
+          Free auto-sync like{" "}
+          <a
+            href="https://citysidecafe.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2"
+          >
+            City Side Cafe
+          </a>
+          . Preferred: Behold JSON feed (custom grid on our site). Alternate: Trustindex
+          widget ID (same free provider City Side uses).
+        </p>
+        <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-salon-body">
+          <li>
+            Create a free{" "}
+            <a
+              href="https://behold.so/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2"
+            >
+              Behold
+            </a>{" "}
+            account and connect{" "}
+            <a
+              href="https://www.instagram.com/familysalonandspa/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2"
+            >
+              @familysalonandspa
+            </a>
+            .
+          </li>
+          <li>Add a JSON feed, copy the URL (feeds.behold.so/…), paste below, save, then Sync.</li>
+          <li>
+            Or use{" "}
+            <a
+              href="https://www.trustindex.io/widgets/instagram-feed-widget/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2"
+            >
+              Trustindex
+            </a>{" "}
+            free Instagram widget and paste the widget ID only.
+          </li>
+        </ol>
+        <label className="mt-4 block text-sm text-salon-body">
+          Instagram handle
+          <input
+            value={instagramDraft.handle}
+            onChange={(e) =>
+              setInstagramDraft((prev) => ({ ...prev, handle: e.target.value }))
+            }
+            className="mt-1 block w-full min-h-11 border border-salon-border bg-salon-panel px-3 text-salon-heading"
+            placeholder="familysalonandspa"
+          />
+        </label>
+        <label className="mt-3 block text-sm text-salon-body">
+          Behold JSON feed URL
+          <input
+            value={instagramDraft.behold_feed_url}
+            onChange={(e) =>
+              setInstagramDraft((prev) => ({
+                ...prev,
+                behold_feed_url: e.target.value,
+              }))
+            }
+            className="mt-1 block w-full min-h-11 border border-salon-border bg-salon-panel px-3 text-salon-heading"
+            placeholder="https://feeds.behold.so/yourFeedId"
+          />
+        </label>
+        <label className="mt-3 block text-sm text-salon-body">
+          Trustindex widget ID (optional)
+          <input
+            value={instagramDraft.trustindex_widget_id}
+            onChange={(e) =>
+              setInstagramDraft((prev) => ({
+                ...prev,
+                trustindex_widget_id: e.target.value,
+              }))
+            }
+            className="mt-1 block w-full min-h-11 border border-salon-border bg-salon-panel px-3 text-salon-heading"
+            placeholder="876a61503e4c847"
+          />
+        </label>
+        <p className="mt-3 text-xs text-salon-body">
+          Last synced: {instagramDraft.last_synced_at || "Not synced yet"}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button
+            type="button"
+            disabled={saving}
+            onClick={() =>
+              save({
+                instagram_feed: {
+                  handle: instagramDraft.handle.trim(),
+                  behold_feed_url: instagramDraft.behold_feed_url.trim(),
+                  trustindex_widget_id: instagramDraft.trustindex_widget_id.trim(),
+                },
+                social: {
+                  ...socialDraft,
+                  instagram:
+                    socialDraft.instagram?.trim() ||
+                    `https://www.instagram.com/${instagramDraft.handle.replace(/^@/, "").trim() || "familysalonandspa"}/`,
+                },
+              })
+            }
+            className="min-h-11 bg-salon-primary px-4 text-sm text-white hover:bg-salon-hover disabled:opacity-50"
+          >
+            Save Instagram feed
+          </button>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={syncInstagramNow}
+            className="min-h-11 border border-salon-border px-4 text-sm hover:border-salon-primary disabled:opacity-50"
+          >
+            Sync now
+          </button>
+        </div>
       </section>
 
       <section className="editorial-panel mt-6 p-6">

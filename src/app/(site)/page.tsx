@@ -2,7 +2,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { GoogleReviewsSection } from "@/components/sections/GoogleReviewsSection";
+import { InstagramFeedSection } from "@/components/sections/InstagramFeedSection";
 import { getDb } from "@/lib/db";
+import {
+  DEFAULT_INSTAGRAM_FEED,
+  listCachedInstagramPosts,
+  getInstagramFeedSettings,
+} from "@/lib/instagram";
 import { getGoogleReviewsMeta, listCachedGoogleReviews } from "@/lib/reviews";
 import { getBusinessInfo, getMediaSettings, getServices } from "@/lib/site";
 
@@ -19,10 +25,14 @@ export default async function HomePage() {
     last_synced_at: null as string | null,
   };
   let reviews: Awaited<ReturnType<typeof listCachedGoogleReviews>> = [];
+  let instagram = DEFAULT_INSTAGRAM_FEED;
+  let instagramPosts: Awaited<ReturnType<typeof listCachedInstagramPosts>> = [];
   try {
     const db = await getDb();
     reviewsMeta = await getGoogleReviewsMeta(db);
     reviews = await listCachedGoogleReviews(db);
+    instagram = await getInstagramFeedSettings(db);
+    instagramPosts = await listCachedInstagramPosts(db, 8);
   } catch {
     // D1 unavailable during build - section omitted
   }
@@ -120,6 +130,8 @@ export default async function HomePage() {
       {reviews.length > 0 && (
         <GoogleReviewsSection meta={reviewsMeta} reviews={reviews} />
       )}
+
+      <InstagramFeedSection settings={instagram} posts={instagramPosts} />
 
       <section className="bg-salon-light">
         <div className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">

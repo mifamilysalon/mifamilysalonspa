@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { InstagramFeedSection } from "@/components/sections/InstagramFeedSection";
+import { getDb } from "@/lib/db";
+import {
+  DEFAULT_INSTAGRAM_FEED,
+  getInstagramFeedSettings,
+  listCachedInstagramPosts,
+} from "@/lib/instagram";
 
 export const metadata: Metadata = { title: "Photo Gallery" };
 
@@ -30,29 +37,55 @@ const IMAGES = [
   },
 ];
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  let instagram = DEFAULT_INSTAGRAM_FEED;
+  let posts: Awaited<ReturnType<typeof listCachedInstagramPosts>> = [];
+  try {
+    const db = await getDb();
+    instagram = await getInstagramFeedSettings(db);
+    posts = await listCachedInstagramPosts(db, 12);
+  } catch {
+    // D1 unavailable during build
+  }
+
+  const showFallbackGallery =
+    !instagram.trustindex_widget_id.trim() && posts.length === 0;
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
-      <h1 className="font-serif text-4xl md:text-5xl">Photo gallery</h1>
-      <p className="mt-5 max-w-2xl text-salon-body">
-        A look at our salon atmosphere and services. Owner photos can replace
-        these images anytime from the admin media library.
-      </p>
-      <div className="mt-12 columns-1 gap-4 sm:columns-2 lg:columns-3">
-        {IMAGES.map((img) => (
-          <div key={img.src} className="mb-4 break-inside-avoid">
-            <div className="relative aspect-[3/4] overflow-hidden">
-              <Image
-                src={img.src}
-                alt={img.alt}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              />
-            </div>
+    <div>
+      <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
+        <h1 className="font-serif text-4xl md:text-5xl">Photo gallery</h1>
+        <p className="mt-5 max-w-2xl text-salon-body">
+          Atmosphere from the salon floor, plus live posts from{" "}
+          <a
+            href={instagram.profile_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-salon-heading underline underline-offset-4 hover:text-salon-primary"
+          >
+            @{instagram.handle}
+          </a>
+          .
+        </p>
+        {showFallbackGallery && (
+          <div className="mt-12 columns-1 gap-4 sm:columns-2 lg:columns-3">
+            {IMAGES.map((img) => (
+              <div key={img.src} className="mb-4 break-inside-avoid">
+                <div className="relative aspect-[3/4] overflow-hidden">
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
+      <InstagramFeedSection settings={instagram} posts={posts} compact />
     </div>
   );
 }

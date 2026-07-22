@@ -1,7 +1,8 @@
-// Custom OpenNext worker: fetch + midnight Google reviews sync
+// Custom OpenNext worker: fetch + midnight Google reviews + Instagram sync
 // @ts-expect-error generated at build time
 import { default as handler } from "./.open-next/worker.js";
 import type { AppEnv } from "./cloudflare-env";
+import { syncInstagramFromBehold } from "./src/lib/instagram";
 import { syncGoogleReviewsFromPlaces } from "./src/lib/reviews";
 
 export default {
@@ -13,9 +14,12 @@ export default {
     ctx: ExecutionContext,
   ) {
     ctx.waitUntil(
-      syncGoogleReviewsFromPlaces(env).then((result) => {
-        console.log("[cron] google reviews sync:", result.message, result.count ?? "");
-      }),
+      (async () => {
+        const reviews = await syncGoogleReviewsFromPlaces(env);
+        console.log("[cron] google reviews sync:", reviews.message, reviews.count ?? "");
+        const instagram = await syncInstagramFromBehold(env);
+        console.log("[cron] instagram sync:", instagram.message, instagram.count ?? "");
+      })(),
     );
   },
 } satisfies ExportedHandler<AppEnv>;

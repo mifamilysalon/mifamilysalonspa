@@ -1,5 +1,10 @@
 import { getDb } from "./db";
 import {
+  DEFAULT_INSTAGRAM_FEED,
+  getInstagramFeedSettings,
+  type InstagramFeedSettings,
+} from "./instagram";
+import {
   DEFAULT_MEDIA,
   DEFAULT_SOCIAL,
   isHeroToneId,
@@ -165,5 +170,14 @@ export async function getSocialLinks(): Promise<SocialLinks> {
     return { ...DEFAULT_SOCIAL, ...JSON.parse(row.value_json) };
   } catch {
     return DEFAULT_SOCIAL;
+  }
+}
+
+export async function getInstagramFeedConfig(): Promise<InstagramFeedSettings> {
+  try {
+    const db = await getDb();
+    return await getInstagramFeedSettings(db);
+  } catch {
+    return DEFAULT_INSTAGRAM_FEED;
   }
 }

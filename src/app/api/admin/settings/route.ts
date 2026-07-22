@@ -3,6 +3,11 @@ import { z } from "zod";
 import { getCurrentUser, requireRole } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import {
+  DEFAULT_INSTAGRAM_FEED,
+  getInstagramFeedSettings,
+  profileUrlFromHandle,
+} from "@/lib/instagram";
+import {
   DEFAULT_MEDIA,
   DEFAULT_SOCIAL,
   HERO_TONE_IDS,
@@ -66,6 +71,13 @@ const socialSchema = z.object({
   tiktok: z.string().max(300).optional(),
 });
 
+const instagramFeedSchema = z.object({
+  handle: z.string().max(80).optional(),
+  profile_url: z.string().max(300).optional(),
+  behold_feed_url: z.string().max(300).optional(),
+  trustindex_widget_id: z.string().max(80).optional(),
+});
+
 const settingsUpdateSchema = z.object({
   palette: paletteSchema.optional(),
   business: businessSchema.optional(),
@@ -74,6 +86,7 @@ const settingsUpdateSchema = z.object({
   google_reviews: googleReviewsSchema.optional(),
   media: mediaSchema.optional(),
   social: socialSchema.optional(),
+  instagram_feed: instagramFeedSchema.optional(),
 });
 
 async function upsertSetting(db: D1Database, key: string, value: unknown) {
@@ -96,16 +109,25 @@ export async function GET() {
     }
 
     const db = await getDb();
-    const [palette, business, sms, auth, google_reviews, media, social] =
-      await Promise.all([
-        getActivePaletteId(),
-        getBusinessInfo(),
-        getSmsSettings(),
-        getAuthSettings(),
-        getGoogleReviewsMeta(db),
-        getMediaSettings(),
-        getSocialLinks(),
-      ]);
+    const [
+      palette,
+      business,
+      sms,
+      auth,
+      google_reviews,
+      media,
+      social,
+      instagram_feed,
+    ] = await Promise.all([
+      getActivePaletteId(),
+      getBusinessInfo(),
+      getSmsSettings(),
+      getAuthSettings(),
+      getGoogleReviewsMeta(db),
+      getMediaSettings(),
+      getSocialLinks(),
+      getInstagramFeedSettings(db),
+    ]);
 
     return NextResponse.json({
       palette,
@@ -121,9 +143,11 @@ export async function GET() {
       google_reviews,
       media,
       social,
+      instagram_feed,
       defaults: {
         media: DEFAULT_MEDIA,
         social: DEFAULT_SOCIAL,
+        instagram_feed: DEFAULT_INSTAGRAM_FEED,
       },
     });
   } catch {
@@ -181,6 +205,29 @@ export async function PUT(request: Request) {
     if (parsed.data.social) {
       const current = await getSocialLinks();
       await upsertSetting(db, "social", { ...current, ...parsed.data.social });
+    }
+
+    if (parsed.data.instagram_feed) {
+      const current = await getInstagramFeedSettings(db);
+      const handle =
+        (parsed.data.instagram_feed.handle ?? current.handle)
+          .replace(/^@/, "")
+          .trim() || current.handle;
+      const profile_url =
+        parsed.data.instagram_feed.profile_url?.trim() ||
+        profileUrlFromHandle(handle);
+      await upsertSetting(db, "instagram_feed", {
+        ...current,
+        ...parsed.data.instagram_feed,
+        handle,
+        profile_url,
+        behold_feed_url:
+          parsed.data.instagram_feed.behold_feed_url?.trim() ??
+          current.behold_feed_url,
+        trustindex_widget_id:
+          parsed.data.instagram_feed.trustindex_widget_id?.trim() ??
+          current.trustindex_widget_id,
+      });
     }
 
     return NextResponse.json({ ok: true });
