@@ -22,7 +22,7 @@ INSERT OR IGNORE INTO services (id, name, category, description, duration_minute
   (10, 'Classic Pedicure', 'nails', 'Soak, care, massage, and polish for feet.', 60, 45, 'instant', 1),
   (11, 'Shellac Manicure', 'nails', 'Long-wear gel polish manicure.', 60, 45, 'instant', 1),
   (12, 'Polish Change', 'nails', 'Quick polish refresh on existing nails.', 20, 18, 'instant', 1),
-  (13, 'Body Wax', 'wellness', 'Professional body waxing services.', 45, 50, 'request', 1),
+  (13, 'Body Wax', 'wellness', 'Professional body waxing services.', 60, 50, 'request', 1),
   (14, 'Relaxation Massage', 'wellness', 'Therapeutic massage for stress relief.', 60, 75, 'request', 1),
   (15, 'Private Suite Service', 'hair', 'Hair or beauty service in our private women''s suite.', 60, 65, 'request', 1);
 

@@ -1,10 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { PaletteId } from "@/lib/palettes";
+import {
+  PALETTE_IDS,
+  PALETTES,
+  paletteDisplayName,
+  type PaletteId,
+} from "@/lib/palettes";
 import type { BusinessInfo } from "@/lib/site";
 
-type PaletteOption = { id: PaletteId; name: string };
+type PaletteOption = {
+  id: PaletteId;
+  name: string;
+  isCurrentSiteInspired?: boolean;
+  suffix?: string;
+};
 
 type SettingsData = {
   palette: PaletteId;
@@ -42,7 +52,7 @@ export default function AdminSettingsPage() {
         body: JSON.stringify(updates),
       });
       if (res.ok) {
-        setMessage("Settings saved.");
+        setMessage("Settings saved. Refresh the public site to see the new default theme.");
         const refreshed = await fetch("/api/admin/settings");
         setSettings((await refreshed.json()) as SettingsData);
       } else {
@@ -70,22 +80,66 @@ export default function AdminSettingsPage() {
 
       <section className="editorial-panel mt-8 p-6">
         <h2 className="font-serif text-lg text-salon-heading">Color palette</h2>
+        <p className="mt-2 text-sm text-salon-body">
+          Sets the site-wide default. Visitors can also preview themes with the public Themes
+          button (temporary preview only).
+        </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {settings.palettes.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              disabled={saving}
-              onClick={() => save({ palette: p.id })}
-              className={`min-h-12 border px-4 py-3 text-left text-sm transition ${
-                settings.palette === p.id
-                  ? "border-salon-primary bg-salon-light"
-                  : "border-salon-border hover:border-salon-primary"
-              }`}
-            >
-              {p.name}
-            </button>
-          ))}
+          {(settings.palettes.length
+            ? settings.palettes
+            : PALETTE_IDS.map((id) => ({
+                id,
+                name: paletteDisplayName(id),
+                isCurrentSiteInspired: PALETTES[id].isCurrentSiteInspired,
+                suffix: PALETTES[id].suffix,
+              }))
+          ).map((p) => {
+            const colors = PALETTES[p.id]?.colors;
+            const label =
+              p.isCurrentSiteInspired || PALETTES[p.id]?.isCurrentSiteInspired
+                ? paletteDisplayName(p.id)
+                : p.suffix || PALETTES[p.id]?.suffix
+                  ? `${p.name}${p.name.includes("(") ? "" : ` (${p.suffix || PALETTES[p.id]?.suffix})`}`
+                  : p.name;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                disabled={saving}
+                onClick={() => save({ palette: p.id })}
+                className={`min-h-14 border px-4 py-3 text-left text-sm transition ${
+                  settings.palette === p.id
+                    ? "border-salon-primary bg-salon-light"
+                    : "border-salon-border hover:border-salon-primary"
+                }`}
+              >
+                <span className="flex items-center gap-3">
+                  {colors && (
+                    <span className="flex shrink-0 gap-0.5">
+                      <span
+                        className="h-6 w-6 border border-salon-border"
+                        style={{ background: colors.bg_main }}
+                      />
+                      <span
+                        className="h-6 w-6 border border-salon-border"
+                        style={{ background: colors.accent_primary }}
+                      />
+                      <span
+                        className="h-6 w-6 border border-salon-border"
+                        style={{ background: colors.text_heading }}
+                      />
+                    </span>
+                  )}
+                  <span className="leading-snug text-salon-heading">{label}</span>
+                </span>
+                {(p.isCurrentSiteInspired || PALETTES[p.id]?.isCurrentSiteInspired) && (
+                  <span className="mt-2 inline-block text-xs font-medium uppercase tracking-wide text-salon-primary">
+                    Current website inspired
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -133,9 +187,6 @@ export default function AdminSettingsPage() {
             <dd>{settings.business.hours}</dd>
           </div>
         </dl>
-        <p className="mt-4 text-xs text-salon-body">
-          Business fields are stored in site settings. Full editing can be added later.
-        </p>
       </section>
     </div>
   );

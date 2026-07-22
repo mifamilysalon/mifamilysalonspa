@@ -2,19 +2,19 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser, requireRole } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { PALETTES, type PaletteId } from "@/lib/palettes";
+import {
+  PALETTE_IDS,
+  PALETTES,
+  paletteDisplayName,
+  type PaletteId,
+} from "@/lib/palettes";
 import {
   getActivePaletteId,
   getBusinessInfo,
   getSmsSettings,
 } from "@/lib/site";
 
-const paletteSchema = z.enum([
-  "farmington-rose-gold",
-  "warm-earth-spa",
-  "noir-salon-luxe",
-  "terracotta-cashmere",
-]);
+const paletteSchema = z.enum(PALETTE_IDS as [PaletteId, ...PaletteId[]]);
 
 const businessSchema = z.object({
   name: z.string().min(1).max(200),
@@ -53,9 +53,11 @@ export async function GET() {
 
     return NextResponse.json({
       palette,
-      palettes: Object.entries(PALETTES).map(([id, p]) => ({
-        id: id as PaletteId,
-        name: p.name,
+      palettes: PALETTE_IDS.map((id) => ({
+        id,
+        name: paletteDisplayName(id),
+        isCurrentSiteInspired: !!PALETTES[id].isCurrentSiteInspired,
+        suffix: PALETTES[id].suffix,
       })),
       business,
       sms,

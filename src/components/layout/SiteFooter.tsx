@@ -58,8 +58,22 @@ export function SiteFooter({
           </div>
         </div>
       </div>
-      <div className="border-t border-salon-border py-4 text-center text-xs text-salon-body/60">
-        &copy; {new Date().getFullYear()} {salonName}. Farmington, Michigan.
+      <div className="border-t border-salon-border px-4 py-5 text-center text-xs text-salon-body/70">
+        <p>
+          &copy; {new Date().getFullYear()} {salonName}. Farmington, Michigan.
+        </p>
+        <p className="mt-2">
+          Website designed, developed and managed by{" "}
+          <a
+            href="https://consultifyit.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-salon-primary underline underline-offset-2 hover:text-salon-hover"
+          >
+            ConsultifyIT Technology Services (Cify)
+          </a>
+          .
+        </p>
       </div>
     </footer>
   );

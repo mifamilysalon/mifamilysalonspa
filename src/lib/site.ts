@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import type { PaletteId } from "./palettes";
+import { isPaletteId, type PaletteId } from "./palettes";
 
 export type BusinessInfo = {
   name: string;
@@ -56,7 +56,8 @@ export async function getActivePaletteId(): Promise<PaletteId> {
       .prepare("SELECT value_json FROM site_settings WHERE key = 'palette'")
       .first<{ value_json: string }>();
     if (!row) return "farmington-rose-gold";
-    return JSON.parse(row.value_json) as PaletteId;
+    const parsed = JSON.parse(row.value_json) as string;
+    return isPaletteId(parsed) ? parsed : "farmington-rose-gold";
   } catch {
     return "farmington-rose-gold";
   }

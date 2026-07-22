@@ -28,16 +28,34 @@ export function HeroSection({
         className="object-cover"
         sizes="100vw"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/45 to-black/25" />
+      {/* Strong opaque wash so brand headline stays readable on any photo */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(105deg, rgba(12,10,9,0.88) 0%, rgba(12,10,9,0.72) 42%, rgba(12,10,9,0.35) 100%)",
+        }}
+      />
       <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 md:px-6 md:pb-24">
-        <div className="fade-in max-w-2xl text-white">
-          <p className="mb-4 text-sm uppercase tracking-[0.2em] text-white/80">
+        <div className="fade-in max-w-2xl">
+          <p
+            className="mb-4 text-sm uppercase tracking-[0.2em]"
+            style={{ color: "rgba(255,255,255,0.85)" }}
+          >
             Farmington, Michigan
           </p>
-          <h1 className="font-serif text-4xl leading-tight text-white md:text-6xl">
+          <h1
+            className="font-serif text-4xl leading-tight md:text-6xl"
+            style={{ color: "#FFFFFF", textShadow: "0 2px 24px rgba(0,0,0,0.45)" }}
+          >
             {headline}
           </h1>
-          <p className="mt-5 max-w-xl text-base text-white/90 md:text-lg">{subhead}</p>
+          <p
+            className="mt-5 max-w-xl text-base md:text-lg"
+            style={{ color: "rgba(255,255,255,0.92)" }}
+          >
+            {subhead}
+          </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href={ctaPrimaryHref}
@@ -48,7 +66,8 @@ export function HeroSection({
             {ctaSecondary && ctaSecondaryHref && (
               <a
                 href={ctaSecondaryHref}
-                className="border border-white/70 px-6 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+                className="border px-6 py-3 text-sm font-medium transition hover:bg-white/10"
+                style={{ borderColor: "rgba(255,255,255,0.75)", color: "#FFFFFF" }}
               >
                 {ctaSecondary}
               </a>

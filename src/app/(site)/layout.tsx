@@ -1,7 +1,8 @@
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { MobileStickyCta } from "@/components/layout/MobileStickyCta";
-import { getBusinessInfo } from "@/lib/site";
+import { PublicThemePicker } from "@/components/layout/PublicThemePicker";
+import { getActivePaletteId, getBusinessInfo } from "@/lib/site";
 
 export default async function SiteLayout({
   children,
@@ -9,6 +10,7 @@ export default async function SiteLayout({
   children: React.ReactNode;
 }) {
   const business = await getBusinessInfo();
+  const siteDefaultPalette = await getActivePaletteId();
 
   return (
     <>
@@ -22,6 +24,7 @@ export default async function SiteLayout({
         hours={business.hours}
       />
       <MobileStickyCta phone={business.phone_primary} />
+      <PublicThemePicker siteDefault={siteDefaultPalette} />
     </>
   );
 }
