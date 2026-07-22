@@ -43,7 +43,7 @@ export function SiteHeader({
             href="/appointments"
             className="bg-salon-primary px-5 py-2.5 text-sm font-medium text-white transition hover:bg-salon-hover"
           >
-            Book an appointment
+            Book / Walk in
           </Link>
         </div>
 
@@ -92,7 +92,7 @@ export function SiteHeader({
               className="mt-4 bg-salon-primary py-3 text-center text-white"
               onClick={() => setOpen(false)}
             >
-              Book an appointment
+              Book / Walk in
             </Link>
             <a
               href={`tel:${phone.replace(/\D/g, "")}`}

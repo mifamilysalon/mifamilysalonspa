@@ -10,6 +10,7 @@ import {
 } from "@/lib/notifications";
 import { getSmsSettings } from "@/lib/site";
 import { bookAppointmentSchema } from "@/lib/validation";
+import { createWalkInAppointment } from "@/lib/walkins";
 
 export async function POST(request: Request) {
   try {
@@ -23,6 +24,49 @@ export async function POST(request: Request) {
     }
 
     const data = parsed.data;
+    const smsSettings = await getSmsSettings();
+    const clientEmail = data.clientEmail?.trim() || null;
+
+    if (data.mode === "walk_in") {
+      const result = await createWalkInAppointment({
+        serviceId: data.serviceId,
+        staffId: data.staffId,
+        clientName: data.clientName,
+        clientEmail,
+        clientPhone: data.clientPhone,
+        startDatetime: data.startDatetime,
+        arriveInMinutes: data.arriveInMinutes ?? 0,
+        notes: data.notes,
+        status: "confirmed",
+        smsOptIn: data.smsOptIn,
+      });
+
+      if ("error" in result) {
+        return NextResponse.json({ error: result.error }, { status: result.status });
+      }
+
+      const when = format(parseISO(result.startDatetime), "EEE, MMM d 'at' h:mm a");
+      await notifyBookingConfirmed({
+        clientName: data.clientName,
+        clientEmail,
+        clientPhone: data.clientPhone,
+        serviceName: result.serviceName,
+        when,
+        smsOptIn: data.smsOptIn,
+        smsEnabled: smsSettings.enabled,
+      });
+
+      return NextResponse.json(
+        {
+          id: result.id,
+          status: result.status,
+          bookingSource: "walk_in",
+          startDatetime: result.startDatetime,
+        },
+        { status: 201 },
+      );
+    }
+
     const db = await getDb();
 
     const service = await db
@@ -42,16 +86,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Service not found" }, { status: 404 });
     }
 
-    const smsSettings = await getSmsSettings();
-    const clientEmail = data.clientEmail?.trim() || null;
-
     if (service.booking_type === "instant") {
       if (!data.staffId) {
         return NextResponse.json({ error: "Staff is required" }, { status: 400 });
       }
 
       const endDatetime = format(
-        addMinutes(parseISO(data.startDatetime), service.duration_minutes),
+        addMinutes(parseISO(data.startDatetime!), service.duration_minutes),
         "yyyy-MM-dd'T'HH:mm:ss",
       );
 
@@ -61,7 +102,7 @@ export async function POST(request: Request) {
         clientName: data.clientName,
         clientEmail,
         clientPhone: data.clientPhone,
-        startDatetime: data.startDatetime,
+        startDatetime: data.startDatetime!,
         endDatetime,
         status: "confirmed",
         bookingSource: "instant",
@@ -78,7 +119,7 @@ export async function POST(request: Request) {
         .bind(data.staffId)
         .first<{ display_name: string }>();
 
-      const when = format(parseISO(data.startDatetime), "EEE, MMM d 'at' h:mm a");
+      const when = format(parseISO(data.startDatetime!), "EEE, MMM d 'at' h:mm a");
 
       await notifyBookingConfirmed({
         clientName: data.clientName,
@@ -98,7 +139,7 @@ export async function POST(request: Request) {
     }
 
     const endDatetime = format(
-      addMinutes(parseISO(data.startDatetime), service.duration_minutes),
+      addMinutes(parseISO(data.startDatetime!), service.duration_minutes),
       "yyyy-MM-dd'T'HH:mm:ss",
     );
 
@@ -108,7 +149,7 @@ export async function POST(request: Request) {
       clientName: data.clientName,
       clientEmail,
       clientPhone: data.clientPhone,
-      startDatetime: data.startDatetime,
+      startDatetime: data.startDatetime!,
       endDatetime,
       status: "pending",
       bookingSource: "request",
@@ -120,7 +161,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.error }, { status: 409 });
     }
 
-    const when = format(parseISO(data.startDatetime), "EEE, MMM d 'at' h:mm a");
+    const when = format(parseISO(data.startDatetime!), "EEE, MMM d 'at' h:mm a");
 
     await notifyBookingRequest({
       clientName: data.clientName,

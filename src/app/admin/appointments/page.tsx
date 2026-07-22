@@ -9,6 +9,7 @@ import {
 } from "date-fns";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { RecordWalkInForm } from "@/components/forms/RecordWalkInForm";
 
 type Appointment = {
   id: number;
@@ -46,6 +47,13 @@ const STATUS_TABS = [
   { id: "no_show", label: "No show" },
 ] as const;
 
+const SOURCE_TABS = [
+  { id: "", label: "All sources" },
+  { id: "walk_in", label: "Walk-ins" },
+  { id: "instant", label: "Instant book" },
+  { id: "request", label: "Requests" },
+] as const;
+
 function buildWeekDays(from: Date) {
   return Array.from({ length: 7 }, (_, i) => {
     const d = addDays(startOfDay(from), i);
@@ -70,35 +78,42 @@ function AdminAppointmentsContent() {
 
   const [view, setView] = useState<"leader" | "employee" | "list">("leader");
   const [statusFilter, setStatusFilter] = useState(initialStatus);
+  const [sourceFilter, setSourceFilter] = useState("");
   const [staffFilter, setStaffFilter] = useState<number | null>(null);
   const [dateFilter, setDateFilter] = useState(todayKey);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [team, setTeam] = useState<TeamRow[]>([]);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+  const [sourceCounts, setSourceCounts] = useState<Record<string, number>>({});
   const [dayCounts, setDayCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<number | null>(null);
+  const [showWalkIn, setShowWalkIn] = useState(false);
 
   const loadSummary = useCallback(async () => {
     const params = new URLSearchParams({ summary: "1" });
     if (dateFilter) params.set("date", dateFilter);
     if (statusFilter) params.set("status", statusFilter);
+    if (sourceFilter) params.set("source", sourceFilter);
     const res = await fetch(`/api/admin/appointments?${params.toString()}`);
     const data = (await res.json()) as {
       team?: TeamRow[];
       statusCounts?: Record<string, number>;
+      sourceCounts?: Record<string, number>;
       dayCounts?: Record<string, number>;
     };
     setTeam(data.team || []);
     setStatusCounts(data.statusCounts || {});
+    setSourceCounts(data.sourceCounts || {});
     setDayCounts(data.dayCounts || {});
-  }, [dateFilter, statusFilter]);
+  }, [dateFilter, statusFilter, sourceFilter]);
 
   const loadAppointments = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (statusFilter) params.set("status", statusFilter);
+      if (sourceFilter) params.set("source", sourceFilter);
       if (staffFilter) params.set("staffId", String(staffFilter));
       if (dateFilter) params.set("date", dateFilter);
       const res = await fetch(`/api/admin/appointments?${params.toString()}`);
@@ -107,7 +122,7 @@ function AdminAppointmentsContent() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, staffFilter, dateFilter]);
+  }, [statusFilter, sourceFilter, staffFilter, dateFilter]);
 
   useEffect(() => {
     loadSummary();
@@ -160,22 +175,48 @@ function AdminAppointmentsContent() {
           <p className="mt-2 text-sm text-salon-body">
             Team board for {selectedDayLabel}
             {statusFilter ? ` · ${statusFilter.replace("_", " ")}` : ""}
+            {sourceFilter ? ` · ${sourceFilter.replace("_", " ")}` : ""}
           </p>
         </div>
-        {(dateFilter !== todayKey || staffFilter || statusFilter) && (
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => {
-              setDateFilter(todayKey);
-              setStaffFilter(null);
-              setStatusFilter("");
-            }}
-            className="min-h-10 border border-salon-border px-4 text-sm text-salon-body hover:border-salon-primary"
+            onClick={() => setShowWalkIn((v) => !v)}
+            className="min-h-10 bg-salon-primary px-4 text-sm text-white hover:bg-salon-hover"
           >
-            Reset to today
+            {showWalkIn ? "Hide walk-in form" : "Record walk-in"}
           </button>
-        )}
+          {(dateFilter !== todayKey || staffFilter || statusFilter || sourceFilter) && (
+            <button
+              type="button"
+              onClick={() => {
+                setDateFilter(todayKey);
+                setStaffFilter(null);
+                setStatusFilter("");
+                setSourceFilter("");
+              }}
+              className="min-h-10 border border-salon-border px-4 text-sm text-salon-body hover:border-salon-primary"
+            >
+              Reset to today
+            </button>
+          )}
+        </div>
       </div>
+
+      {showWalkIn && (
+        <div className="mt-6">
+          <RecordWalkInForm
+            onSaved={() => {
+              setShowWalkIn(false);
+              setSourceFilter("walk_in");
+              setView("list");
+              loadAppointments();
+              loadSummary();
+            }}
+            onCancel={() => setShowWalkIn(false)}
+          />
+        </div>
+      )}
 
       {/* View mode */}
       <div className="mt-6 flex flex-wrap gap-2">
@@ -286,6 +327,30 @@ function AdminAppointmentsContent() {
               className={`min-h-10 border px-3 py-1.5 text-xs uppercase tracking-wide transition ${
                 statusFilter === tab.id
                   ? "border-salon-primary bg-salon-primary text-white"
+                  : "border-salon-border text-salon-body hover:border-salon-primary"
+              }`}
+            >
+              {tab.label}
+              <span className="ml-1 opacity-80">({count})</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Source chips */}
+      <div className="mt-3 flex flex-wrap gap-2">
+        {SOURCE_TABS.map((tab) => {
+          const count = tab.id
+            ? sourceCounts[tab.id] || 0
+            : Object.values(sourceCounts).reduce((a, b) => a + b, 0);
+          return (
+            <button
+              key={tab.id || "all-sources"}
+              type="button"
+              onClick={() => setSourceFilter(tab.id)}
+              className={`min-h-10 border px-3 py-1.5 text-xs uppercase tracking-wide transition ${
+                sourceFilter === tab.id
+                  ? "border-salon-primary bg-salon-light text-salon-heading"
                   : "border-salon-border text-salon-body hover:border-salon-primary"
               }`}
             >

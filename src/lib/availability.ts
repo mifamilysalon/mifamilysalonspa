@@ -158,6 +158,9 @@ export async function createAppointmentTransactional(input: {
     }
   }
 
+  // walk_in intentionally skips hard conflict checks so floor traffic can be recorded
+  // even when the book is busy; staff can still manage queue via status.
+
   const result = await db
     .prepare(
       `INSERT INTO appointments

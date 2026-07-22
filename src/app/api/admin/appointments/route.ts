@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     const from = searchParams.get("from");
     const to = searchParams.get("to");
     const staffId = searchParams.get("staffId");
+    const source = searchParams.get("source");
     const summary = searchParams.get("summary") === "1";
 
     const db = await getDb();
@@ -35,6 +36,10 @@ export async function GET(request: Request) {
       if (status) {
         joinFilters.push("a.status = ?");
         joinBinds.push(status);
+      }
+      if (source) {
+        joinFilters.push("a.booking_source = ?");
+        joinBinds.push(source);
       }
       if (joinFilters.length) {
         appointmentJoin += ` AND ${joinFilters.join(" AND ")}`;
@@ -76,12 +81,16 @@ export async function GET(request: Request) {
           total_count: number;
         }>();
 
-      // Status counts for chips (respect selected day when set)
+      // Status counts for chips (respect selected day + source when set)
       let statusQuery = `SELECT status, COUNT(*) AS count FROM appointments WHERE 1=1`;
       const statusBinds: string[] = [];
       if (focusDate) {
         statusQuery += " AND date(start_datetime) = ?";
         statusBinds.push(focusDate);
+      }
+      if (source) {
+        statusQuery += " AND booking_source = ?";
+        statusBinds.push(source);
       }
       statusQuery += " GROUP BY status";
       const statusRes = await db
@@ -89,15 +98,31 @@ export async function GET(request: Request) {
         .bind(...statusBinds)
         .all<{ status: string; count: number }>();
 
-      // Next 7 days (today + 6) with appointment counts for day strip
-      const dayCountsRes = await db
+      const sourceRes = await db
         .prepare(
-          `SELECT date(start_datetime) AS day, COUNT(*) AS count
+          focusDate
+            ? `SELECT booking_source AS source, COUNT(*) AS count FROM appointments
+               WHERE date(start_datetime) = ? GROUP BY booking_source`
+            : `SELECT booking_source AS source, COUNT(*) AS count FROM appointments
+               GROUP BY booking_source`,
+        )
+        .bind(...(focusDate ? [focusDate] : []))
+        .all<{ source: string; count: number }>();
+
+      // Next 7 days (today + 6) with appointment counts for day strip
+      let dayCountsQuery = `SELECT date(start_datetime) AS day, COUNT(*) AS count
            FROM appointments
            WHERE date(start_datetime) >= date('now', 'localtime')
-             AND date(start_datetime) <= date('now', 'localtime', '+6 days')
-           GROUP BY date(start_datetime)`,
-        )
+             AND date(start_datetime) <= date('now', 'localtime', '+6 days')`;
+      const dayBinds: string[] = [];
+      if (source) {
+        dayCountsQuery += " AND booking_source = ?";
+        dayBinds.push(source);
+      }
+      dayCountsQuery += " GROUP BY date(start_datetime)";
+      const dayCountsRes = await db
+        .prepare(dayCountsQuery)
+        .bind(...dayBinds)
         .all<{ day: string; count: number }>();
 
       return NextResponse.json({
@@ -107,6 +132,9 @@ export async function GET(request: Request) {
         })),
         statusCounts: Object.fromEntries(
           (statusRes.results || []).map((r) => [r.status, r.count]),
+        ),
+        sourceCounts: Object.fromEntries(
+          (sourceRes.results || []).map((r) => [r.source, r.count]),
         ),
         dayCounts: Object.fromEntries(
           (dayCountsRes.results || []).map((r) => [r.day, r.count]),
@@ -143,6 +171,10 @@ export async function GET(request: Request) {
     if (staffId) {
       query += " AND a.staff_id = ?";
       binds.push(Number(staffId));
+    }
+    if (source) {
+      query += " AND a.booking_source = ?";
+      binds.push(source);
     }
 
     query += " ORDER BY a.start_datetime ASC LIMIT 400";
