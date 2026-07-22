@@ -33,7 +33,7 @@ export function HeroSection({
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(105deg, rgba(12,10,9,0.88) 0%, rgba(12,10,9,0.72) 42%, rgba(12,10,9,0.35) 100%)",
+            "linear-gradient(105deg, rgba(12,10,9,0.92) 0%, rgba(12,10,9,0.82) 38%, rgba(12,10,9,0.55) 62%, rgba(12,10,9,0.28) 100%)",
         }}
       />
       <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 md:px-6 md:pb-24">
@@ -44,10 +44,7 @@ export function HeroSection({
           >
             Farmington, Michigan
           </p>
-          <h1
-            className="font-serif text-4xl leading-tight md:text-6xl"
-            style={{ color: "#FFFFFF", textShadow: "0 2px 24px rgba(0,0,0,0.45)" }}
-          >
+          <h1 className="hero-brand-title font-serif text-4xl leading-tight md:text-6xl">
             {headline}
           </h1>
           <p

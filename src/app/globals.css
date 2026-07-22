@@ -45,6 +45,14 @@ h4 {
   font-weight: 500;
 }
 
+/* Hero brand title must stay white over photography regardless of palette heading color */
+.hero-brand-title {
+  color: #ffffff !important;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 2px 28px rgba(0, 0, 0, 0.75);
+}
+
 .fade-in {
   animation: fadeIn 0.7s ease-out both;
 }
