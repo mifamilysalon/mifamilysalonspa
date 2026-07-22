@@ -63,7 +63,7 @@ export function heroToneFilter(id: HeroToneId): string {
 }
 
 export const DEFAULT_HERO_IMAGE =
-  "https://images.unsplash.com/photo-1633681926022-84c23e8cb2d7?w=1600&q=80";
+  "https://images.unsplash.com/photo-1562322140-8baeececf3df?w=1600&q=80";
 
 export type MediaSettings = {
   hero_image: string;

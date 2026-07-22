@@ -23,20 +23,22 @@ export function HeroSection({
 }) {
   return (
     <section className="relative min-h-[88vh] w-full overflow-hidden">
-      <Image
-        src={image}
-        alt="Salon interior and styling atmosphere"
-        fill
-        priority
-        className="object-cover"
-        sizes="100vw"
-        style={{ filter: heroToneFilter(tone) }}
-      />
+      <div className="absolute inset-0">
+        <Image
+          src={image}
+          alt="Salon interior and styling atmosphere"
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+          style={{ filter: heroToneFilter(tone) }}
+        />
+      </div>
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(105deg, rgba(12,10,9,0.88) 0%, rgba(12,10,9,0.72) 40%, rgba(12,10,9,0.38) 100%)",
+            "linear-gradient(105deg, rgba(12,10,9,0.78) 0%, rgba(12,10,9,0.58) 42%, rgba(12,10,9,0.28) 100%)",
         }}
       />
       <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 md:px-6 md:pb-24">
