@@ -21,6 +21,12 @@ export function HeroSection({
   ctaSecondary?: string;
   ctaSecondaryHref?: string;
 }) {
+  // Full color needs a lighter wash so vibrancy stays visible
+  const overlay =
+    tone === "color"
+      ? "linear-gradient(105deg, rgba(12,10,9,0.62) 0%, rgba(12,10,9,0.42) 45%, rgba(12,10,9,0.2) 100%)"
+      : "linear-gradient(105deg, rgba(12,10,9,0.78) 0%, rgba(12,10,9,0.58) 42%, rgba(12,10,9,0.28) 100%)";
+
   return (
     <section className="relative min-h-[88vh] w-full overflow-hidden">
       <div className="absolute inset-0">
@@ -34,13 +40,7 @@ export function HeroSection({
           style={{ filter: heroToneFilter(tone) }}
         />
       </div>
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(105deg, rgba(12,10,9,0.78) 0%, rgba(12,10,9,0.58) 42%, rgba(12,10,9,0.28) 100%)",
-        }}
-      />
+      <div className="absolute inset-0" style={{ background: overlay }} />
       <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 md:px-6 md:pb-24">
         <div className="fade-in max-w-2xl">
           <p

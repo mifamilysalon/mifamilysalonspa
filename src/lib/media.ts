@@ -17,8 +17,10 @@ export const HERO_TONES: HeroToneMeta[] = [
   {
     id: "color",
     name: "Full color",
-    description: "Natural color photography",
-    filter: "none",
+    description: "Vivid natural color",
+    // Boost saturation so Full color is clearly distinct from Soft muted,
+    // even when the source photo is already somewhat desaturated.
+    filter: "saturate(1.35) contrast(1.06) brightness(1.02)",
   },
   {
     id: "grayscale",
@@ -36,19 +38,19 @@ export const HERO_TONES: HeroToneMeta[] = [
     id: "warm-sepia",
     name: "Warm sepia",
     description: "Soft warm editorial tone",
-    filter: "sepia(0.4) saturate(0.8) contrast(1.05)",
+    filter: "sepia(0.45) saturate(0.9) contrast(1.06) brightness(1.02)",
   },
   {
     id: "cool-slate",
     name: "Cool slate",
     description: "Cool near-monochrome",
-    filter: "grayscale(0.75) contrast(1.08) brightness(0.96)",
+    filter: "grayscale(0.72) contrast(1.1) brightness(0.97)",
   },
   {
     id: "high-contrast-bw",
     name: "High-contrast B&W",
     description: "Bold black and white",
-    filter: "grayscale(1) contrast(1.28)",
+    filter: "grayscale(1) contrast(1.35) brightness(1.02)",
   },
 ];
 
@@ -63,7 +65,7 @@ export function heroToneFilter(id: HeroToneId): string {
 }
 
 export const DEFAULT_HERO_IMAGE =
-  "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1600&q=80";
+  "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=1600&q=80";
 
 export type MediaSettings = {
   hero_image: string;
