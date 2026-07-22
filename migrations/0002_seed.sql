@@ -1,9 +1,9 @@
 -- Owner: admin@familysalonspa.com / SalonOwner2026!
 -- Staff PIN demo: 1234
 INSERT OR IGNORE INTO users (id, email, password_hash, pin_hash, role, name, is_active) VALUES
-  (1, 'admin@familysalonspa.com', '$2b$10$8OtLjejlPRL74aP6YoZeyeIFwMlTm.qahmY3zmEVbhV05jxZUWtDm', NULL, 'owner', 'Salon Owner', 1),
-  (2, 'stylist@familysalonspa.com', NULL, '$2b$10$4d6l08bFwL/1MHO3i3e7neK08VIivb2SweeZICt6wNqxjU4OwRCAW', 'stylist', 'Sarah Chen', 1),
-  (3, 'nails@familysalonspa.com', NULL, '$2b$10$4d6l08bFwL/1MHO3i3e7neK08VIivb2SweeZICt6wNqxjU4OwRCAW', 'stylist', 'Maria Lopez', 1);
+  (1, 'admin@familysalonspa.com', 'pbkdf2$25000$J4FdxaOUdIjh7ZType/gPA==$A27ajkizGoYw826sP0OsUjlBftN8LPTb33/aoMdWhAk=', NULL, 'owner', 'Salon Owner', 1),
+  (2, 'stylist@familysalonspa.com', NULL, 'pbkdf2$25000$/W16Vuzsw6W7c+Vyn7WZzg==$yJhdH5IrVeeajeAymfABLb3EZc0F9MIOy2jK9xlIlC8=', 'stylist', 'Sarah Chen', 1),
+  (3, 'nails@familysalonspa.com', NULL, 'pbkdf2$25000$/W16Vuzsw6W7c+Vyn7WZzg==$yJhdH5IrVeeajeAymfABLb3EZc0F9MIOy2jK9xlIlC8=', 'stylist', 'Maria Lopez', 1);
 
 INSERT OR IGNORE INTO staff_profiles (id, user_id, display_name, bio, is_bookable) VALUES
   (1, 2, 'Sarah Chen', 'Hair stylist specializing in color, cuts, and styling.', 1),

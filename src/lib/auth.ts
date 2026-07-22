@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { getDb, getEnv } from "./db";
 
@@ -15,6 +14,7 @@ export type SessionUser = {
 const COOKIE_NAME = "fss_session";
 const SESSION_DAYS = 7;
 const STAFF_SESSION_HOURS = 8;
+const PBKDF2_ITERATIONS = 25_000;
 
 function randomId(): string {
   const bytes = new Uint8Array(32);
@@ -22,15 +22,66 @@ function randomId(): string {
   return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+function bytesToBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary);
+}
+
+function base64ToBytes(value: string): Uint8Array {
+  const binary = atob(value);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function deriveKey(
+  password: string,
+  salt: Uint8Array,
+  iterations: number = PBKDF2_ITERATIONS,
+): Promise<Uint8Array> {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveBits"],
+  );
+  const bits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt: salt as BufferSource,
+      iterations,
+      hash: "SHA-256",
+    },
+    keyMaterial,
+    256,
+  );
+  return new Uint8Array(bits);
+}
+
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await deriveKey(password, salt, PBKDF2_ITERATIONS);
+  return `pbkdf2$${PBKDF2_ITERATIONS}$${bytesToBase64(salt)}$${bytesToBase64(key)}`;
 }
 
 export async function verifyPassword(
   password: string,
   hash: string,
 ): Promise<boolean> {
-  return bcrypt.compare(password, hash);
+  if (!hash.startsWith("pbkdf2$")) return false;
+  const parts = hash.split("$");
+  if (parts.length !== 4) return false;
+  const iterations = Number(parts[1]) || PBKDF2_ITERATIONS;
+  const salt = base64ToBytes(parts[2]);
+  const expected = base64ToBytes(parts[3]);
+  const actual = await deriveKey(password, salt, iterations);
+  if (actual.length !== expected.length) return false;
+  let diff = 0;
+  for (let i = 0; i < actual.length; i++) diff |= actual[i] ^ expected[i];
+  return diff === 0;
 }
 
 export async function createSession(
@@ -49,7 +100,7 @@ export async function createSession(
   const jar = await cookies();
   jar.set(COOKIE_NAME, id, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "lax",
     path: "/",
     expires: new Date(expires),
