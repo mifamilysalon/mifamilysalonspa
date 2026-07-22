@@ -1,10 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
+import { heroToneFilter, type HeroToneId } from "@/lib/media";
 
 export function HeroSection({
   headline,
   subhead,
   image,
+  tone = "color",
   ctaPrimary,
   ctaPrimaryHref,
   ctaSecondary,
@@ -13,6 +15,7 @@ export function HeroSection({
   headline: string;
   subhead: string;
   image: string;
+  tone?: HeroToneId;
   ctaPrimary: string;
   ctaPrimaryHref: string;
   ctaSecondary?: string;
@@ -27,13 +30,13 @@ export function HeroSection({
         priority
         className="object-cover"
         sizes="100vw"
+        style={{ filter: heroToneFilter(tone) }}
       />
-      {/* Strong opaque wash so brand headline stays readable on any photo */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "linear-gradient(105deg, rgba(12,10,9,0.92) 0%, rgba(12,10,9,0.82) 38%, rgba(12,10,9,0.55) 62%, rgba(12,10,9,0.28) 100%)",
+            "linear-gradient(105deg, rgba(12,10,9,0.88) 0%, rgba(12,10,9,0.72) 40%, rgba(12,10,9,0.38) 100%)",
         }}
       />
       <div className="relative mx-auto flex min-h-[88vh] max-w-6xl flex-col justify-end px-4 pb-16 pt-28 md:px-6 md:pb-24">

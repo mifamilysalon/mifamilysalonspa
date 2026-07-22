@@ -50,7 +50,7 @@ export function GoogleReviewsSection({
       <div className="relative mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
         <div className="fade-in grid gap-12 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-end">
           <div>
-            <p className="text-sm uppercase tracking-[0.18em] text-salon-primary">Google reviews</p>
+            <p className="text-sm uppercase tracking-[0.18em] text-salon-primary">Reviews</p>
             <h2 className="mt-3 font-serif text-3xl md:text-5xl">Loved by Farmington clients</h2>
             <div className="mt-8 flex flex-wrap items-end gap-6">
               <div>
@@ -62,8 +62,7 @@ export function GoogleReviewsSection({
                 </p>
               </div>
               <div className="pb-1 text-sm text-salon-body">
-                <p className="text-base font-medium text-salon-heading">{countLabel} reviews</p>
-                <p className="mt-1">Updated nightly from Google when sync is enabled.</p>
+                <p className="text-base font-medium text-salon-heading">{countLabel} Google reviews</p>
               </div>
             </div>
             <a
@@ -72,7 +71,7 @@ export function GoogleReviewsSection({
               rel="noopener noreferrer"
               className="mt-8 inline-block border border-salon-border bg-salon-panel px-5 py-3 text-sm font-medium text-salon-heading transition hover:border-salon-primary"
             >
-              Read all reviews on Google
+              Read reviews on Google
             </a>
           </div>
 

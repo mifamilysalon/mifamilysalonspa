@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SOCIAL_LABELS, type SocialLinks } from "@/lib/media";
 
 export function SiteFooter({
   salonName,
@@ -6,19 +7,44 @@ export function SiteFooter({
   phonePrimary,
   phoneSecondary,
   hours,
+  social,
 }: {
   salonName: string;
   address: string;
   phonePrimary: string;
   phoneSecondary: string;
   hours: string;
+  social: SocialLinks;
 }) {
+  const socialEntries = SOCIAL_LABELS.filter(({ key }) => social[key]?.trim());
+
   return (
     <footer className="mt-24 border-t border-salon-border bg-salon-panel">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-3 md:px-6">
         <div>
           <p className="font-serif text-2xl text-salon-heading">{salonName}</p>
           <p className="mt-3 text-sm text-salon-body">{address}</p>
+          {socialEntries.length > 0 && (
+            <div className="mt-6">
+              <p className="text-sm font-medium uppercase tracking-wide text-salon-heading">
+                Follow us
+              </p>
+              <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
+                {socialEntries.map(({ key, label }) => (
+                  <li key={key}>
+                    <a
+                      href={social[key]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-salon-primary hover:text-salon-hover"
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-salon-heading">
@@ -40,7 +66,7 @@ export function SiteFooter({
             href="/appointments"
             className="mt-4 inline-block text-sm underline underline-offset-4"
           >
-            Book online
+            Book or walk in
           </Link>
         </div>
         <div>

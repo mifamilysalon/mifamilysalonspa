@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from "react";
 import {
+  DEFAULT_MEDIA,
+  DEFAULT_SOCIAL,
+  HERO_TONES,
+  SOCIAL_LABELS,
+  type HeroToneId,
+  type MediaSettings,
+  type SocialLinks,
+} from "@/lib/media";
+import {
   PALETTE_IDS,
   PALETTES,
   paletteDisplayName,
@@ -29,6 +38,8 @@ type SettingsData = {
     review_count: number;
     last_synced_at: string | null;
   };
+  media: MediaSettings;
+  social: SocialLinks;
 };
 
 export default function AdminSettingsPage() {
@@ -38,6 +49,8 @@ export default function AdminSettingsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [placeIdDraft, setPlaceIdDraft] = useState("");
   const [mapsUrlDraft, setMapsUrlDraft] = useState("");
+  const [heroImageDraft, setHeroImageDraft] = useState("");
+  const [socialDraft, setSocialDraft] = useState<SocialLinks>(DEFAULT_SOCIAL);
 
   useEffect(() => {
     async function load() {
@@ -47,6 +60,8 @@ export default function AdminSettingsPage() {
         setSettings(data);
         setPlaceIdDraft(data.google_reviews?.place_id || "");
         setMapsUrlDraft(data.google_reviews?.maps_url || "");
+        setHeroImageDraft(data.media?.hero_image || DEFAULT_MEDIA.hero_image);
+        setSocialDraft(data.social || DEFAULT_SOCIAL);
       } finally {
         setLoading(false);
       }
@@ -64,12 +79,14 @@ export default function AdminSettingsPage() {
         body: JSON.stringify(updates),
       });
       if (res.ok) {
-        setMessage("Settings saved. Refresh the public site to see theme changes.");
+        setMessage("Settings saved.");
         const refreshed = await fetch("/api/admin/settings");
         const data = (await refreshed.json()) as SettingsData;
         setSettings(data);
         setPlaceIdDraft(data.google_reviews?.place_id || "");
         setMapsUrlDraft(data.google_reviews?.maps_url || "");
+        setHeroImageDraft(data.media?.hero_image || DEFAULT_MEDIA.hero_image);
+        setSocialDraft(data.social || DEFAULT_SOCIAL);
       } else {
         setMessage("Failed to save settings.");
       }
@@ -110,7 +127,7 @@ export default function AdminSettingsPage() {
     <div>
       <h1 className="font-serif text-2xl text-salon-heading">Settings</h1>
       <p className="mt-2 text-sm text-salon-body">
-        Site palette, staff PIN length, Google reviews, business info, and SMS.
+        Brand look, hero photography, social links, reviews, and operations.
       </p>
 
       {message && (
@@ -122,8 +139,7 @@ export default function AdminSettingsPage() {
       <section className="editorial-panel mt-8 p-6">
         <h2 className="font-serif text-lg text-salon-heading">Color palette</h2>
         <p className="mt-2 text-sm text-salon-body">
-          Sets the site-wide default. Use Midnight Magenta for the current pink/magenta
-          website look. Farmington Rose Gold uses soft alabaster with rose-metal accents.
+          Site-wide brand colors. Midnight Magenta matches the current pink and magenta site.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {paletteOptions.map((p) => {
@@ -162,7 +178,7 @@ export default function AdminSettingsPage() {
                 </span>
                 {(p.isCurrentSiteInspired || PALETTES[p.id]?.isCurrentSiteInspired) && (
                   <span className="mt-2 inline-block text-xs font-medium uppercase tracking-wide text-salon-primary">
-                    Current website inspired - pink &amp; magenta
+                    Current website inspired
                   </span>
                 )}
               </button>
@@ -172,9 +188,95 @@ export default function AdminSettingsPage() {
       </section>
 
       <section className="editorial-panel mt-6 p-6">
+        <h2 className="font-serif text-lg text-salon-heading">Hero image tone</h2>
+        <p className="mt-2 text-sm text-salon-body">
+          Choose full color or a photographic treatment for the homepage hero.
+        </p>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {HERO_TONES.map((tone) => (
+            <button
+              key={tone.id}
+              type="button"
+              disabled={saving}
+              onClick={() =>
+                save({
+                  media: {
+                    ...settings.media,
+                    hero_tone: tone.id as HeroToneId,
+                  },
+                })
+              }
+              className={`min-h-14 border px-4 py-3 text-left text-sm transition ${
+                settings.media.hero_tone === tone.id
+                  ? "border-salon-primary bg-salon-light"
+                  : "border-salon-border hover:border-salon-primary"
+              }`}
+            >
+              <span className="block font-medium text-salon-heading">{tone.name}</span>
+              <span className="mt-1 block text-xs text-salon-body">{tone.description}</span>
+            </button>
+          ))}
+        </div>
+        <label className="mt-5 block text-sm text-salon-body">
+          Hero image URL
+          <input
+            value={heroImageDraft}
+            onChange={(e) => setHeroImageDraft(e.target.value)}
+            className="mt-1 block w-full min-h-11 border border-salon-border bg-salon-panel px-3 text-salon-heading"
+          />
+        </label>
+        <button
+          type="button"
+          disabled={saving}
+          onClick={() =>
+            save({
+              media: {
+                ...settings.media,
+                hero_image: heroImageDraft.trim() || DEFAULT_MEDIA.hero_image,
+              },
+            })
+          }
+          className="mt-3 min-h-11 bg-salon-primary px-4 text-sm text-white hover:bg-salon-hover disabled:opacity-50"
+        >
+          Save hero image
+        </button>
+      </section>
+
+      <section className="editorial-panel mt-6 p-6">
+        <h2 className="font-serif text-lg text-salon-heading">Social media</h2>
+        <p className="mt-2 text-sm text-salon-body">
+          Links shown in the site footer. Leave blank to hide a network. Placeholder URLs are
+          included until the client confirms finals.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {SOCIAL_LABELS.map(({ key, label }) => (
+            <label key={key} className="block text-sm text-salon-body">
+              {label}
+              <input
+                value={socialDraft[key] || ""}
+                onChange={(e) =>
+                  setSocialDraft((prev) => ({ ...prev, [key]: e.target.value }))
+                }
+                className="mt-1 block w-full min-h-11 border border-salon-border bg-salon-panel px-3 text-salon-heading"
+                placeholder={`https://...`}
+              />
+            </label>
+          ))}
+        </div>
+        <button
+          type="button"
+          disabled={saving}
+          onClick={() => save({ social: socialDraft })}
+          className="mt-4 min-h-11 bg-salon-primary px-4 text-sm text-white hover:bg-salon-hover disabled:opacity-50"
+        >
+          Save social links
+        </button>
+      </section>
+
+      <section className="editorial-panel mt-6 p-6">
         <h2 className="font-serif text-lg text-salon-heading">Staff PIN length</h2>
         <p className="mt-2 text-sm text-salon-body">
-          Staff login shows exactly this many digit boxes. Choose 4 or 6.
+          Controls how many digit boxes appear on staff login.
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           {([4, 6] as const).map((len) => (
@@ -193,18 +295,13 @@ export default function AdminSettingsPage() {
             </button>
           ))}
         </div>
-        <p className="mt-3 text-xs text-salon-body">
-          Demo staff PINs are currently 4 digits (1234). If you switch to 6, update staff PIN
-          hashes before they can sign in.
-        </p>
       </section>
 
       <section className="editorial-panel mt-6 p-6">
         <h2 className="font-serif text-lg text-salon-heading">Google reviews</h2>
         <p className="mt-2 text-sm text-salon-body">
-          Reviews display on the homepage and refresh every night at midnight Eastern (cron).
-          Sync uses Google Places free monthly quota (1 call/day). Without an API key, the
-          cached/seeded reviews stay free forever.
+          Homepage review module. Optional Place ID enables nightly refresh when an API key is
+          configured.
         </p>
         <dl className="mt-4 grid gap-2 text-sm text-salon-body sm:grid-cols-2">
           <div>
@@ -217,11 +314,11 @@ export default function AdminSettingsPage() {
           </div>
           <div className="sm:col-span-2">
             <dt className="font-medium text-salon-heading">Last synced</dt>
-            <dd>{settings.google_reviews.last_synced_at || "Not synced yet (using cached reviews)"}</dd>
+            <dd>{settings.google_reviews.last_synced_at || "Using cached reviews"}</dd>
           </div>
         </dl>
         <label className="mt-4 block text-sm text-salon-body">
-          Google Place ID (optional for live sync)
+          Google Place ID
           <input
             value={placeIdDraft}
             onChange={(e) => setPlaceIdDraft(e.target.value)}
@@ -230,7 +327,7 @@ export default function AdminSettingsPage() {
           />
         </label>
         <label className="mt-3 block text-sm text-salon-body">
-          Google Maps reviews URL
+          Google Maps URL
           <input
             value={mapsUrlDraft}
             onChange={(e) => setMapsUrlDraft(e.target.value)}
@@ -268,7 +365,7 @@ export default function AdminSettingsPage() {
       <section className="editorial-panel mt-6 p-6">
         <h2 className="font-serif text-lg text-salon-heading">SMS notifications</h2>
         <p className="mt-2 text-sm text-salon-body">
-          SMS is off by default. Enable only when Twilio is configured.
+          Off by default. Enable only when Twilio is configured.
         </p>
         <label className="mt-4 flex min-h-12 cursor-pointer items-center gap-3">
           <input

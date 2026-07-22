@@ -1,4 +1,11 @@
 import { getDb } from "./db";
+import {
+  DEFAULT_MEDIA,
+  DEFAULT_SOCIAL,
+  isHeroToneId,
+  type MediaSettings,
+  type SocialLinks,
+} from "./media";
 import { isPaletteId, type PaletteId } from "./palettes";
 
 export type BusinessInfo = {
@@ -126,5 +133,37 @@ export async function getAuthSettings(): Promise<{ pin_length: 4 | 6 }> {
     return { pin_length: parsed.pin_length === 6 ? 6 : 4 };
   } catch {
     return { pin_length: 4 };
+  }
+}
+
+export async function getMediaSettings(): Promise<MediaSettings> {
+  try {
+    const db = await getDb();
+    const row = await db
+      .prepare("SELECT value_json FROM site_settings WHERE key = 'media'")
+      .first<{ value_json: string }>();
+    if (!row) return DEFAULT_MEDIA;
+    const parsed = JSON.parse(row.value_json) as Partial<MediaSettings>;
+    return {
+      hero_image: parsed.hero_image || DEFAULT_MEDIA.hero_image,
+      hero_tone: isHeroToneId(parsed.hero_tone || "")
+        ? parsed.hero_tone!
+        : DEFAULT_MEDIA.hero_tone,
+    };
+  } catch {
+    return DEFAULT_MEDIA;
+  }
+}
+
+export async function getSocialLinks(): Promise<SocialLinks> {
+  try {
+    const db = await getDb();
+    const row = await db
+      .prepare("SELECT value_json FROM site_settings WHERE key = 'social'")
+      .first<{ value_json: string }>();
+    if (!row) return DEFAULT_SOCIAL;
+    return { ...DEFAULT_SOCIAL, ...JSON.parse(row.value_json) };
+  } catch {
+    return DEFAULT_SOCIAL;
   }
 }

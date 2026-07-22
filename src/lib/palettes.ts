@@ -8,7 +8,10 @@ export type PaletteId =
   | "blush-pearl"
   | "sage-linen"
   | "espresso-gold"
-  | "coastal-spa";
+  | "coastal-spa"
+  | "orchid-ink"
+  | "copper-mist"
+  | "porcelain-berry";
 
 export type PaletteColors = {
   bg_main: string;
@@ -163,6 +166,45 @@ export const PALETTES: Record<PaletteId, PaletteMeta> = {
       accent_primary: "#4A7C8C",
       accent_hover: "#3A6572",
       accent_subtle: "#E2EEF1",
+    },
+  },
+  "orchid-ink": {
+    name: "Orchid Ink",
+    colors: {
+      bg_main: "#F8F4F8",
+      bg_panel: "#FFFFFF",
+      border_subtle: "#E3D6E4",
+      text_heading: "#2C1F2E",
+      text_body: "#5A4A5C",
+      accent_primary: "#8B4F7A",
+      accent_hover: "#713F63",
+      accent_subtle: "#F0E4EE",
+    },
+  },
+  "copper-mist": {
+    name: "Copper Mist",
+    colors: {
+      bg_main: "#F8F5F1",
+      bg_panel: "#FFFFFF",
+      border_subtle: "#E4D8CC",
+      text_heading: "#2E241C",
+      text_body: "#5A4C40",
+      accent_primary: "#B8734A",
+      accent_hover: "#975C39",
+      accent_subtle: "#F1E6DC",
+    },
+  },
+  "porcelain-berry": {
+    name: "Porcelain Berry",
+    colors: {
+      bg_main: "#FBF8FA",
+      bg_panel: "#FFFFFF",
+      border_subtle: "#EADFE6",
+      text_heading: "#2A1C24",
+      text_body: "#5C4A54",
+      accent_primary: "#9B3D5A",
+      accent_hover: "#7E3149",
+      accent_subtle: "#F4E6EC",
     },
   },
 };

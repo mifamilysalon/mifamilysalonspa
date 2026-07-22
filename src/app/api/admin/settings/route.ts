@@ -3,6 +3,12 @@ import { z } from "zod";
 import { getCurrentUser, requireRole } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import {
+  DEFAULT_MEDIA,
+  DEFAULT_SOCIAL,
+  HERO_TONE_IDS,
+  type HeroToneId,
+} from "@/lib/media";
+import {
   PALETTE_IDS,
   PALETTES,
   paletteDisplayName,
@@ -13,10 +19,13 @@ import {
   getActivePaletteId,
   getAuthSettings,
   getBusinessInfo,
+  getMediaSettings,
   getSmsSettings,
+  getSocialLinks,
 } from "@/lib/site";
 
 const paletteSchema = z.enum(PALETTE_IDS as [PaletteId, ...PaletteId[]]);
+const heroToneSchema = z.enum(HERO_TONE_IDS as [HeroToneId, ...HeroToneId[]]);
 
 const businessSchema = z.object({
   name: z.string().min(1).max(200),
@@ -44,13 +53,38 @@ const googleReviewsSchema = z.object({
   last_synced_at: z.string().nullable().optional(),
 });
 
+const mediaSchema = z.object({
+  hero_image: z.string().url().max(500).optional(),
+  hero_tone: heroToneSchema.optional(),
+});
+
+const socialSchema = z.object({
+  facebook: z.string().max(300).optional(),
+  instagram: z.string().max(300).optional(),
+  yelp: z.string().max(300).optional(),
+  threads: z.string().max(300).optional(),
+  tiktok: z.string().max(300).optional(),
+});
+
 const settingsUpdateSchema = z.object({
   palette: paletteSchema.optional(),
   business: businessSchema.optional(),
   sms: smsSchema.optional(),
   auth: authSchema.optional(),
   google_reviews: googleReviewsSchema.optional(),
+  media: mediaSchema.optional(),
+  social: socialSchema.optional(),
 });
+
+async function upsertSetting(db: D1Database, key: string, value: unknown) {
+  await db
+    .prepare(
+      `INSERT INTO site_settings (key, value_json) VALUES (?, ?)
+       ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
+    )
+    .bind(key, JSON.stringify(value))
+    .run();
+}
 
 export async function GET() {
   try {
@@ -62,13 +96,16 @@ export async function GET() {
     }
 
     const db = await getDb();
-    const [palette, business, sms, auth, google_reviews] = await Promise.all([
-      getActivePaletteId(),
-      getBusinessInfo(),
-      getSmsSettings(),
-      getAuthSettings(),
-      getGoogleReviewsMeta(db),
-    ]);
+    const [palette, business, sms, auth, google_reviews, media, social] =
+      await Promise.all([
+        getActivePaletteId(),
+        getBusinessInfo(),
+        getSmsSettings(),
+        getAuthSettings(),
+        getGoogleReviewsMeta(db),
+        getMediaSettings(),
+        getSocialLinks(),
+      ]);
 
     return NextResponse.json({
       palette,
@@ -82,6 +119,12 @@ export async function GET() {
       sms,
       auth,
       google_reviews,
+      media,
+      social,
+      defaults: {
+        media: DEFAULT_MEDIA,
+        social: DEFAULT_SOCIAL,
+      },
     });
   } catch {
     return NextResponse.json({ error: "Failed to load settings" }, { status: 500 });
@@ -106,60 +149,38 @@ export async function PUT(request: Request) {
     const db = await getDb();
 
     if (parsed.data.palette) {
-      await db
-        .prepare(
-          `INSERT INTO site_settings (key, value_json) VALUES ('palette', ?)
-           ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
-        )
-        .bind(JSON.stringify(parsed.data.palette))
-        .run();
+      await upsertSetting(db, "palette", parsed.data.palette);
     }
 
     if (parsed.data.business) {
-      await db
-        .prepare(
-          `INSERT INTO site_settings (key, value_json) VALUES ('business', ?)
-           ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
-        )
-        .bind(JSON.stringify(parsed.data.business))
-        .run();
+      await upsertSetting(db, "business", parsed.data.business);
     }
 
     if (parsed.data.sms) {
       const current = await getSmsSettings();
-      const merged = {
-        ...current,
-        ...parsed.data.sms,
-      };
-      await db
-        .prepare(
-          `INSERT INTO site_settings (key, value_json) VALUES ('sms', ?)
-           ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
-        )
-        .bind(JSON.stringify(merged))
-        .run();
+      await upsertSetting(db, "sms", { ...current, ...parsed.data.sms });
     }
 
     if (parsed.data.auth) {
-      await db
-        .prepare(
-          `INSERT INTO site_settings (key, value_json) VALUES ('auth', ?)
-           ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
-        )
-        .bind(JSON.stringify(parsed.data.auth))
-        .run();
+      await upsertSetting(db, "auth", parsed.data.auth);
     }
 
     if (parsed.data.google_reviews) {
       const current = await getGoogleReviewsMeta(db);
-      const merged = { ...current, ...parsed.data.google_reviews };
-      await db
-        .prepare(
-          `INSERT INTO site_settings (key, value_json) VALUES ('google_reviews', ?)
-           ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
-        )
-        .bind(JSON.stringify(merged))
-        .run();
+      await upsertSetting(db, "google_reviews", {
+        ...current,
+        ...parsed.data.google_reviews,
+      });
+    }
+
+    if (parsed.data.media) {
+      const current = await getMediaSettings();
+      await upsertSetting(db, "media", { ...current, ...parsed.data.media });
+    }
+
+    if (parsed.data.social) {
+      const current = await getSocialLinks();
+      await upsertSetting(db, "social", { ...current, ...parsed.data.social });
     }
 
     return NextResponse.json({ ok: true });

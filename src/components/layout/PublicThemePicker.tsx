@@ -61,10 +61,8 @@ export function PublicThemePicker({
         <div className="editorial-panel mb-2 max-h-[70vh] w-72 overflow-y-auto p-3 shadow-none">
           <div className="mb-2 flex items-start justify-between gap-2">
             <div>
-              <p className="text-sm font-medium text-salon-heading">Theme preview</p>
-              <p className="text-xs text-salon-body">
-                Temporary for you only. Owner default is set in Admin.
-              </p>
+              <p className="text-sm font-medium text-salon-heading">Themes</p>
+              <p className="text-xs text-salon-body">Try a look. Your choice stays on this device.</p>
             </div>
             <button
               type="button"

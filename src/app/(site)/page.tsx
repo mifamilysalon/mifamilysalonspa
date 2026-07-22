@@ -4,11 +4,12 @@ import { HeroSection } from "@/components/sections/HeroSection";
 import { GoogleReviewsSection } from "@/components/sections/GoogleReviewsSection";
 import { getDb } from "@/lib/db";
 import { getGoogleReviewsMeta, listCachedGoogleReviews } from "@/lib/reviews";
-import { getBusinessInfo, getServices } from "@/lib/site";
+import { getBusinessInfo, getMediaSettings, getServices } from "@/lib/site";
 
 export default async function HomePage() {
   const business = await getBusinessInfo();
   const services = await getServices();
+  const media = await getMediaSettings();
   let reviewsMeta = {
     place_id: "",
     maps_url:
@@ -54,7 +55,8 @@ export default async function HomePage() {
       <HeroSection
         headline="Family Hair Salon & Wellness Spa"
         subhead="Hair, skin, nails, and wellness for Farmington. Walk in for a cut, color, facial, or manicure - or book time in our private suite if you prefer a quieter setting."
-        image="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1600&q=80"
+        image={media.hero_image}
+        tone={media.hero_tone}
         ctaPrimary="Book an appointment"
         ctaPrimaryHref="/appointments"
         ctaSecondary={`Call ${business.phone_primary}`}
