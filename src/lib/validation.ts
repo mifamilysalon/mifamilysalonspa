@@ -49,16 +49,35 @@ export const recordWalkInSchema = z.object({
 });
 
 export const updateAppointmentStatusSchema = z.object({
-  status: z.enum([
-    "pending",
-    "confirmed",
-    "in_progress",
-    "completed",
-    "cancelled",
-    "no_show",
-  ]),
+  status: z
+    .enum([
+      "pending",
+      "confirmed",
+      "in_progress",
+      "completed",
+      "cancelled",
+      "no_show",
+    ])
+    .optional(),
   notes: z.string().max(1000).optional(),
-});
+  /** Reassign / transfer; null unassigns to the open pool */
+  staffId: z.number().int().positive().nullable().optional(),
+  claim: z.boolean().optional(),
+  claimAndConfirm: z.boolean().optional(),
+  startDatetime: z.string().min(10).optional(),
+  reason: z.string().max(500).optional(),
+  force: z.boolean().optional(),
+}).refine(
+  (v) =>
+    v.status !== undefined ||
+    v.notes !== undefined ||
+    v.staffId !== undefined ||
+    v.claim ||
+    v.claimAndConfirm ||
+    v.startDatetime !== undefined,
+  { message: "Provide at least one change" },
+);
 
 export type BookAppointmentInput = z.infer<typeof bookAppointmentSchema>;
 export type RecordWalkInInput = z.infer<typeof recordWalkInSchema>;
+export type UpdateAppointmentInput = z.infer<typeof updateAppointmentStatusSchema>;

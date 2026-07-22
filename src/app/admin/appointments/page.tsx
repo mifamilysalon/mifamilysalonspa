@@ -9,6 +9,7 @@ import {
 } from "date-fns";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { AppointmentHandoffPanel } from "@/components/appointments/AppointmentHandoffPanel";
 import { RecordWalkInForm } from "@/components/forms/RecordWalkInForm";
 
 type Appointment = {
@@ -89,6 +90,7 @@ function AdminAppointmentsContent() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<number | null>(null);
   const [showWalkIn, setShowWalkIn] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const loadSummary = useCallback(async () => {
     const params = new URLSearchParams({ summary: "1" });
@@ -134,14 +136,18 @@ function AdminAppointmentsContent() {
 
   async function updateStatus(id: number, status: string) {
     setUpdating(id);
+    setActionError(null);
     try {
       const res = await fetch(`/api/admin/appointments/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
+      const data = (await res.json()) as { error?: string };
       if (res.ok) {
         await Promise.all([loadAppointments(), loadSummary()]);
+      } else {
+        setActionError(data.error || "Update failed");
       }
     } finally {
       setUpdating(null);
@@ -202,6 +208,12 @@ function AdminAppointmentsContent() {
           )}
         </div>
       </div>
+
+      {actionError && (
+        <p className="mt-4 text-sm text-red-700" role="alert">
+          {actionError}
+        </p>
+      )}
 
       {showWalkIn && (
         <div className="mt-6">
@@ -539,6 +551,18 @@ function AdminAppointmentsContent() {
                       )}
                     </div>
                   </div>
+                  <AppointmentHandoffPanel
+                    appointmentId={appt.id}
+                    apiBase="/api/admin/appointments"
+                    mode="admin"
+                    staffId={appt.staff_id}
+                    status={appt.status}
+                    startDatetime={appt.start_datetime}
+                    onDone={async () => {
+                      await Promise.all([loadAppointments(), loadSummary()]);
+                    }}
+                    onError={setActionError}
+                  />
                 </li>
               ))}
             </ul>

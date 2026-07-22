@@ -17,7 +17,9 @@ export async function GET() {
     const db = await getDb();
     const res = await db
       .prepare(
-        `SELECT a.*, s.name AS service_name, sp.display_name AS staff_name
+        `SELECT a.id, a.staff_id, a.service_id, a.client_name, a.client_phone,
+                a.start_datetime, a.status, a.notes, s.name AS service_name,
+                sp.display_name AS staff_name
          FROM appointments a
          JOIN services s ON s.id = a.service_id
          LEFT JOIN staff_profiles sp ON sp.id = a.staff_id
@@ -26,6 +28,8 @@ export async function GET() {
       )
       .all<{
         id: number;
+        staff_id: number | null;
+        service_id: number;
         service_name: string;
         staff_name: string | null;
         client_name: string;

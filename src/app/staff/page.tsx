@@ -3,10 +3,12 @@
 import { format, parseISO } from "date-fns";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AppointmentHandoffPanel } from "@/components/appointments/AppointmentHandoffPanel";
 import { RecordWalkInForm } from "@/components/forms/RecordWalkInForm";
 
 type Appointment = {
   id: number;
+  staff_id: number | null;
   service_name: string;
   staff_name: string | null;
   client_name: string;
@@ -23,6 +25,7 @@ export default function StaffSchedulePage() {
   const [updating, setUpdating] = useState<number | null>(null);
   const [showWalkIn, setShowWalkIn] = useState(false);
   const [staffProfileId, setStaffProfileId] = useState<number | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const today = format(new Date(), "EEE, MMM d yyyy");
 
   async function loadSchedule() {
@@ -59,13 +62,16 @@ export default function StaffSchedulePage() {
 
   async function updateStatus(id: number, status: string) {
     setUpdating(id);
+    setActionError(null);
     try {
       const res = await fetch(`/api/staff/appointments/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
+      const data = (await res.json()) as { error?: string };
       if (res.ok) await loadSchedule();
+      else setActionError(data.error || "Update failed");
     } finally {
       setUpdating(null);
     }
@@ -96,6 +102,12 @@ export default function StaffSchedulePage() {
           )}
         </div>
       </div>
+
+      {actionError && (
+        <p className="mb-4 text-sm text-red-700" role="alert">
+          {actionError}
+        </p>
+      )}
 
       {showWalkIn && (
         <div className="mb-6">
@@ -134,7 +146,7 @@ export default function StaffSchedulePage() {
                   </p>
                   <p className="text-sm text-salon-body">
                     {appt.service_name}
-                    {appt.staff_name ? ` with ${appt.staff_name}` : ""}
+                    {appt.staff_name ? ` with ${appt.staff_name}` : " · Unassigned"}
                   </p>
                   <p className="text-sm text-salon-body">{appt.client_phone}</p>
                   <p className="mt-1 text-xs uppercase tracking-wide text-salon-body">
@@ -143,7 +155,7 @@ export default function StaffSchedulePage() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {appt.status === "pending" && (
+                  {appt.status === "pending" && appt.staff_id != null && (
                     <button
                       type="button"
                       disabled={updating === appt.id}
@@ -185,6 +197,17 @@ export default function StaffSchedulePage() {
                   )}
                 </div>
               </div>
+              <AppointmentHandoffPanel
+                appointmentId={appt.id}
+                apiBase="/api/staff/appointments"
+                mode="staff"
+                staffId={appt.staff_id}
+                status={appt.status}
+                startDatetime={appt.start_datetime}
+                myStaffId={staffProfileId}
+                onDone={loadSchedule}
+                onError={setActionError}
+              />
             </li>
           ))}
         </ul>
