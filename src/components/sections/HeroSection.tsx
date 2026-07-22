@@ -21,10 +21,10 @@ export function HeroSection({
   ctaSecondary?: string;
   ctaSecondaryHref?: string;
 }) {
-  // Full color needs a lighter wash so vibrancy stays visible
+  // Full color needs a much lighter wash so pinks/warms stay visible
   const overlay =
     tone === "color"
-      ? "linear-gradient(105deg, rgba(12,10,9,0.62) 0%, rgba(12,10,9,0.42) 45%, rgba(12,10,9,0.2) 100%)"
+      ? "linear-gradient(105deg, rgba(12,10,9,0.52) 0%, rgba(12,10,9,0.28) 48%, rgba(12,10,9,0.08) 100%)"
       : "linear-gradient(105deg, rgba(12,10,9,0.78) 0%, rgba(12,10,9,0.58) 42%, rgba(12,10,9,0.28) 100%)";
 
   return (

@@ -18,9 +18,8 @@ export const HERO_TONES: HeroToneMeta[] = [
     id: "color",
     name: "Full color",
     description: "Vivid natural color",
-    // Boost saturation so Full color is clearly distinct from Soft muted,
-    // even when the source photo is already somewhat desaturated.
-    filter: "saturate(1.35) contrast(1.06) brightness(1.02)",
+    // Strong boost so Full color reads clearly vs Soft muted on muted source photos.
+    filter: "saturate(1.65) contrast(1.1) brightness(1.05)",
   },
   {
     id: "grayscale",
