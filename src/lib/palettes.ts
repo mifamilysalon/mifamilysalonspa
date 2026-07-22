@@ -34,14 +34,15 @@ export const PALETTES: Record<PaletteId, PaletteMeta> = {
     name: "Farmington Rose Gold & Alabaster",
     suffix: "Default luxury",
     colors: {
-      bg_main: "#FAF8F5",
+      // Soft alabaster + true rose-gold (pink-metal), not champagne tan
+      bg_main: "#FBF6F4",
       bg_panel: "#FFFFFF",
-      border_subtle: "#E8E2D9",
-      text_heading: "#1C1917",
-      text_body: "#44403C",
-      accent_primary: "#B88E4C",
-      accent_hover: "#9A7336",
-      accent_subtle: "#F4ECE1",
+      border_subtle: "#E8D5D2",
+      text_heading: "#3A2428",
+      text_body: "#5C4549",
+      accent_primary: "#C47880",
+      accent_hover: "#A85F68",
+      accent_subtle: "#F5E6E4",
     },
   },
   "midnight-magenta": {
@@ -49,15 +50,15 @@ export const PALETTES: Record<PaletteId, PaletteMeta> = {
     isCurrentSiteInspired: true,
     suffix: "Current website inspired",
     colors: {
-      // From live GoDaddy site: dark purple/black + hot magenta accents + cream text
-      bg_main: "#1A0F1A",
+      // Matched to live GoDaddy site: near-black purple, hot pink/magenta, cream type
+      bg_main: "#1D111D",
       bg_panel: "#2A1528",
-      border_subtle: "#4A2A48",
-      text_heading: "#F5EDE8",
-      text_body: "#D4C4CE",
-      accent_primary: "#D946A8",
-      accent_hover: "#BE185D",
-      accent_subtle: "#3D1F3A",
+      border_subtle: "#4A2040",
+      text_heading: "#FFFBD0",
+      text_body: "#F0DCE8",
+      accent_primary: "#FF008A",
+      accent_hover: "#E00078",
+      accent_subtle: "#3D1535",
     },
   },
   "warm-earth-spa": {

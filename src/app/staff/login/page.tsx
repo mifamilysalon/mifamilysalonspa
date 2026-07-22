@@ -7,6 +7,7 @@ import type { StaffProfile } from "@/lib/site";
 export default function StaffLoginPage() {
   const router = useRouter();
   const [staff, setStaff] = useState<StaffProfile[]>([]);
+  const [pinLength, setPinLength] = useState<4 | 6>(4);
   const [selectedStaff, setSelectedStaff] = useState<StaffProfile | null>(null);
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -16,8 +17,12 @@ export default function StaffLoginPage() {
     async function loadStaff() {
       try {
         const res = await fetch("/api/staff");
-        const d = (await res.json()) as { staff?: StaffProfile[] };
+        const d = (await res.json()) as {
+          staff?: StaffProfile[];
+          pinLength?: 4 | 6;
+        };
         setStaff(d.staff || []);
+        if (d.pinLength === 6 || d.pinLength === 4) setPinLength(d.pinLength);
       } catch {
         setError("Could not load staff list.");
       }
@@ -26,7 +31,7 @@ export default function StaffLoginPage() {
   }, []);
 
   function appendDigit(digit: string) {
-    if (pin.length < 6) setPin((p) => p + digit);
+    setPin((p) => (p.length < pinLength ? p + digit : p));
   }
 
   function backspace() {
@@ -34,8 +39,8 @@ export default function StaffLoginPage() {
   }
 
   async function handleLogin() {
-    if (!selectedStaff || pin.length < 4) {
-      setError("Select your name and enter your PIN (4-6 digits).");
+    if (!selectedStaff || pin.length !== pinLength) {
+      setError(`Select your name and enter your ${pinLength}-digit PIN.`);
       return;
     }
 
@@ -69,7 +74,9 @@ export default function StaffLoginPage() {
     <div className="mx-auto max-w-md px-4 py-10">
       <div className="editorial-panel p-6">
         <h1 className="font-serif text-2xl text-salon-heading">Staff login</h1>
-        <p className="mt-2 text-sm text-salon-body">Select your name and enter your PIN.</p>
+        <p className="mt-2 text-sm text-salon-body">
+          Select your name and enter your {pinLength}-digit PIN.
+        </p>
 
         {error && (
           <p className="mt-4 border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
@@ -79,7 +86,7 @@ export default function StaffLoginPage() {
 
         <div className="mt-6">
           <span className="mb-2 block text-sm font-medium text-salon-heading">Who are you?</span>
-          <div className="space-y-2">
+          <div className="max-h-64 space-y-2 overflow-y-auto">
             {staff.map((member) => (
               <button
                 key={member.id}
@@ -103,9 +110,11 @@ export default function StaffLoginPage() {
 
         {selectedStaff && (
           <div className="mt-6">
-            <span className="mb-2 block text-sm font-medium text-salon-heading">PIN</span>
+            <span className="mb-2 block text-sm font-medium text-salon-heading">
+              PIN ({pinLength} digits)
+            </span>
             <div className="mb-4 flex justify-center gap-2">
-              {Array.from({ length: 6 }).map((_, i) => (
+              {Array.from({ length: pinLength }).map((_, i) => (
                 <span
                   key={i}
                   className="flex h-12 w-10 items-center justify-center border border-salon-border text-xl"
@@ -135,7 +144,7 @@ export default function StaffLoginPage() {
             <button
               type="button"
               onClick={handleLogin}
-              disabled={loading || pin.length < 4}
+              disabled={loading || pin.length !== pinLength}
               className="mt-6 min-h-12 w-full bg-salon-primary py-3 text-white transition hover:bg-salon-hover disabled:opacity-50"
             >
               {loading ? "Signing in..." : "Sign in"}

@@ -2,9 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "account_id": "9c767ec1aaffb8ef43e273152b199945",
   "name": "familysalonspa",
-  "main": ".open-next/worker.js",
+  "main": "./worker.ts",
   "compatibility_date": "2026-07-22",
   "compatibility_flags": ["nodejs_compat"],
+  "triggers": {
+    "crons": ["0 4 * * *"]
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"

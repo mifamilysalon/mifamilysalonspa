@@ -8,8 +8,10 @@ import {
   paletteDisplayName,
   type PaletteId,
 } from "@/lib/palettes";
+import { getGoogleReviewsMeta } from "@/lib/reviews";
 import {
   getActivePaletteId,
+  getAuthSettings,
   getBusinessInfo,
   getSmsSettings,
 } from "@/lib/site";
@@ -30,10 +32,24 @@ const smsSchema = z.object({
   sent_this_month: z.number().int().min(0).optional(),
 });
 
+const authSchema = z.object({
+  pin_length: z.union([z.literal(4), z.literal(6)]),
+});
+
+const googleReviewsSchema = z.object({
+  place_id: z.string().max(200).optional(),
+  maps_url: z.string().url().max(500).optional(),
+  rating: z.number().min(0).max(5).optional(),
+  review_count: z.number().int().min(0).optional(),
+  last_synced_at: z.string().nullable().optional(),
+});
+
 const settingsUpdateSchema = z.object({
   palette: paletteSchema.optional(),
   business: businessSchema.optional(),
   sms: smsSchema.optional(),
+  auth: authSchema.optional(),
+  google_reviews: googleReviewsSchema.optional(),
 });
 
 export async function GET() {
@@ -45,10 +61,13 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const [palette, business, sms] = await Promise.all([
+    const db = await getDb();
+    const [palette, business, sms, auth, google_reviews] = await Promise.all([
       getActivePaletteId(),
       getBusinessInfo(),
       getSmsSettings(),
+      getAuthSettings(),
+      getGoogleReviewsMeta(db),
     ]);
 
     return NextResponse.json({
@@ -61,6 +80,8 @@ export async function GET() {
       })),
       business,
       sms,
+      auth,
+      google_reviews,
     });
   } catch {
     return NextResponse.json({ error: "Failed to load settings" }, { status: 500 });
@@ -113,6 +134,28 @@ export async function PUT(request: Request) {
       await db
         .prepare(
           `INSERT INTO site_settings (key, value_json) VALUES ('sms', ?)
+           ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
+        )
+        .bind(JSON.stringify(merged))
+        .run();
+    }
+
+    if (parsed.data.auth) {
+      await db
+        .prepare(
+          `INSERT INTO site_settings (key, value_json) VALUES ('auth', ?)
+           ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
+        )
+        .bind(JSON.stringify(parsed.data.auth))
+        .run();
+    }
+
+    if (parsed.data.google_reviews) {
+      const current = await getGoogleReviewsMeta(db);
+      const merged = { ...current, ...parsed.data.google_reviews };
+      await db
+        .prepare(
+          `INSERT INTO site_settings (key, value_json) VALUES ('google_reviews', ?)
            ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json`,
         )
         .bind(JSON.stringify(merged))

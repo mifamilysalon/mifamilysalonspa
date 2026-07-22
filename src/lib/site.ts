@@ -89,7 +89,7 @@ export async function getBookableStaff(): Promise<StaffProfile[]> {
     const db = await getDb();
     const res = await db
       .prepare(
-        "SELECT id, display_name, bio, photo_url, is_bookable FROM staff_profiles WHERE is_bookable = 1",
+        "SELECT id, display_name, bio, photo_url, is_bookable FROM staff_profiles WHERE is_bookable = 1 ORDER BY display_name",
       )
       .all<StaffProfile>();
     return res.results || [];
@@ -112,5 +112,19 @@ export async function getSmsSettings(): Promise<{
     return JSON.parse(row.value_json);
   } catch {
     return { enabled: false, monthly_cap: 5000, sent_this_month: 0 };
+  }
+}
+
+export async function getAuthSettings(): Promise<{ pin_length: 4 | 6 }> {
+  try {
+    const db = await getDb();
+    const row = await db
+      .prepare("SELECT value_json FROM site_settings WHERE key = 'auth'")
+      .first<{ value_json: string }>();
+    if (!row) return { pin_length: 4 };
+    const parsed = JSON.parse(row.value_json) as { pin_length?: number };
+    return { pin_length: parsed.pin_length === 6 ? 6 : 4 };
+  } catch {
+    return { pin_length: 4 };
   }
 }

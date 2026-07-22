@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { getBookableStaff } from "@/lib/site";
+import { getAuthSettings, getBookableStaff } from "@/lib/site";
 import type { StaffProfile } from "@/lib/site";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const serviceId = searchParams.get("serviceId");
+    const auth = await getAuthSettings();
 
     if (!serviceId) {
       const staff = await getBookableStaff();
-      return NextResponse.json({ staff });
+      return NextResponse.json({ staff, pinLength: auth.pin_length });
     }
 
     const sid = Number(serviceId);
@@ -30,7 +31,7 @@ export async function GET(request: Request) {
       .bind(sid)
       .all<StaffProfile>();
 
-    return NextResponse.json({ staff: res.results || [] });
+    return NextResponse.json({ staff: res.results || [], pinLength: auth.pin_length });
   } catch {
     return NextResponse.json({ error: "Failed to load staff" }, { status: 500 });
   }

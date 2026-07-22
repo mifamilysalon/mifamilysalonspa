@@ -14,8 +14,56 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const date = searchParams.get("date");
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
+    const staffId = searchParams.get("staffId");
+    const summary = searchParams.get("summary") === "1";
 
     const db = await getDb();
+
+    if (summary) {
+      const staffRes = await db
+        .prepare(
+          `SELECT sp.id, sp.display_name,
+            SUM(CASE WHEN date(a.start_datetime) = date('now', 'localtime')
+              AND a.status NOT IN ('cancelled') THEN 1 ELSE 0 END) AS today_count,
+            SUM(CASE WHEN a.start_datetime >= datetime('now', 'localtime')
+              AND a.status IN ('pending', 'confirmed', 'in_progress') THEN 1 ELSE 0 END) AS upcoming_count,
+            SUM(CASE WHEN a.status = 'pending' THEN 1 ELSE 0 END) AS pending_count,
+            SUM(CASE WHEN a.status = 'completed' THEN 1 ELSE 0 END) AS completed_count,
+            COUNT(a.id) AS total_count
+           FROM staff_profiles sp
+           LEFT JOIN appointments a ON a.staff_id = sp.id
+           WHERE sp.is_bookable = 1
+           GROUP BY sp.id, sp.display_name
+           ORDER BY sp.display_name`,
+        )
+        .all<{
+          id: number;
+          display_name: string;
+          today_count: number;
+          upcoming_count: number;
+          pending_count: number;
+          completed_count: number;
+          total_count: number;
+        }>();
+
+      const statusRes = await db
+        .prepare(
+          `SELECT status, COUNT(*) AS count
+           FROM appointments
+           GROUP BY status`,
+        )
+        .all<{ status: string; count: number }>();
+
+      return NextResponse.json({
+        team: staffRes.results || [],
+        statusCounts: Object.fromEntries(
+          (statusRes.results || []).map((r) => [r.status, r.count]),
+        ),
+      });
+    }
+
     let query = `
       SELECT a.*, s.name AS service_name, sp.display_name AS staff_name
       FROM appointments a
@@ -33,8 +81,20 @@ export async function GET(request: Request) {
       query += " AND date(a.start_datetime) = ?";
       binds.push(date);
     }
+    if (from) {
+      query += " AND date(a.start_datetime) >= ?";
+      binds.push(from);
+    }
+    if (to) {
+      query += " AND date(a.start_datetime) <= ?";
+      binds.push(to);
+    }
+    if (staffId) {
+      query += " AND a.staff_id = ?";
+      binds.push(Number(staffId));
+    }
 
-    query += " ORDER BY a.start_datetime DESC LIMIT 200";
+    query += " ORDER BY a.start_datetime ASC LIMIT 400";
 
     const res = await db.prepare(query).bind(...binds).all<{
       id: number;

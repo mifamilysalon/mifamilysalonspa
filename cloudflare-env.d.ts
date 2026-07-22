@@ -6,6 +6,7 @@ export type AppEnv = {
   CACHE: KVNamespace;
   ASSETS?: Fetcher;
   SESSION_SECRET?: string;
+  GOOGLE_PLACES_API_KEY?: string;
   TWILIO_ACCOUNT_SID?: string;
   TWILIO_AUTH_TOKEN?: string;
   TWILIO_FROM_NUMBER?: string;

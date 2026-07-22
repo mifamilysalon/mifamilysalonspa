@@ -1,11 +1,30 @@
 import Link from "next/link";
 import Image from "next/image";
 import { HeroSection } from "@/components/sections/HeroSection";
+import { GoogleReviewsSection } from "@/components/sections/GoogleReviewsSection";
+import { getDb } from "@/lib/db";
+import { getGoogleReviewsMeta, listCachedGoogleReviews } from "@/lib/reviews";
 import { getBusinessInfo, getServices } from "@/lib/site";
 
 export default async function HomePage() {
   const business = await getBusinessInfo();
   const services = await getServices();
+  let reviewsMeta = {
+    place_id: "",
+    maps_url:
+      "https://www.google.com/maps/search/?api=1&query=Family+Hair+Salon+%26+Wellness+Spa+34777+Grand+River+Ave+Farmington+MI",
+    rating: 4.4,
+    review_count: 1012,
+    last_synced_at: null as string | null,
+  };
+  let reviews: Awaited<ReturnType<typeof listCachedGoogleReviews>> = [];
+  try {
+    const db = await getDb();
+    reviewsMeta = await getGoogleReviewsMeta(db);
+    reviews = await listCachedGoogleReviews(db);
+  } catch {
+    // D1 unavailable during build - section omitted
+  }
   const featured = [
     {
       title: "Hair Care",
@@ -95,6 +114,10 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      {reviews.length > 0 && (
+        <GoogleReviewsSection meta={reviewsMeta} reviews={reviews} />
+      )}
 
       <section className="bg-salon-light">
         <div className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
