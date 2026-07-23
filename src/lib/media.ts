@@ -84,7 +84,7 @@ export type SocialLinks = {
   tiktok: string;
 };
 
-/** Placeholders until client confirms live URLs */
+/** Confirmed client social profiles */
 export const DEFAULT_SOCIAL: SocialLinks = {
   facebook: "https://www.facebook.com/familysalonandspa/",
   instagram: "https://www.instagram.com/familysalonandspa/",

@@ -1,26 +1,35 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/seo";
+
+type RouteConfig = {
+  path: string;
+  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+  priority: number;
+};
+
+const ROUTES: RouteConfig[] = [
+  { path: "", changeFrequency: "weekly", priority: 1 },
+  { path: "/appointments", changeFrequency: "weekly", priority: 0.95 },
+  { path: "/hair-care", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/skin-care", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/nail-care", changeFrequency: "monthly", priority: 0.9 },
+  { path: "/wellness", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/private-area", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/contact", changeFrequency: "monthly", priority: 0.85 },
+  { path: "/about", changeFrequency: "monthly", priority: 0.75 },
+  { path: "/gallery", changeFrequency: "weekly", priority: 0.7 },
+  { path: "/gift-certificates", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/products", changeFrequency: "monthly", priority: 0.65 },
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://familysalonspa.com";
-  const routes = [
-    "",
-    "/hair-care",
-    "/skin-care",
-    "/nail-care",
-    "/wellness",
-    "/private-area",
-    "/gallery",
-    "/gift-certificates",
-    "/products",
-    "/about",
-    "/contact",
-    "/appointments",
-  ];
+  // Stable lastModified for crawlers (update when major content ships)
+  const lastModified = new Date("2026-07-22");
 
-  return routes.map((path) => ({
-    url: `${base}${path}`,
-    lastModified: new Date(),
-    changeFrequency: path === "" ? "weekly" : "monthly",
-    priority: path === "" || path === "/appointments" ? 1 : 0.8,
+  return ROUTES.map(({ path, changeFrequency, priority }) => ({
+    url: path ? `${SITE_URL}${path}` : SITE_URL,
+    lastModified,
+    changeFrequency,
+    priority,
   }));
 }

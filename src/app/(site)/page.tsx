@@ -3,6 +3,8 @@ import Image from "next/image";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { GoogleReviewsSection } from "@/components/sections/GoogleReviewsSection";
 import { InstagramFeedSection } from "@/components/sections/InstagramFeedSection";
+import { FaqSection } from "@/components/seo/FaqSection";
+import { JsonLd } from "@/components/seo/JsonLd";
 import { getDb } from "@/lib/db";
 import {
   DEFAULT_INSTAGRAM_FEED,
@@ -10,12 +12,31 @@ import {
   getInstagramFeedSettings,
 } from "@/lib/instagram";
 import { getGoogleReviewsMeta, listCachedGoogleReviews } from "@/lib/reviews";
-import { getBusinessInfo, getMediaSettings, getServices } from "@/lib/site";
+import {
+  buildLocalBusinessJsonLd,
+  buildWebsiteJsonLd,
+  buildPageMetadata,
+} from "@/lib/seo";
+import { getBusinessInfo, getMediaSettings, getServices, getSocialLinks } from "@/lib/site";
+
+export const metadata = buildPageMetadata({
+  title: "Hair Salon & Spa in Farmington, MI",
+  description:
+    "Family Hair Salon & Wellness Spa in Farmington, MI — hair, skin, nails, wellness, and a private women's suite. Walk in or book online. Call (248) 474-6520.",
+  path: "/",
+  keywords: [
+    "hair salon Farmington MI",
+    "spa Farmington Michigan",
+    "walk in haircut Farmington",
+    "private suite salon Farmington",
+  ],
+});
 
 export default async function HomePage() {
   const business = await getBusinessInfo();
   const services = await getServices();
   const media = await getMediaSettings();
+  const social = await getSocialLinks();
   let reviewsMeta = {
     place_id: "",
     maps_url:
@@ -184,25 +205,18 @@ export default async function HomePage() {
         )}
       </section>
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "HairSalon",
-            name: business.name,
-            telephone: [business.phone_primary, business.phone_secondary],
-            address: {
-              "@type": "PostalAddress",
-              streetAddress: "34777 Grand River Ave",
-              addressLocality: "Farmington",
-              addressRegion: "MI",
-              postalCode: "48335",
-              addressCountry: "US",
-            },
-            url: "https://familysalonspa.com",
+      <FaqSection />
+
+      <JsonLd
+        data={[
+          buildLocalBusinessJsonLd({
+            rating: reviewsMeta.rating,
+            reviewCount: reviewsMeta.review_count,
+            social,
+            image: media.hero_image,
           }),
-        }}
+          buildWebsiteJsonLd(),
+        ]}
       />
     </>
   );

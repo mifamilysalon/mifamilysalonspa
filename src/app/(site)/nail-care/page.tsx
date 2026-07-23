@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
 import ServiceCategoryPage from "@/components/sections/ServiceCategoryPage";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Nail Care" };
+export const metadata: Metadata = buildPageMetadata({
+  title: "Nail Care in Farmington, MI",
+  description:
+    "Manicures, pedicures, shellac, and polish changes from Farmington nail technicians. Book at Family Hair Salon & Wellness Spa.",
+  path: "/nail-care",
+  keywords: ["manicure Farmington MI", "pedicure Farmington", "shellac nails Michigan"],
+});
 
 export default function NailCarePage() {
   return (
     <ServiceCategoryPage
       title="Nail Care"
       category="nails"
-      intro="Pamper your fingers and toes with nail service from Family Hair Salon & Wellness Spa. Manicures, pedicures, shellac, and polish changes are available."
+      intro="Manicures, pedicures, shellac, and polish changes from Farmington nail technicians. Walk in when seats are open, or book ahead for a set time."
     />
   );
 }

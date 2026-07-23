@@ -301,17 +301,17 @@ export default function AdminSettingsPage() {
       <section className="editorial-panel mt-6 p-6">
         <h2 className="font-serif text-lg text-salon-heading">Instagram feed</h2>
         <p className="mt-2 text-sm text-salon-body">
-          Free auto-sync like{" "}
+          Free Instagram post sync — no Trustindex required. Preferred:{" "}
           <a
-            href="https://citysidecafe.com/"
+            href="https://behold.so/"
             target="_blank"
             rel="noopener noreferrer"
             className="underline underline-offset-2"
           >
-            City Side Cafe
-          </a>
-          . Preferred: Behold JSON feed (custom grid on our site). Alternate: Trustindex
-          widget ID (same free provider City Side uses).
+            Behold
+          </a>{" "}
+          JSON feed (custom grid on our site, nightly sync). Trustindex is only an optional
+          alternate if you already use it.
         </p>
         <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-salon-body">
           <li>
@@ -336,18 +336,7 @@ export default function AdminSettingsPage() {
             .
           </li>
           <li>Add a JSON feed, copy the URL (feeds.behold.so/…), paste below, save, then Sync.</li>
-          <li>
-            Or use{" "}
-            <a
-              href="https://www.trustindex.io/widgets/instagram-feed-widget/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2"
-            >
-              Trustindex
-            </a>{" "}
-            free Instagram widget and paste the widget ID only.
-          </li>
+          <li>Optional: leave Trustindex widget ID blank unless you prefer that provider.</li>
         </ol>
         <label className="mt-4 block text-sm text-salon-body">
           Instagram handle

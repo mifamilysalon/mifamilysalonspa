@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { buildPageMetadata } from "@/lib/seo";
 import { getBusinessInfo } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Products" };
+export const metadata: Metadata = buildPageMetadata({
+  title: "Hair & Skin Products",
+  description:
+    "Professional hair and skin care products recommended by stylists at Family Hair Salon & Wellness Spa in Farmington, MI.",
+  path: "/products",
+});
 
 export default async function ProductsPage() {
   const business = await getBusinessInfo();
@@ -17,7 +23,7 @@ export default async function ProductsPage() {
       </p>
       <p className="mt-5 text-salon-body">
         Product availability changes. Call {business.phone_primary} if you need
-        a specific item reserved.
+        a specific item reserved at our Farmington location.
       </p>
       <Link
         href="/contact"

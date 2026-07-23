@@ -7,8 +7,14 @@ import {
   getInstagramFeedSettings,
   listCachedInstagramPosts,
 } from "@/lib/instagram";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = { title: "Photo Gallery" };
+export const metadata: Metadata = buildPageMetadata({
+  title: "Photo Gallery",
+  description:
+    "Photos and Instagram moments from Family Hair Salon & Wellness Spa in Farmington, MI — salon atmosphere, hair, skin, and nails.",
+  path: "/gallery",
+});
 
 const IMAGES = [
   {
