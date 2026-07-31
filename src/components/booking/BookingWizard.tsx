@@ -19,9 +19,8 @@ function formatSlotTime(iso: string): string {
   return format(parseISO(iso), "h:mm a");
 }
 
-function formatPrice(price: number | null): string {
-  if (price === null || price === 0) return "Price on request";
-  return `$${price.toFixed(0)}`;
+function formatDuration(minutes: number): string {
+  return `${minutes} min`;
 }
 
 export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) {
@@ -302,7 +301,7 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
                     <span>
                       <span className="block font-medium text-salon-heading">{s.name}</span>
                       <span className="text-sm text-salon-body">
-                        {s.duration_minutes} min - {formatPrice(s.price)} -{" "}
+                        {formatDuration(s.duration_minutes)} ·{" "}
                         {s.booking_type === "instant" ? "Instant book" : "Request"}
                       </span>
                     </span>

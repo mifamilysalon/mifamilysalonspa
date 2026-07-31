@@ -68,17 +68,23 @@ export function SiteFooter({
           >
             Book or walk in
           </Link>
+          <Link
+            href="/gift-certificates"
+            className="mt-2 block text-sm text-salon-body hover:text-salon-primary"
+          >
+            Gift certificates
+          </Link>
         </div>
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-salon-heading">
             Hours
           </p>
           <p className="mt-3 text-sm text-salon-body">{hours}</p>
-          <div className="mt-6 flex flex-wrap gap-4 text-sm">
-            <Link href="/staff/login" className="text-salon-body/70 hover:text-salon-primary">
+          <div className="mt-8 flex flex-wrap gap-4 text-xs text-salon-body/50">
+            <Link href="/staff/login" className="hover:text-salon-primary">
               Staff
             </Link>
-            <Link href="/admin/login" className="text-salon-body/70 hover:text-salon-primary">
+            <Link href="/admin/login" className="hover:text-salon-primary">
               Admin
             </Link>
           </div>

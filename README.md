@@ -36,6 +36,21 @@ npx wrangler d1 migrations apply familysalonspa-db --remote
 
 ---
 
+## In-salon price brochure (QR)
+
+Prices are **not** shown on the public website. Guests at the desk scan a QR code:
+
+| Environment | URL |
+|-------------|-----|
+| Production | `https://familysalonspa.com/menu` |
+| Preview | `https://familysalonspa.consultifyit-forms.workers.dev/menu` |
+
+- Hidden from nav, sitemap, and robots (`noindex`)
+- Edit dollar amounts in **Admin → Services**
+- QR tip: point the printed code at `/menu` only — do not put the link on social or the main site
+
+---
+
 ## Secrets & API keys (do not lose)
 
 Store production values with Wrangler secrets (never commit real keys). Local: `.dev.vars` (gitignored). Template: `.dev.vars.example`.

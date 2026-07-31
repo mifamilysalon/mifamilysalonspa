@@ -79,3 +79,20 @@ h4 {
   background: var(--salon-bg-panel);
   border: 1px solid var(--salon-border);
 }
+
+@media print {
+  header a[href="/"],
+  .print\:hidden {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+}

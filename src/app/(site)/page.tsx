@@ -17,7 +17,7 @@ import {
   buildWebsiteJsonLd,
   buildPageMetadata,
 } from "@/lib/seo";
-import { getBusinessInfo, getMediaSettings, getServices, getSocialLinks } from "@/lib/site";
+import { getBusinessInfo, getMediaSettings, getSocialLinks } from "@/lib/site";
 
 export const metadata = buildPageMetadata({
   title: "Hair Salon & Spa in Farmington, MI",
@@ -34,7 +34,6 @@ export const metadata = buildPageMetadata({
 
 export default async function HomePage() {
   const business = await getBusinessInfo();
-  const services = await getServices();
   const media = await getMediaSettings();
   const social = await getSocialLinks();
   let reviewsMeta = {
@@ -198,11 +197,6 @@ export default async function HomePage() {
             Contact us
           </Link>
         </div>
-        {services.length > 0 && (
-          <p className="mt-10 text-sm text-salon-body/70">
-            {services.length} services available to book online
-          </p>
-        )}
       </section>
 
       <FaqSection />

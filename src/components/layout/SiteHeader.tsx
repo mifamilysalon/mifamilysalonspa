@@ -5,13 +5,12 @@ import { useState } from "react";
 
 const NAV = [
   { href: "/", label: "Home" },
-  { href: "/hair-care", label: "Hair Care" },
-  { href: "/skin-care", label: "Skin Care" },
-  { href: "/nail-care", label: "Nail Care" },
+  { href: "/hair-care", label: "Hair" },
+  { href: "/skin-care", label: "Skin" },
+  { href: "/nail-care", label: "Nails" },
   { href: "/wellness", label: "Wellness" },
   { href: "/private-area", label: "Private Suite" },
   { href: "/gallery", label: "Gallery" },
-  { href: "/gift-certificates", label: "Gift Certificates" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -26,7 +25,7 @@ export function SiteHeader({
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-salon-border bg-salon-bg/95 backdrop-blur-0">
+    <header className="sticky top-0 z-50 border-b border-salon-border bg-salon-bg/95 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 md:px-6">
         <Link href="/" className="font-serif text-xl text-salon-heading md:text-2xl">
           {salonName}

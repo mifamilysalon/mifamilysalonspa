@@ -34,7 +34,6 @@ export default async function ServiceCategoryPage({
               )}
               <p className="mt-3 text-sm text-salon-body/70">
                 {s.duration_minutes} min
-                {s.price != null && s.price > 0 ? ` · from $${s.price}` : ""}
                 {s.booking_type === "request" ? " · request to confirm" : ""}
               </p>
             </div>
@@ -53,13 +52,16 @@ export default async function ServiceCategoryPage({
         )}
       </div>
 
-      <div className="mt-12">
+      <div className="mt-12 flex flex-wrap items-center gap-4">
         <Link
           href="/appointments"
           className="bg-salon-primary px-6 py-3 text-sm font-medium text-white hover:bg-salon-hover"
         >
           Book an appointment
         </Link>
+        <p className="text-sm text-salon-body">
+          Current rates are available in salon — ask at the desk.
+        </p>
       </div>
     </div>
   );

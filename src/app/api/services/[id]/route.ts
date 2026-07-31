@@ -23,7 +23,9 @@ export async function GET(
       return NextResponse.json({ error: "Service not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ service });
+    const { price, ...publicService } = service;
+    void price;
+    return NextResponse.json({ service: publicService });
   } catch {
     return NextResponse.json({ error: "Failed to load service" }, { status: 500 });
   }

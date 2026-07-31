@@ -24,7 +24,6 @@ export const LOCAL_BUSINESS = {
   /** Approximate salon coordinates for LocalBusiness geo (Grand River Ave, Farmington) */
   latitude: 42.4645,
   longitude: -83.3763,
-  priceRange: "$$",
   /** Schema.org OpeningHoursSpecification */
   openingHours: [
     { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "09:00", closes: "18:00" },
@@ -121,7 +120,6 @@ export function buildLocalBusinessJsonLd(input?: {
     url: SITE_URL,
     telephone: LOCAL_BUSINESS.telephoneDisplay[0],
     image: input?.image || LOCAL_BUSINESS.defaultImage,
-    priceRange: LOCAL_BUSINESS.priceRange,
     address: {
       "@type": "PostalAddress",
       streetAddress: LOCAL_BUSINESS.streetAddress,
@@ -256,6 +254,11 @@ export const SITE_FAQS: Array<{ question: string; answer: string }> = [
     question: "How do I book an appointment?",
     answer:
       "Book online at familysalonspa.com/appointments, or call (248) 474-6520 or (248) 635-5127. Instant-book services confirm immediately; request services are confirmed by our team.",
+  },
+  {
+    question: "How much do services cost?",
+    answer:
+      "Current rates are available in the salon. Ask at the front desk for our service menu — your stylist will confirm pricing before your service begins.",
   },
   {
     question: "What services do you offer?",

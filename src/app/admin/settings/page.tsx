@@ -268,10 +268,24 @@ export default function AdminSettingsPage() {
       </section>
 
       <section className="editorial-panel mt-6 p-6">
+        <h2 className="font-serif text-lg text-salon-heading">In-salon price brochure</h2>
+        <p className="mt-2 text-sm text-salon-body">
+          Prices are hidden from the public website. Guests scan a desk QR code to open the
+          private menu. Do not link this URL in the public nav or marketing site.
+        </p>
+        <p className="mt-3 break-all rounded border border-salon-border bg-salon-light px-3 py-3 font-mono text-sm text-salon-heading">
+          https://familysalonspa.com/menu
+        </p>
+        <p className="mt-2 text-xs text-salon-body">
+          Preview on Workers: https://familysalonspa.consultifyit-forms.workers.dev/menu — edit
+          amounts under Admin → Services.
+        </p>
+      </section>
+
+      <section className="editorial-panel mt-6 p-6">
         <h2 className="font-serif text-lg text-salon-heading">Social media</h2>
         <p className="mt-2 text-sm text-salon-body">
-          Links shown in the site footer. Leave blank to hide a network. Placeholder URLs are
-          included until the client confirms finals.
+          Links shown in the site footer. Leave blank to hide a network.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {SOCIAL_LABELS.map(({ key, label }) => (
