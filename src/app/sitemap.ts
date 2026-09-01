@@ -19,6 +19,7 @@ const ROUTES: RouteConfig[] = [
   { path: "/about", changeFrequency: "monthly", priority: 0.75 },
   { path: "/gallery", changeFrequency: "weekly", priority: 0.7 },
   { path: "/gift-certificates", changeFrequency: "monthly", priority: 0.7 },
+  { path: "/offers", changeFrequency: "weekly", priority: 0.75 },
   { path: "/products", changeFrequency: "monthly", priority: 0.65 },
 ];
 

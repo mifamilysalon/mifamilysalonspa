@@ -31,23 +31,36 @@ npx wrangler d1 migrations apply familysalonspa-db --remote
 
 ## Credentials (seed)
 
-- Admin: `admin@familysalonspa.com` / `SalonOwner2026!`
-- Staff PIN: `1234` (all seeded stylists)
+Default admin and staff details live in **`local/credentials.md`** (gitignored — not in the repo). Create that file locally from your seed notes; do not commit passwords.
+
+## Owner: self-serve promos
+
+Salon owners can publish time-bound homepage/offers without a developer. See **[docs/owner-promos.md](docs/owner-promos.md)** (Admin → Promos).
+
+## UX standards
+
+UI work follows [Laws of UX](https://lawsofux.com/). Project mapping + 3D immersive analysis: **[docs/ux-laws.md](docs/ux-laws.md)**. Agent rule: `.cursor/rules/laws-of-ux.mdc`.
 
 ---
 
 ## In-salon price brochure (QR)
 
-Prices are **not** shown on the public website. Guests at the desk scan a QR code:
+Prices are **not** on the public website. Guests at the desk scan a QR code to an **unguessable** URL (not `/menu`).
 
-| Environment | URL |
-|-------------|-----|
-| Production | `https://familysalonspa.com/menu` |
-| Preview | `https://familysalonspa.consultifyit-forms.workers.dev/menu` |
+| Item | Detail |
+|------|--------|
+| Path shape | `/r/<random-slug>` (16+ characters) |
+| Where to copy | Admin → Settings → In-salon price brochure |
+| Preview host | `https://familysalonspa.consultifyit-forms.workers.dev` + path from Admin |
+| Production | `https://familysalonspa.com` + same path |
 
 - Hidden from nav, sitemap, and robots (`noindex`)
+- Wrong or old slugs return 404 (including `/menu`)
+- **Rotate brochure URL** in Admin if the link leaks — then reprint the QR
 - Edit dollar amounts in **Admin → Services**
-- QR tip: point the printed code at `/menu` only — do not put the link on social or the main site
+- Never post the brochure URL on social or the main site
+
+Default slug (until rotated): see `src/lib/price-list.ts` / D1 `price_list` setting.
 
 ---
 
@@ -58,10 +71,13 @@ Store production values with Wrangler secrets (never commit real keys). Local: `
 | Name | Required? | Where used | Notes |
 |------|-----------|------------|--------|
 | `SESSION_SECRET` | **Yes** | Auth cookies | Long random string (≥32 chars). `wrangler secret put SESSION_SECRET` |
+| `RESEND_API_KEY` | Optional fallback | Gift certificates + booking emails | Free at [resend.com](https://resend.com) if Cloudflare Email Sending is unavailable. |
 | `GOOGLE_PLACES_API_KEY` | Optional | Nightly Google reviews sync (`worker.ts` cron `0 4 * * *`) | Free Places API quota. Without it, seeded/cached reviews stay. Set Place ID in Admin → Settings. |
 | `TWILIO_ACCOUNT_SID` | Optional | SMS opt-in notifications | Keep SMS **OFF** in Admin until configured |
 | `TWILIO_AUTH_TOKEN` | Optional | SMS | |
 | `TWILIO_FROM_NUMBER` | Optional | SMS | E.164 format |
+
+Email delivery uses the Worker `EMAIL` (`send_email`) binding first. Demo from-address is `appointments@consultifyit.com` (`MAIL_FROM` var) until `familysalonspa.com` is onboarded on Cloudflare. Optional `RESEND_API_KEY` is a fallback.
 
 ### Instagram feed (free — no Trustindex required)
 

@@ -150,7 +150,10 @@ export async function getMediaSettings(): Promise<MediaSettings> {
     if (!row) return DEFAULT_MEDIA;
     const parsed = JSON.parse(row.value_json) as Partial<MediaSettings>;
     return {
-      hero_image: parsed.hero_image || DEFAULT_MEDIA.hero_image,
+      hero_image:
+        typeof parsed.hero_image === "string"
+          ? parsed.hero_image
+          : DEFAULT_MEDIA.hero_image,
       hero_tone: isHeroToneId(parsed.hero_tone || "")
         ? parsed.hero_tone!
         : DEFAULT_MEDIA.hero_tone,

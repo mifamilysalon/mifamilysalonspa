@@ -13,6 +13,14 @@ TWILIO_ACCOUNT_SID=
 TWILIO_AUTH_TOKEN=
 TWILIO_FROM_NUMBER=
 
+# Optional email delivery (gift certificates + booking notices)
+# Prefer Worker EMAIL binding. Fallback: Cloudflare Email Sending REST API token
+# with Email Sending Edit permission, or Resend.
+CLOUDFLARE_API_TOKEN=
+RESEND_API_KEY=
+MAIL_FROM=appointments@consultifyit.com
+MAIL_FROM_NAME=Family Hair Salon & Wellness Spa
+
 # Instagram: no secret needed here.
 # Paste Behold JSON feed URL (or Trustindex widget ID) in Admin → Settings.
 # See README "Instagram feed" section.

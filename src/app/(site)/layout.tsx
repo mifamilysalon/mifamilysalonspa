@@ -13,8 +13,13 @@ export default async function SiteLayout({
 
   return (
     <>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
       <SiteHeader phone={business.phone_primary} salonName={business.name} />
-      <main className="pb-16 md:pb-0">{children}</main>
+      <main id="main-content" className="pb-16 md:pb-0">
+        {children}
+      </main>
       <SiteFooter
         salonName={business.name}
         address={business.address}

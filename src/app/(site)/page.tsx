@@ -1,5 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
+import { IllustrationPanel } from "@/components/illustrations";
+import type { IllustrationId } from "@/components/illustrations";
+import { PromoBanner } from "@/components/promos/PromoBanner";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { GoogleReviewsSection } from "@/components/sections/GoogleReviewsSection";
 import { InstagramFeedSection } from "@/components/sections/InstagramFeedSection";
@@ -11,6 +13,7 @@ import {
   listCachedInstagramPosts,
   getInstagramFeedSettings,
 } from "@/lib/instagram";
+import { getFeaturedBannerPromo } from "@/lib/promos";
 import { getGoogleReviewsMeta, listCachedGoogleReviews } from "@/lib/reviews";
 import {
   buildLocalBusinessJsonLd,
@@ -36,6 +39,7 @@ export default async function HomePage() {
   const business = await getBusinessInfo();
   const media = await getMediaSettings();
   const social = await getSocialLinks();
+  const bannerPromo = await getFeaturedBannerPromo();
   let reviewsMeta = {
     place_id: "",
     maps_url:
@@ -56,36 +60,40 @@ export default async function HomePage() {
   } catch {
     // D1 unavailable during build - section omitted
   }
-  const featured = [
+  const featured: {
+    title: string;
+    href: string;
+    body: string;
+    art: IllustrationId;
+  }[] = [
     {
       title: "Hair Care",
       href: "/hair-care",
       body: "Creative styling, coloring, extensions, permanent waving, straightening, and rebonding.",
-      image:
-        "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=900&q=80",
+      art: "hair",
     },
     {
       title: "Skin Care",
       href: "/skin-care",
       body: "Dermatological facials planned after face mapping skin analysis for your skin type.",
-      image:
-        "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=900&q=80",
+      art: "skin",
     },
     {
       title: "Nail Care",
       href: "/nail-care",
       body: "Manicures, pedicures, shellac, and polish changes from Farmington nail technicians.",
-      image:
-        "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=900&q=80",
+      art: "nails",
     },
   ];
 
   return (
     <>
+      {bannerPromo ? <PromoBanner promo={bannerPromo} /> : null}
+
       <HeroSection
         headline="Family Hair Salon & Wellness Spa"
         subhead="Hair, skin, nails, and wellness for Farmington. Walk in for a cut, color, facial, or manicure - or book time in our private suite if you prefer a quieter setting."
-        image={media.hero_image}
+        illustrated
         tone={media.hero_tone}
         ctaPrimary="Book an appointment"
         ctaPrimaryHref="/appointments"
@@ -123,15 +131,7 @@ export default async function HomePage() {
                 i % 2 === 1 ? "md:[&>*:first-child]:order-2" : ""
               }`}
             >
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <Image
-                  src={item.image}
-                  alt={item.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-              </div>
+              <IllustrationPanel id={item.art} title={item.title} />
               <div>
                 <h3 className="font-serif text-2xl md:text-3xl">{item.title}</h3>
                 <p className="mt-4 text-salon-body">{item.body}</p>
@@ -154,8 +154,9 @@ export default async function HomePage() {
       <InstagramFeedSection settings={instagram} posts={instagramPosts} />
 
       <section className="bg-salon-light">
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-6 md:py-28">
-          <div className="editorial-panel max-w-3xl p-8 md:p-12">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-20 md:grid-cols-2 md:px-6 md:py-28">
+          <IllustrationPanel id="private" title="Private women's suite" />
+          <div>
             <p className="text-sm uppercase tracking-[0.18em] text-salon-primary">
               Private women&apos;s suite
             </p>
@@ -207,7 +208,6 @@ export default async function HomePage() {
             rating: reviewsMeta.rating,
             reviewCount: reviewsMeta.review_count,
             social,
-            image: media.hero_image,
           }),
           buildWebsiteJsonLd(),
         ]}

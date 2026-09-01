@@ -71,8 +71,8 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6">
-      <header className="editorial-panel mb-6 flex flex-wrap items-center justify-between gap-4 p-4">
+    <div className="min-h-screen w-full px-4 py-6 md:px-8 md:py-8 lg:px-10">
+      <header className="editorial-panel mb-6 flex w-full flex-wrap items-center justify-between gap-4 p-4 md:p-5">
         <div>
           <p className="font-serif text-lg text-salon-heading">Staff portal</p>
           {user && <p className="text-xs text-salon-body">{user.name}</p>}
@@ -97,6 +97,16 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
               </span>
             )}
           </Link>
+          <Link
+            href="/staff/gift-certificates"
+            className={`min-h-12 px-4 py-2 text-sm ${
+              pathname === "/staff/gift-certificates"
+                ? "text-salon-primary"
+                : "text-salon-body"
+            }`}
+          >
+            Gift certs
+          </Link>
           <button
             type="button"
             onClick={handleLogout}
@@ -106,7 +116,7 @@ export function StaffShell({ children }: { children: React.ReactNode }) {
           </button>
         </nav>
       </header>
-      {children}
+      <div className="w-full min-w-0">{children}</div>
     </div>
   );
 }

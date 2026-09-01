@@ -47,3 +47,7 @@ next-env.d.ts
 
 scripts/login.json
 scripts/pin.json
+
+# Local-only secrets / seed credentials
+/local/
+local/credentials.md

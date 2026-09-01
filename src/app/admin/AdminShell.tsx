@@ -13,6 +13,8 @@ type SessionUser = {
 const NAV = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/appointments", label: "Appointments" },
+  { href: "/admin/gift-certificates", label: "Gift certificates" },
+  { href: "/admin/promos", label: "Promos" },
   { href: "/admin/services", label: "Services" },
   { href: "/admin/settings", label: "Settings" },
 ];
@@ -69,9 +71,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-0 md:flex-row">
-      <aside className="editorial-panel shrink-0 border-b md:w-56 md:border-b-0 md:border-r">
-        <div className="p-4">
+    <div className="flex min-h-screen w-full flex-col md:flex-row">
+      <aside className="editorial-panel w-full shrink-0 border-b md:sticky md:top-0 md:h-screen md:w-60 md:overflow-y-auto md:border-b-0 md:border-r">
+        <div className="px-4 py-4 md:px-5">
           <p className="font-serif text-lg text-salon-heading">Admin</p>
           {user && <p className="text-xs text-salon-body">{user.name}</p>}
         </div>
@@ -98,7 +100,9 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           </button>
         </nav>
       </aside>
-      <div className="min-w-0 flex-1 p-4 md:p-8">{children}</div>
+      <div className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8 lg:px-10">
+        {children}
+      </div>
     </div>
   );
 }

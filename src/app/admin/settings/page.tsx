@@ -45,6 +45,7 @@ type SettingsData = {
   media: MediaSettings;
   social: SocialLinks;
   instagram_feed: InstagramFeedSettings;
+  price_list: { slug: string; path: string };
 };
 
 export default function AdminSettingsPage() {
@@ -164,7 +165,9 @@ export default function AdminSettingsPage() {
       <section className="editorial-panel mt-8 p-6">
         <h2 className="font-serif text-lg text-salon-heading">Color palette</h2>
         <p className="mt-2 text-sm text-salon-body">
-          Site-wide brand colors. Midnight Magenta matches the current pink and magenta site.
+          Site-wide brand colors. Light palettes pair best with the white
+          illustration panels; dark themes keep soft contrast so cream headings
+          never sit on the art.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {paletteOptions.map((p) => {
@@ -213,9 +216,11 @@ export default function AdminSettingsPage() {
       </section>
 
       <section className="editorial-panel mt-6 p-6">
-        <h2 className="font-serif text-lg text-salon-heading">Hero image tone</h2>
+        <h2 className="font-serif text-lg text-salon-heading">Homepage hero</h2>
         <p className="mt-2 text-sm text-salon-body">
-          Choose full color or a photographic treatment for the homepage hero.
+          The public site uses custom salon illustrations by default (not stock
+          photos). Optional photo URL and tone settings below are kept for a
+          future photo override.
         </p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {HERO_TONES.map((tone) => (
@@ -243,7 +248,7 @@ export default function AdminSettingsPage() {
           ))}
         </div>
         <label className="mt-5 block text-sm text-salon-body">
-          Hero image URL
+          Optional photo URL (unused while illustrations are on)
           <input
             value={heroImageDraft}
             onChange={(e) => setHeroImageDraft(e.target.value)}
@@ -270,16 +275,44 @@ export default function AdminSettingsPage() {
       <section className="editorial-panel mt-6 p-6">
         <h2 className="font-serif text-lg text-salon-heading">In-salon price brochure</h2>
         <p className="mt-2 text-sm text-salon-body">
-          Prices are hidden from the public website. Guests scan a desk QR code to open the
-          private menu. Do not link this URL in the public nav or marketing site.
+          Prices stay off the public site. Use this hard-to-guess URL only on the desk QR code.
+          Guessing <span className="font-mono">/menu</span> no longer works. Do not post this
+          link on social or the main website.
         </p>
-        <p className="mt-3 break-all rounded border border-salon-border bg-salon-light px-3 py-3 font-mono text-sm text-salon-heading">
-          https://familysalonspa.com/menu
-        </p>
+        {settings.price_list?.path ? (
+          <>
+            <p className="mt-3 break-all rounded border border-salon-border bg-salon-light px-3 py-3 font-mono text-sm text-salon-heading">
+              https://familysalonspa.com{settings.price_list.path}
+            </p>
+            <p className="mt-2 break-all text-xs text-salon-body">
+              Preview: https://familysalonspa.consultifyit-forms.workers.dev
+              {settings.price_list.path}
+            </p>
+          </>
+        ) : (
+          <p className="mt-3 text-sm text-salon-body">Loading brochure URL…</p>
+        )}
         <p className="mt-2 text-xs text-salon-body">
-          Preview on Workers: https://familysalonspa.consultifyit-forms.workers.dev/menu — edit
-          amounts under Admin → Services.
+          Edit dollar amounts under Admin → Services. If a competitor finds the link, rotate the
+          URL and reprint the QR.
         </p>
+        <button
+          type="button"
+          disabled={saving}
+          onClick={async () => {
+            if (
+              !window.confirm(
+                "Generate a new brochure URL? Old QR codes will stop working until you reprint them.",
+              )
+            ) {
+              return;
+            }
+            await save({ price_list: { rotate: true } });
+          }}
+          className="mt-4 min-h-11 border border-salon-border px-4 text-sm hover:border-salon-primary disabled:opacity-50"
+        >
+          Rotate brochure URL
+        </button>
       </section>
 
       <section className="editorial-panel mt-6 p-6">

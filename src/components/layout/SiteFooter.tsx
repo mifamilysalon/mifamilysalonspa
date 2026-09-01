@@ -74,6 +74,12 @@ export function SiteFooter({
           >
             Gift certificates
           </Link>
+          <Link
+            href="/offers"
+            className="mt-2 block text-sm text-salon-body hover:text-salon-primary"
+          >
+            Current offers
+          </Link>
         </div>
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-salon-heading">

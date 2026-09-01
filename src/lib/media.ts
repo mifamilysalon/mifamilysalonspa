@@ -63,10 +63,10 @@ export function heroToneFilter(id: HeroToneId): string {
   return HERO_TONES.find((t) => t.id === id)?.filter || "none";
 }
 
-export const DEFAULT_HERO_IMAGE =
-  "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?w=1600&q=80";
+export const DEFAULT_HERO_IMAGE = "";
 
 export type MediaSettings = {
+  /** Optional photo URL override. Empty = illustrated hero. */
   hero_image: string;
   hero_tone: HeroToneId;
 };

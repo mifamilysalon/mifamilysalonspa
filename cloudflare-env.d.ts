@@ -16,14 +16,14 @@ export type AppEnv = {
   SALON_PHONE_SECONDARY?: string;
   SALON_ADDRESS?: string;
   EMAIL?: {
-    send: (msg: {
-      to: string | string[];
-      from: { email: string; name?: string };
-      subject: string;
-      html?: string;
-      text?: string;
-    }) => Promise<unknown>;
+    send: (msg: unknown) => Promise<unknown>;
   };
+  RESEND_API_KEY?: string;
+  MAIL_FROM?: string;
+  MAIL_FROM_NAME?: string;
+  CLOUDFLARE_API_TOKEN?: string;
+  CF_API_TOKEN?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
 };
 
 export {};

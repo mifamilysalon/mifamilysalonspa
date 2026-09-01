@@ -30,27 +30,36 @@ function AppointmentsContent({ smsEnabled }: { smsEnabled: boolean }) {
 
   return (
     <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-2">
+      {/* Walk-in first: Pareto / mental model — most common visit type */}
+      <button
+        type="button"
+        onClick={() => setIntent("walk_in")}
+        className="border-2 border-salon-primary bg-salon-panel p-6 text-left transition hover:bg-salon-light/50 md:p-8"
+      >
+        <p className="text-xs uppercase tracking-[0.16em] text-salon-primary">
+          Same day · most common
+        </p>
+        <h2 className="mt-3 font-serif text-2xl text-salon-heading">
+          Walk in today
+        </h2>
+        <p className="mt-3 text-sm text-salon-body">
+          Join the walk-in list for today. We take guests as chairs open.
+        </p>
+      </button>
       <button
         type="button"
         onClick={() => setIntent("appointment")}
         className="border border-salon-border bg-salon-panel p-6 text-left transition hover:border-salon-primary md:p-8"
       >
-        <p className="text-xs uppercase tracking-[0.16em] text-salon-primary">Plan ahead</p>
-        <h2 className="mt-3 font-serif text-2xl text-salon-heading">Book an appointment</h2>
-        <p className="mt-3 text-sm text-salon-body">
-          Pick a service, stylist, and time. Instant services confirm right away; others are
-          reviewed by the team.
+        <p className="text-xs uppercase tracking-[0.16em] text-salon-primary">
+          Plan ahead
         </p>
-      </button>
-      <button
-        type="button"
-        onClick={() => setIntent("walk_in")}
-        className="border border-salon-border bg-salon-panel p-6 text-left transition hover:border-salon-primary md:p-8"
-      >
-        <p className="text-xs uppercase tracking-[0.16em] text-salon-primary">Same day</p>
-        <h2 className="mt-3 font-serif text-2xl text-salon-heading">Walk in today</h2>
+        <h2 className="mt-3 font-serif text-2xl text-salon-heading">
+          Book an appointment
+        </h2>
         <p className="mt-3 text-sm text-salon-body">
-          Join the walk-in list for today. We take guests as chairs open - our busiest option.
+          Pick a service, stylist, and time. Instant services confirm right
+          away; others are reviewed by the team.
         </p>
       </button>
     </div>

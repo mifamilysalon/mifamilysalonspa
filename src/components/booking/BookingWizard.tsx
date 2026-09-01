@@ -261,7 +261,14 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
           </span>
           <span>{stepLabel(step)}</span>
         </div>
-        <div className="h-1 bg-salon-border">
+        <div
+          className="h-1 bg-salon-border"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress)}
+          aria-label={`Booking progress: step ${stepIndex + 1} of ${steps.length}, ${stepLabel(step)}`}
+        >
           <div
             className="h-full bg-salon-primary transition-all duration-300"
             style={{ width: `${progress}%` }}

@@ -14,6 +14,13 @@ import {
   type HeroToneId,
 } from "@/lib/media";
 import {
+  DEFAULT_PRICE_LIST,
+  generatePriceListSlug,
+  getPriceListSettings,
+  isValidPriceListSlug,
+  priceListPath,
+} from "@/lib/price-list";
+import {
   PALETTE_IDS,
   PALETTES,
   paletteDisplayName,
@@ -59,7 +66,7 @@ const googleReviewsSchema = z.object({
 });
 
 const mediaSchema = z.object({
-  hero_image: z.string().url().max(500).optional(),
+  hero_image: z.union([z.string().url().max(500), z.literal("")]).optional(),
   hero_tone: heroToneSchema.optional(),
 });
 
@@ -78,6 +85,12 @@ const instagramFeedSchema = z.object({
   trustindex_widget_id: z.string().max(80).optional(),
 });
 
+const priceListSchema = z.object({
+  /** Set true to mint a new unguessable QR slug (invalidates old printed codes). */
+  rotate: z.boolean().optional(),
+  slug: z.string().max(32).optional(),
+});
+
 const settingsUpdateSchema = z.object({
   palette: paletteSchema.optional(),
   business: businessSchema.optional(),
@@ -87,6 +100,7 @@ const settingsUpdateSchema = z.object({
   media: mediaSchema.optional(),
   social: socialSchema.optional(),
   instagram_feed: instagramFeedSchema.optional(),
+  price_list: priceListSchema.optional(),
 });
 
 async function upsertSetting(db: D1Database, key: string, value: unknown) {
@@ -118,6 +132,7 @@ export async function GET() {
       media,
       social,
       instagram_feed,
+      price_list,
     ] = await Promise.all([
       getActivePaletteId(),
       getBusinessInfo(),
@@ -127,6 +142,7 @@ export async function GET() {
       getMediaSettings(),
       getSocialLinks(),
       getInstagramFeedSettings(db),
+      getPriceListSettings(),
     ]);
 
     return NextResponse.json({
@@ -144,10 +160,15 @@ export async function GET() {
       media,
       social,
       instagram_feed,
+      price_list: {
+        ...price_list,
+        path: priceListPath(price_list.slug),
+      },
       defaults: {
         media: DEFAULT_MEDIA,
         social: DEFAULT_SOCIAL,
         instagram_feed: DEFAULT_INSTAGRAM_FEED,
+        price_list: DEFAULT_PRICE_LIST,
       },
     });
   } catch {
@@ -228,6 +249,20 @@ export async function PUT(request: Request) {
           parsed.data.instagram_feed.trustindex_widget_id?.trim() ??
           current.trustindex_widget_id,
       });
+    }
+
+    if (parsed.data.price_list) {
+      let slug = (parsed.data.price_list.slug || "").trim().toLowerCase();
+      if (parsed.data.price_list.rotate) {
+        slug = generatePriceListSlug();
+      }
+      if (!isValidPriceListSlug(slug)) {
+        return NextResponse.json(
+          { error: "Invalid price list slug" },
+          { status: 400 },
+        );
+      }
+      await upsertSetting(db, "price_list", { slug });
     }
 
     return NextResponse.json({ ok: true });

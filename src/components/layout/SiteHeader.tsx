@@ -11,6 +11,7 @@ const NAV = [
   { href: "/wellness", label: "Wellness" },
   { href: "/private-area", label: "Private Suite" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/offers", label: "Offers" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -50,6 +51,8 @@ export function SiteHeader({
           type="button"
           className="flex min-h-12 min-w-12 items-center justify-center border border-salon-border lg:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="mobile-site-nav"
           onClick={() => setOpen((v) => !v)}
         >
           <span className="sr-only">Menu</span>
@@ -74,7 +77,10 @@ export function SiteHeader({
       </nav>
 
       {open && (
-        <div className="border-t border-salon-border bg-salon-panel lg:hidden">
+        <div
+          id="mobile-site-nav"
+          className="border-t border-salon-border bg-salon-panel lg:hidden"
+        >
           <nav className="flex flex-col px-4 py-4">
             {NAV.map((item) => (
               <Link
