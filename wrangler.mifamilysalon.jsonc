@@ -1,0 +1,50 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "account_id": "b51ded38b292d1a89fdd26e99e1bb7e9",
+  "name": "mifamilysalonspa",
+  "main": "./worker.ts",
+  "compatibility_date": "2026-07-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "triggers": {
+    "crons": ["0 4 * * *"]
+  },
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "familysalonspa-db",
+      "database_id": "28a7d7aa-7558-4aab-8370-502517ca5375"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "familysalonspa-media"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "CACHE",
+      "id": "b5bde43a058d411283500560970aefa0"
+    }
+  ],
+  "send_email": [
+    {
+      "name": "EMAIL"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production",
+    "SALON_NAME": "Family Hair Salon & Wellness Spa",
+    "SALON_PHONE_PRIMARY": "(248) 474-6520",
+    "SALON_PHONE_SECONDARY": "(248) 635-5127",
+    "SALON_ADDRESS": "34777 Grand River Ave, Farmington, MI 48335",
+    "MAIL_FROM": "appointments@mifamilysalon.com",
+    "MAIL_FROM_APPOINTMENTS": "appointments@mifamilysalon.com",
+    "MAIL_FROM_GIFTS": "gifts@mifamilysalon.com",
+    "MAIL_FROM_NAME": "Family Hair Salon & Wellness Spa"
+  }
+}

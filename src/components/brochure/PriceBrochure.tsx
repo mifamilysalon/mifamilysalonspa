@@ -1,18 +1,13 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState } from "react";
+import {
+  BROCHURE_CATEGORY_LABELS,
+  BROCHURE_CATEGORY_ORDER,
+  type BrochureCategoryKey,
+} from "@/lib/service-categories";
 import type { Service } from "@/lib/site";
 import { PrintButton } from "@/components/brochure/PrintButton";
-
-const CATEGORY_ORDER = ["hair", "skin", "nails", "wellness", "other"] as const;
-
-const CATEGORY_LABELS: Record<string, string> = {
-  hair: "Hair",
-  skin: "Skin",
-  nails: "Nails",
-  wellness: "Wellness",
-  other: "More",
-};
 
 type CategoryGroup = {
   key: string;
@@ -29,17 +24,28 @@ function formatPrice(price: number | null): string {
 function groupByCategory(services: Service[]): CategoryGroup[] {
   const map = new Map<string, Service[]>();
   for (const s of services) {
-    const key = CATEGORY_LABELS[s.category] ? s.category : "other";
+    const key = (BROCHURE_CATEGORY_LABELS as Record<string, string>)[s.category]
+      ? s.category
+      : "wellness";
     const list = map.get(key) || [];
     list.push(s);
     map.set(key, list);
   }
-  return CATEGORY_ORDER.filter((c) => map.has(c)).map((c, index) => ({
-    key: c,
-    label: CATEGORY_LABELS[c],
-    index: index + 1,
-    services: map.get(c)!,
-  }));
+  const ordered = [
+    ...BROCHURE_CATEGORY_ORDER,
+    ...[...map.keys()].filter(
+      (k) => !BROCHURE_CATEGORY_ORDER.includes(k as BrochureCategoryKey),
+    ),
+  ];
+  return ordered
+    .filter((c) => map.has(c))
+    .map((c, index) => ({
+      key: c,
+      label:
+        (BROCHURE_CATEGORY_LABELS as Record<string, string>)[c] || c,
+      index: index + 1,
+      services: map.get(c)!,
+    }));
 }
 
 function ServiceList({ services }: { services: Service[] }) {

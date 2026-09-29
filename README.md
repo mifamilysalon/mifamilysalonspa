@@ -3,7 +3,7 @@
 Luxury website and appointment system for **Family Hair Salon & Wellness Spa** (Farmington, MI).
 
 - Live preview: https://familysalonspa.consultifyit-forms.workers.dev  
-- Production domain (canonical SEO): https://familysalonspa.com  
+- Production domain (canonical SEO): https://www.mifamilysalon.com  
 
 ## Stack
 
@@ -20,13 +20,23 @@ cp .dev.vars.example .dev.vars
 npm run dev
 ```
 
-## Deploy
+## Deploy targets
+
+| Target | Config | Account |
+|--------|--------|---------|
+| ConsultifyIT preview | `wrangler.jsonc` | ConsultifyIT (`9c767ec1…`) |
+| **Client production** | `wrangler.mifamilysalon.jsonc` | Familysalonspa@gmail.com (`b51ded38…`) |
+
+Full checklist: **[docs/deploy-mifamilysalon-cloudflare.md](docs/deploy-mifamilysalon-cloudflare.md)** (GitHub Actions, secrets, custom domain).
+
+GitHub repo for the client: **https://github.com/mifamilysalon/mifamilysalonspa** (`origin` remote).
 
 ```bash
-npx wrangler secret put SESSION_SECRET
-# optional secrets below
-npm run deploy
-npx wrangler d1 migrations apply familysalonspa-db --remote
+# ConsultifyIT preview
+npm run deploy && npm run db:migrate:remote
+
+# Client account (after workers.dev onboarding — see doc)
+npm run db:migrate:mifamilysalon && npm run deploy:mifamilysalon
 ```
 
 ## Credentials (seed)
@@ -52,7 +62,7 @@ Prices are **not** on the public website. Guests at the desk scan a QR code to a
 | Path shape | `/r/<random-slug>` (16+ characters) |
 | Where to copy | Admin → Settings → In-salon price brochure |
 | Preview host | `https://familysalonspa.consultifyit-forms.workers.dev` + path from Admin |
-| Production | `https://familysalonspa.com` + same path |
+| Production | `https://www.mifamilysalon.com` + same path |
 
 - Hidden from nav, sitemap, and robots (`noindex`)
 - Wrong or old slugs return 404 (including `/menu`)
@@ -71,13 +81,14 @@ Store production values with Wrangler secrets (never commit real keys). Local: `
 | Name | Required? | Where used | Notes |
 |------|-----------|------------|--------|
 | `SESSION_SECRET` | **Yes** | Auth cookies | Long random string (≥32 chars). `wrangler secret put SESSION_SECRET` |
-| `RESEND_API_KEY` | Optional fallback | Gift certificates + booking emails | Free at [resend.com](https://resend.com) if Cloudflare Email Sending is unavailable. |
+| `RESEND_API_KEY` | Optional fallback | Transactional email (after Cloudflare) | [resend.com](https://resend.com) |
+| `BREVO_API_KEY` | Optional fallback | Transactional email (after Resend) | [brevo.com](https://www.brevo.com) — verify `MAIL_FROM` domain in Brevo |
 | `GOOGLE_PLACES_API_KEY` | Optional | Nightly Google reviews sync (`worker.ts` cron `0 4 * * *`) | Free Places API quota. Without it, seeded/cached reviews stay. Set Place ID in Admin → Settings. |
 | `TWILIO_ACCOUNT_SID` | Optional | SMS opt-in notifications | Keep SMS **OFF** in Admin until configured |
 | `TWILIO_AUTH_TOKEN` | Optional | SMS | |
 | `TWILIO_FROM_NUMBER` | Optional | SMS | E.164 format |
 
-Email delivery uses the Worker `EMAIL` (`send_email`) binding first. Demo from-address is `appointments@consultifyit.com` (`MAIL_FROM` var) until `familysalonspa.com` is onboarded on Cloudflare. Optional `RESEND_API_KEY` is a fallback.
+Email delivery order: Cloudflare `EMAIL` binding → Cloudflare REST (`CLOUDFLARE_API_TOKEN`) → Resend → Brevo. Set `wrangler secret put BREVO_API_KEY` and/or `RESEND_API_KEY` for redundancy.
 
 ### Instagram feed (free — no Trustindex required)
 
@@ -126,10 +137,11 @@ Implemented for local search + answer engines (desktop & mobile):
 
 ### After domain cutover
 
-1. Google Search Console → verify `familysalonspa.com` → submit `https://familysalonspa.com/sitemap.xml`
-2. Align Google Business Profile NAP with site (address, phones, hours)
-3. Optional: add `metadata.verification.google` in `src/app/layout.tsx` when GSC gives a meta tag
-4. Optional: Cloudflare Web Analytics or GA4 (not bundled yet)
+1. Google Search Console → verify `www.mifamilysalon.com` → submit `https://www.mifamilysalon.com/sitemap.xml`
+2. Cloudflare → redirect `mifamilysalon.com` → `https://www.mifamilysalon.com` (301; app middleware also redirects apex when on custom domain)
+3. Align Google Business Profile NAP with site (address, phones, hours)
+4. Optional: add `metadata.verification.google` in `src/app/layout.tsx` when GSC gives a meta tag
+5. Optional: Cloudflare Web Analytics or GA4 (not bundled yet)
 
 ---
 

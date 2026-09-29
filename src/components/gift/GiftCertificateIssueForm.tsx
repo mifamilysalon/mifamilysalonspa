@@ -1,8 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GiftCertificateTemplate } from "@/components/gift/GiftCertificateTemplate";
 import { formatIssuedDate } from "@/lib/gift-certificates-shared";
+
+type ClientDirectoryEntry = {
+  client_name: string;
+  client_email: string | null;
+  client_phone: string;
+  last_visit: string;
+  booking_source: string | null;
+};
 
 type Business = {
   name: string;
@@ -42,6 +50,50 @@ export function GiftCertificateIssueForm({ business, mode, onCreated }: Props) {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [clientQuery, setClientQuery] = useState("");
+  const [clientMatches, setClientMatches] = useState<ClientDirectoryEntry[]>(
+    [],
+  );
+  const [clientSearchBusy, setClientSearchBusy] = useState(false);
+  const [selectedClientPhone, setSelectedClientPhone] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const q = clientQuery.trim();
+    if (q.length < 2) {
+      setClientMatches([]);
+      return;
+    }
+
+    const timer = window.setTimeout(async () => {
+      setClientSearchBusy(true);
+      try {
+        const res = await fetch(
+          `/api/clients/search?q=${encodeURIComponent(q)}`,
+        );
+        const data = (await res.json()) as {
+          clients?: ClientDirectoryEntry[];
+          error?: string;
+        };
+        if (res.ok) setClientMatches(data.clients || []);
+      } catch {
+        setClientMatches([]);
+      } finally {
+        setClientSearchBusy(false);
+      }
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [clientQuery]);
+
+  function applyClient(entry: ClientDirectoryEntry) {
+    setRecipient(entry.client_name);
+    setEmail(entry.client_email?.trim() || "");
+    setSelectedClientPhone(entry.client_phone);
+    setClientQuery("");
+    setClientMatches([]);
+  }
 
   const amountNumber = Number(amount);
   const previewAmount =
@@ -110,6 +162,9 @@ export function GiftCertificateIssueForm({ business, mode, onCreated }: Props) {
       setAmount("");
       setEmail("");
       setNote("");
+      setClientQuery("");
+      setClientMatches([]);
+      setSelectedClientPhone(null);
       const today = todayIso();
       setIssuedDate(today);
       setValidUntilDate(plusOneYearIso(today));
@@ -143,6 +198,60 @@ export function GiftCertificateIssueForm({ business, mode, onCreated }: Props) {
             {message}
           </p>
         )}
+
+        <div className="border border-salon-border bg-salon-light/50 p-4">
+          <label className="block">
+            <span className="mb-1 block text-sm text-salon-heading">
+              Find guest (appointments & walk-ins)
+            </span>
+            <input
+              value={clientQuery}
+              onChange={(e) => setClientQuery(e.target.value)}
+              placeholder="Name, phone, or email"
+              className="min-h-12 w-full border border-salon-border bg-white px-3"
+              autoComplete="off"
+            />
+          </label>
+          <p className="mt-2 text-xs text-salon-body/80">
+            Prefills name and email from their latest visit. You can change any
+            field before issuing — use a different email if the cert goes to
+            someone else.
+          </p>
+          {clientSearchBusy && (
+            <p className="mt-2 text-sm text-salon-body">Searching…</p>
+          )}
+          {clientMatches.length > 0 && (
+            <ul
+              className="mt-3 max-h-48 overflow-y-auto border border-salon-border bg-white"
+              role="listbox"
+            >
+              {clientMatches.map((c) => (
+                <li key={c.client_phone}>
+                  <button
+                    type="button"
+                    role="option"
+                    onClick={() => applyClient(c)}
+                    className="min-h-12 w-full border-b border-salon-border px-3 py-2 text-left text-sm last:border-b-0 hover:bg-salon-light"
+                  >
+                    <span className="font-medium text-salon-heading">
+                      {c.client_name}
+                    </span>
+                    <span className="mt-0.5 block text-salon-body">
+                      {c.client_phone}
+                      {c.client_email ? ` · ${c.client_email}` : " · No email on file"}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {selectedClientPhone && !clientQuery && (
+            <p className="mt-2 text-xs text-salon-body">
+              Prefilled from guest on file ({selectedClientPhone}). Edit below
+              if needed.
+            </p>
+          )}
+        </div>
 
         <label className="block">
           <span className="mb-1 block text-sm text-salon-heading">Presented to</span>

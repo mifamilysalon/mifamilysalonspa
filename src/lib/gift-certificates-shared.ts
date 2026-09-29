@@ -6,12 +6,24 @@ export type GiftCertificateStatus =
   | "void"
   | "cancelled";
 
+export type GiftCertificateRedemption = {
+  id: number;
+  gift_certificate_id: number;
+  amount_cents: number;
+  redeemed_at: string;
+  redeemed_by_user_id: number;
+  note: string | null;
+  redeemed_by_name?: string | null;
+};
+
 export type GiftCertificate = {
   id: number;
   code: string;
   recipient_name: string;
   from_name: string;
   amount_cents: number;
+  /** Remaining value; defaults to full amount when unset (legacy rows). */
+  balance_cents: number | null;
   customer_email: string;
   issued_date: string;
   valid_until_date: string;
@@ -61,6 +73,13 @@ export type GiftCertificateValidation = {
   message: string;
   certificate: GiftCertificate | null;
 };
+
+export function giftCertificateBalanceCents(cert: GiftCertificate): number {
+  if (cert.balance_cents != null) return cert.balance_cents;
+  if (cert.status === "redeemed") return 0;
+  if (cert.status === "sent") return cert.amount_cents;
+  return 0;
+}
 
 export function formatGiftAmount(cents: number): string {
   return new Intl.NumberFormat("en-US", {

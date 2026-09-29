@@ -10,6 +10,7 @@ import {
   type MediaSettings,
   type SocialLinks,
 } from "@/lib/media";
+import { PREVIEW_SITE_URL, SITE_URL } from "@/lib/seo";
 import {
   DEFAULT_INSTAGRAM_FEED,
   type InstagramFeedSettings,
@@ -282,10 +283,10 @@ export default function AdminSettingsPage() {
         {settings.price_list?.path ? (
           <>
             <p className="mt-3 break-all rounded border border-salon-border bg-salon-light px-3 py-3 font-mono text-sm text-salon-heading">
-              https://familysalonspa.com{settings.price_list.path}
+              {SITE_URL}{settings.price_list.path}
             </p>
             <p className="mt-2 break-all text-xs text-salon-body">
-              Preview: https://familysalonspa.consultifyit-forms.workers.dev
+              Preview: {PREVIEW_SITE_URL}
               {settings.price_list.path}
             </p>
           </>

@@ -3,10 +3,15 @@ import type { SessionUser } from "./auth";
 import type {
   GiftCertificate,
   GiftCertificateInput,
+  GiftCertificateRedemption,
   GiftCertificateStatus,
   GiftCertificateValidation,
 } from "./gift-certificates-shared";
-import { normalizeGiftCode } from "./gift-certificates-shared";
+import {
+  normalizeGiftCode,
+  giftCertificateBalanceCents,
+  formatGiftAmount,
+} from "./gift-certificates-shared";
 
 export type {
   GiftCertificate,
@@ -17,6 +22,7 @@ export type {
 export {
   formatGiftAmount,
   formatIssuedDate,
+  giftCertificateBalanceCents,
   giftCertificateStatusLabel,
   isAdminRole,
   isStaffPortalRole,
@@ -149,7 +155,7 @@ export function evaluateGiftCertificate(
       code: cert.code,
       usable: false,
       reason: "already_redeemed",
-      message: `Already redeemed${cert.redeemed_at ? ` on ${cert.redeemed_at.slice(0, 10)}` : ""}. Cannot be reused.`,
+      message: `Fully redeemed${cert.redeemed_at ? ` on ${cert.redeemed_at.slice(0, 10)}` : ""}. No balance remaining.`,
       certificate: cert,
     };
   }
@@ -164,12 +170,29 @@ export function evaluateGiftCertificate(
         certificate: cert,
       };
     }
+    const balance = giftCertificateBalanceCents(cert);
+    if (balance <= 0) {
+      return {
+        found: true,
+        code: cert.code,
+        usable: false,
+        reason: "already_redeemed",
+        message: "No balance remaining on this certificate.",
+        certificate: cert,
+      };
+    }
+    const balanceLabel = formatGiftAmount(balance);
+    const originalLabel = formatGiftAmount(cert.amount_cents);
+    const partial =
+      balance < cert.amount_cents
+        ? ` ${balanceLabel} remaining of ${originalLabel} original value.`
+        : ` Full ${balanceLabel} available.`;
     return {
       found: true,
       code: cert.code,
       usable: true,
       reason: "valid",
-      message: "Valid certificate. Safe to redeem for services.",
+      message: `Valid certificate.${partial} Redeem any amount up to the remaining balance.`,
       certificate: cert,
     };
   }
@@ -212,14 +235,15 @@ export async function createGiftCertificate(
       const result = await db
         .prepare(
           `INSERT INTO gift_certificates (
-            code, recipient_name, from_name, amount_cents, customer_email,
+            code, recipient_name, from_name, amount_cents, balance_cents, customer_email,
             issued_date, valid_until_date, note, status, created_by_user_id, approved_by_user_id, sent_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
         .bind(
           code,
           input.recipient_name.trim(),
           input.from_name.trim(),
+          amountCents,
           amountCents,
           input.customer_email.trim().toLowerCase(),
           input.issued_date,
@@ -309,10 +333,27 @@ export async function rejectGiftCertificate(
   return row;
 }
 
+export async function listGiftCertificateRedemptions(
+  giftCertificateId: number,
+): Promise<GiftCertificateRedemption[]> {
+  const db = await getDb();
+  const result = await db
+    .prepare(
+      `SELECT r.*, u.name AS redeemed_by_name
+       FROM gift_certificate_redemptions r
+       LEFT JOIN users u ON u.id = r.redeemed_by_user_id
+       WHERE r.gift_certificate_id = ?
+       ORDER BY r.redeemed_at ASC`,
+    )
+    .bind(giftCertificateId)
+    .all<GiftCertificateRedemption>();
+  return result.results || [];
+}
+
 export async function redeemGiftCertificate(
   code: string,
   staff: SessionUser,
-  note?: string,
+  opts?: { note?: string; amount_dollars?: number },
 ): Promise<GiftCertificate> {
   const validation = await validateGiftCertificateCode(code);
   if (!validation.certificate) throw new Error("Not found");
@@ -320,31 +361,67 @@ export async function redeemGiftCertificate(
     throw new Error(validation.message);
   }
 
+  const cert = validation.certificate;
+  const balance = giftCertificateBalanceCents(cert);
+  const amountCents =
+    opts?.amount_dollars != null
+      ? Math.round(opts.amount_dollars * 100)
+      : balance;
+
+  if (!Number.isFinite(amountCents) || amountCents <= 0) {
+    throw new Error("Redemption amount must be greater than zero");
+  }
+  if (amountCents > balance) {
+    throw new Error(
+      `Amount exceeds remaining balance (${formatGiftAmount(balance)})`,
+    );
+  }
+
   const db = await getDb();
   const now = new Date().toISOString();
-  const result = await db
+  const note = opts?.note?.trim() || null;
+  const newBalance = balance - amountCents;
+  const fullyRedeemed = newBalance <= 0;
+
+  const updateResult = await db
     .prepare(
       `UPDATE gift_certificates
-       SET status = 'redeemed',
-           redeemed_at = ?,
-           redeemed_by_user_id = ?,
-           redemption_note = ?,
+       SET balance_cents = ?,
+           status = CASE WHEN ? THEN 'redeemed' ELSE status END,
+           redeemed_at = CASE WHEN ? THEN ? ELSE redeemed_at END,
+           redeemed_by_user_id = CASE WHEN ? THEN ? ELSE redeemed_by_user_id END,
+           redemption_note = CASE WHEN ? THEN ? ELSE redemption_note END,
            updated_at = datetime('now')
-       WHERE id = ? AND status = 'sent'`,
+       WHERE id = ? AND status = 'sent' AND COALESCE(balance_cents, amount_cents) >= ?`,
     )
     .bind(
+      newBalance,
+      fullyRedeemed ? 1 : 0,
+      fullyRedeemed ? 1 : 0,
       now,
+      fullyRedeemed ? 1 : 0,
       staff.id,
-      note?.trim() || null,
-      validation.certificate.id,
+      fullyRedeemed ? 1 : 0,
+      note,
+      cert.id,
+      amountCents,
     )
     .run();
 
-  if (!result.meta.changes) {
-    throw new Error("Certificate could not be redeemed (already used or changed)");
+  if (!updateResult.meta.changes) {
+    throw new Error("Certificate could not be redeemed (balance changed or invalid)");
   }
 
-  const row = await getGiftCertificate(validation.certificate.id);
+  await db
+    .prepare(
+      `INSERT INTO gift_certificate_redemptions (
+         gift_certificate_id, amount_cents, redeemed_at, redeemed_by_user_id, note
+       ) VALUES (?, ?, ?, ?, ?)`,
+    )
+    .bind(cert.id, amountCents, now, staff.id, note)
+    .run();
+
+  const row = await getGiftCertificate(cert.id);
   if (!row) throw new Error("Not found after redeem");
   return row;
 }

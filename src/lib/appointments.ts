@@ -1,5 +1,7 @@
 import type { SessionUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { format, parseISO } from "date-fns";
+import { notifyAppointmentUpdated } from "@/lib/notifications";
 
 export const APPOINTMENT_STATUSES = [
   "pending",
@@ -17,6 +19,8 @@ export type AppointmentRow = {
   service_id: number;
   staff_id: number | null;
   client_name: string;
+  client_email: string | null;
+  client_phone: string;
   start_datetime: string;
   end_datetime: string;
   status: string;
@@ -24,6 +28,7 @@ export type AppointmentRow = {
   notes: string | null;
   duration_minutes: number;
   service_name: string;
+  staff_name?: string | null;
 };
 
 export type ManageAppointmentInput = {
@@ -61,10 +66,13 @@ export async function getAppointmentById(
   return (
     (await db
       .prepare(
-        `SELECT a.id, a.service_id, a.staff_id, a.client_name, a.start_datetime, a.end_datetime,
-                a.status, a.booking_source, a.notes, s.duration_minutes, s.name AS service_name
+        `SELECT a.id, a.service_id, a.staff_id, a.client_name, a.client_email, a.client_phone,
+                a.start_datetime, a.end_datetime,
+                a.status, a.booking_source, a.notes, s.duration_minutes, s.name AS service_name,
+                sp.display_name AS staff_name
          FROM appointments a
          JOIN services s ON s.id = a.service_id
+         LEFT JOIN staff_profiles sp ON sp.id = a.staff_id
          WHERE a.id = ?`,
       )
       .bind(appointmentId)
@@ -84,6 +92,75 @@ async function staffCanDoService(staffId: number, serviceId: number): Promise<bo
     .bind(staffId, serviceId)
     .first();
   return !!row;
+}
+
+function formatWhen(iso: string): string {
+  try {
+    return format(parseISO(iso), "EEE, MMM d 'at' h:mm a");
+  } catch {
+    return iso;
+  }
+}
+
+function statusLabel(status: string): string {
+  return status.replaceAll("_", " ");
+}
+
+async function notifyGuestOfAppointmentChanges(input: {
+  before: AppointmentRow;
+  after: AppointmentRow;
+  eventTypes: string[];
+}): Promise<void> {
+  const guestEvents = input.eventTypes.filter((t) => t !== "notes");
+  if (guestEvents.length === 0) return;
+  if (!input.after.client_email?.trim()) return;
+
+  const changeLines: string[] = [];
+  const { before, after } = input;
+
+  if (
+    guestEvents.some((t) =>
+      ["reassign", "claim", "claim_self", "unassign"].includes(t),
+    ) &&
+    before.staff_id !== after.staff_id
+  ) {
+    const prev = before.staff_name ?? (before.staff_id ? "previous stylist" : "unassigned");
+    const next =
+      after.staff_name ??
+      (after.staff_id ? "your stylist" : "our team (stylist to be confirmed)");
+    changeLines.push(`Stylist: ${prev} → ${next}`);
+  }
+
+  if (guestEvents.includes("reschedule") && before.start_datetime !== after.start_datetime) {
+    changeLines.push(
+      `Time: ${formatWhen(before.start_datetime)} → ${formatWhen(after.start_datetime)}`,
+    );
+  }
+
+  if (guestEvents.includes("status_change") && before.status !== after.status) {
+    changeLines.push(
+      `Status: ${statusLabel(before.status)} → ${statusLabel(after.status)}`,
+    );
+  }
+
+  if (changeLines.length === 0) return;
+
+  const emailResult = await notifyAppointmentUpdated({
+    clientName: after.client_name,
+    clientEmail: after.client_email,
+    serviceName: after.service_name,
+    when: formatWhen(after.start_datetime),
+    staffName: after.staff_name,
+    changeLines,
+  });
+
+  if (!emailResult.ok) {
+    console.error(
+      "Appointment update email failed",
+      after.id,
+      emailResult.detail,
+    );
+  }
 }
 
 async function hasStaffConflict(input: {
@@ -402,7 +479,15 @@ export async function manageAppointment(
   }
 
   const updated = await getAppointmentById(appt.id);
-  return { ok: true, appointment: updated! };
+  if (!updated) return { ok: false, error: "Not found after update", status: 500 };
+
+  await notifyGuestOfAppointmentChanges({
+    before: appt,
+    after: updated,
+    eventTypes,
+  });
+
+  return { ok: true, appointment: updated };
 }
 
 export async function listEligibleStaffForService(serviceId: number) {

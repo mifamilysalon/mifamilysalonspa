@@ -5,6 +5,7 @@ import {
 } from "./gift-certificates-shared";
 import { sendEmail } from "./email";
 import { getEnv } from "./db";
+import { SITE_ADMIN_EMAIL } from "./seo";
 
 export function giftCertificateEmailHtml(opts: {
   salonName: string;
@@ -74,7 +75,7 @@ export function giftCertificateEmailHtml(opts: {
         </table>
 
         <p style="margin:28px auto 0;max-width:420px;text-align:center;font-family:Arial,sans-serif;font-size:13px;line-height:1.6;color:#6a5f56;">
-          Present this certificate code in salon. It is single-use and will be validated at the desk. Redeemable for hair, skin, nail, and wellness services through the valid-until date. Not redeemable for cash.
+          Present this certificate code in salon. Staff will validate it at the desk and apply any amount up to the full value. You may use the remaining balance on later visits through the valid-until date. Not redeemable for cash.
         </p>
 
         <p style="margin:18px auto 0;text-align:center;font-family:Arial,sans-serif;font-size:12px;letter-spacing:0.14em;text-transform:uppercase;color:#9a7b4a;font-weight:600;">
@@ -131,7 +132,7 @@ export async function sendGiftCertificateEmail(
     `Issued: ${formatIssuedDate(cert.issued_date)}`,
     `Valid until: ${formatIssuedDate(cert.valid_until_date)}`,
     "",
-    "This code is single-use. Present it at the salon; staff will validate and redeem it.",
+    "This code may be used for multiple visits until the full amount is applied or it expires.",
     `Present this email or code at ${salonName}.`,
     address,
     `Questions? Call ${phonePrimary}.`,
@@ -139,18 +140,21 @@ export async function sendGiftCertificateEmail(
     "Family Hair Salon & Wellness Spa",
   ].join("\n");
 
-  return sendEmail({
-    to: cert.customer_email,
-    subject: `Your gift certificate from ${salonName}`,
-    text,
-    html: giftCertificateEmailHtml({
-      salonName,
-      address,
-      phonePrimary,
-      phoneSecondary,
-      cert,
-    }),
-  });
+  return sendEmail(
+    {
+      to: cert.customer_email,
+      subject: `Your gift certificate from ${salonName}`,
+      text,
+      html: giftCertificateEmailHtml({
+        salonName,
+        address,
+        phonePrimary,
+        phoneSecondary,
+        cert,
+      }),
+    },
+    { kind: "gift_certificate" },
+  );
 }
 
 export async function notifyAdminGiftCertificatePending(
@@ -158,20 +162,23 @@ export async function notifyAdminGiftCertificatePending(
   staffName: string,
 ): Promise<void> {
   const amount = formatGiftAmount(cert.amount_cents);
-  await sendEmail({
-    to: "admin@familysalonspa.com",
-    subject: `Gift certificate needs approval: ${cert.recipient_name}`,
-    text: [
-      `${staffName} submitted a gift certificate for approval.`,
-      "",
-      `To: ${cert.recipient_name}`,
-      `From: ${cert.from_name}`,
-      `Amount: ${amount}`,
-      `Email: ${cert.customer_email}`,
-      `Valid until: ${formatIssuedDate(cert.valid_until_date)}`,
-      `Code: ${cert.code}`,
-      "",
-      "Approve or reject in Admin → Gift certificates.",
-    ].join("\n"),
-  });
+  await sendEmail(
+    {
+      to: SITE_ADMIN_EMAIL,
+      subject: `Gift certificate needs approval: ${cert.recipient_name}`,
+      text: [
+        `${staffName} submitted a gift certificate for approval.`,
+        "",
+        `To: ${cert.recipient_name}`,
+        `From: ${cert.from_name}`,
+        `Amount: ${amount}`,
+        `Email: ${cert.customer_email}`,
+        `Valid until: ${formatIssuedDate(cert.valid_until_date)}`,
+        `Code: ${cert.code}`,
+        "",
+        "Approve or reject in Admin → Gift certificates.",
+      ].join("\n"),
+    },
+    { kind: "staff" },
+  );
 }

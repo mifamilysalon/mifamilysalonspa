@@ -4,6 +4,7 @@ import {
   bookingConfirmationText,
   sendEmail,
 } from "./email";
+import { SITE_ADMIN_EMAIL } from "./seo";
 
 export async function sendSms(to: string, body: string): Promise<boolean> {
   const env = await getEnv();
@@ -60,11 +61,14 @@ export async function notifyBookingConfirmed(opts: {
   });
 
   if (opts.clientEmail) {
-    await sendEmail({
-      to: opts.clientEmail,
-      subject: "Appointment confirmed - Family Hair Salon",
-      text,
-    });
+    await sendEmail(
+      {
+        to: opts.clientEmail,
+        subject: "Appointment confirmed - Family Hair Salon",
+        text,
+      },
+      { kind: "appointment" },
+    );
   }
 
   if (opts.smsEnabled && opts.smsOptIn) {
@@ -86,26 +90,32 @@ export async function notifyBookingRequest(opts: {
 }): Promise<void> {
   const env = await getEnv();
   const phone = env.SALON_PHONE_PRIMARY || "(248) 474-6520";
-  const staffEmail = "admin@familysalonspa.com";
+  const staffEmail = SITE_ADMIN_EMAIL;
 
   if (opts.clientEmail) {
-    await sendEmail({
-      to: opts.clientEmail,
-      subject: "We received your appointment request",
-      text: bookingAckText({
-        clientName: opts.clientName,
-        serviceName: opts.serviceName,
-        when: opts.when,
-        phone,
-      }),
-    });
+    await sendEmail(
+      {
+        to: opts.clientEmail,
+        subject: "We received your appointment request",
+        text: bookingAckText({
+          clientName: opts.clientName,
+          serviceName: opts.serviceName,
+          when: opts.when,
+          phone,
+        }),
+      },
+      { kind: "appointment" },
+    );
   }
 
-  await sendEmail({
-    to: staffEmail,
-    subject: `New booking request: ${opts.clientName}`,
-    text: `${opts.clientName} requested ${opts.serviceName} on ${opts.when}. Phone: ${opts.clientPhone}`,
-  });
+  await sendEmail(
+    {
+      to: staffEmail,
+      subject: `New booking request: ${opts.clientName}`,
+      text: `${opts.clientName} requested ${opts.serviceName} on ${opts.when}. Phone: ${opts.clientPhone}`,
+    },
+    { kind: "staff" },
+  );
 
   if (opts.smsEnabled && opts.smsOptIn) {
     await sendSms(
@@ -113,4 +123,68 @@ export async function notifyBookingRequest(opts: {
       `Request received for ${opts.serviceName} on ${opts.when}. We will confirm soon. Family Hair Salon`,
     );
   }
+}
+
+function appointmentUpdatedText(opts: {
+  clientName: string;
+  serviceName: string;
+  when: string;
+  staffName?: string | null;
+  address: string;
+  phone: string;
+  changeLines: string[];
+}): string {
+  return [
+    `Hi ${opts.clientName},`,
+    "",
+    `Your appointment at Family Hair Salon & Wellness Spa was updated.`,
+    "",
+    ...opts.changeLines.map((line) => `- ${line}`),
+    "",
+    `Service: ${opts.serviceName}`,
+    opts.staffName ? `With: ${opts.staffName}` : "Stylist: to be confirmed",
+    `When: ${opts.when}`,
+    `Where: ${opts.address}`,
+    "",
+    `Questions? Call ${opts.phone}.`,
+    "",
+    "Family Hair Salon & Wellness Spa",
+  ].join("\n");
+}
+
+export async function notifyAppointmentUpdated(opts: {
+  clientName: string;
+  clientEmail?: string | null;
+  serviceName: string;
+  when: string;
+  staffName?: string | null;
+  changeLines: string[];
+}): Promise<{ ok: boolean; detail?: string }> {
+  if (!opts.clientEmail?.trim()) {
+    return { ok: false, detail: "no client email" };
+  }
+
+  const env = await getEnv();
+  const address =
+    env.SALON_ADDRESS || "34777 Grand River Ave, Farmington, MI 48335";
+  const phone = env.SALON_PHONE_PRIMARY || "(248) 474-6520";
+
+  const text = appointmentUpdatedText({
+    clientName: opts.clientName,
+    serviceName: opts.serviceName,
+    when: opts.when,
+    staffName: opts.staffName,
+    address,
+    phone,
+    changeLines: opts.changeLines,
+  });
+
+  return sendEmail(
+    {
+      to: opts.clientEmail.trim(),
+      subject: "Your appointment was updated - Family Hair Salon",
+      text,
+    },
+    { kind: "appointment" },
+  );
 }

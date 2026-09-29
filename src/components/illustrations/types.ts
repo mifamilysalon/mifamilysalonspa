@@ -100,8 +100,11 @@ export function illustrationForService(
 ): IllustrationId {
   if (SERVICE_ILLUSTRATION[serviceId]) return SERVICE_ILLUSTRATION[serviceId];
   if (category === "hair") return "hair";
-  if (category === "skin") return "skin";
+  if (category === "skin" || category === "facials") return "facial";
   if (category === "nails") return "nails";
+  if (category === "waxing") return "wax";
   if (category === "wellness") return "wellness";
+  if (category === "threading" || category === "lashes" || category === "makeup" || category === "henna")
+    return "skin";
   return "interior";
 }

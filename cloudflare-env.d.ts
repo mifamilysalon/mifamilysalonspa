@@ -19,7 +19,11 @@ export type AppEnv = {
     send: (msg: unknown) => Promise<unknown>;
   };
   RESEND_API_KEY?: string;
+  BREVO_API_KEY?: string;
   MAIL_FROM?: string;
+  MAIL_FROM_APPOINTMENTS?: string;
+  MAIL_FROM_GIFTS?: string;
+  MAIL_FROM_STAFF?: string;
   MAIL_FROM_NAME?: string;
   CLOUDFLARE_API_TOKEN?: string;
   CF_API_TOKEN?: string;

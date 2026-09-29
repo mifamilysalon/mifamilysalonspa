@@ -3,18 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 
-const NAV = [
-  { href: "/", label: "Home" },
-  { href: "/hair-care", label: "Hair" },
-  { href: "/skin-care", label: "Skin" },
-  { href: "/nail-care", label: "Nails" },
-  { href: "/wellness", label: "Wellness" },
-  { href: "/private-area", label: "Private Suite" },
-  { href: "/gallery", label: "Gallery" },
-  { href: "/offers", label: "Offers" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-];
+import { SITE_HEADER_NAV } from "@/lib/service-categories";
+
+const NAV = SITE_HEADER_NAV;
 
 export function SiteHeader({
   phone,

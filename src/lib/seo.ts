@@ -1,8 +1,17 @@
 import type { Metadata } from "next";
 import { DEFAULT_SOCIAL, type SocialLinks } from "@/lib/media";
 
-/** Canonical production origin (also used for OG / sitemap / JSON-LD) */
-export const SITE_URL = "https://familysalonspa.com";
+/** Canonical production origin (always www — used for OG / sitemap / JSON-LD) */
+export const SITE_URL = "https://www.mifamilysalon.com";
+export const SITE_HOST = "www.mifamilysalon.com";
+export const SITE_APEX_HOST = "mifamilysalon.com";
+
+/** Staging / pre-domain Workers URL */
+export const PREVIEW_SITE_URL =
+  "https://familysalonspa.consultifyit-forms.workers.dev";
+
+export const SITE_CONTACT_EMAIL = "info@mifamilysalon.com";
+export const SITE_ADMIN_EMAIL = "admin@mifamilysalon.com";
 export const SITE_NAME = "Family Hair Salon & Wellness Spa";
 export const SITE_TAGLINE =
   "Hair, skin, nails, and wellness in Farmington, Michigan";
@@ -15,7 +24,7 @@ export const LOCAL_BUSINESS = {
   url: SITE_URL,
   telephone: ["+12484746520", "+12486355127"],
   telephoneDisplay: ["(248) 474-6520", "(248) 635-5127"],
-  email: "info@familysalonspa.com",
+  email: SITE_CONTACT_EMAIL,
   streetAddress: "34777 Grand River Ave",
   addressLocality: "Farmington",
   addressRegion: "MI",
@@ -253,7 +262,7 @@ export const SITE_FAQS: Array<{ question: string; answer: string }> = [
   {
     question: "How do I book an appointment?",
     answer:
-      "Book online at familysalonspa.com/appointments, or call (248) 474-6520 or (248) 635-5127. Instant-book services confirm immediately; request services are confirmed by our team.",
+      "Book online at www.mifamilysalon.com/appointments, or call (248) 474-6520 or (248) 635-5127. Instant-book services confirm immediately; request services are confirmed by our team.",
   },
   {
     question: "How much do services cost?",

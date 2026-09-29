@@ -9,7 +9,13 @@ import { getServices } from "@/lib/site";
 const CATEGORY_ART: Record<string, IllustrationId> = {
   hair: "hair",
   skin: "skin",
+  facials: "facial",
   nails: "nails",
+  threading: "skin",
+  waxing: "wax",
+  lashes: "skin",
+  makeup: "skin",
+  henna: "skin",
   wellness: "wellness",
 };
 

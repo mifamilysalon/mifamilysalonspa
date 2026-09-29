@@ -43,7 +43,9 @@
     "SALON_PHONE_PRIMARY": "(248) 474-6520",
     "SALON_PHONE_SECONDARY": "(248) 635-5127",
     "SALON_ADDRESS": "34777 Grand River Ave, Farmington, MI 48335",
-    "MAIL_FROM": "appointments@consultifyit.com",
+    "MAIL_FROM": "appointments@mifamilysalon.com",
+    "MAIL_FROM_APPOINTMENTS": "appointments@mifamilysalon.com",
+    "MAIL_FROM_GIFTS": "gifts@mifamilysalon.com",
     "MAIL_FROM_NAME": "Family Hair Salon & Wellness Spa"
   },
   "env": {

@@ -61,6 +61,26 @@ export async function listCachedGoogleReviews(db: D1Database): Promise<GoogleRev
   return res.results || [];
 }
 
+function normalizePlaceId(raw: string): string {
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("places/")) return trimmed.slice("places/".length);
+  return trimmed;
+}
+
+function placesErrorHint(status: number, body: string): string {
+  if (body.includes("API_KEY_SERVICE_BLOCKED")) {
+    return (
+      " Your API key cannot call Places API (New). In Google Cloud: enable Places API (New) " +
+      "(not only legacy Places API), then edit the key → API restrictions → allow Places API (New). " +
+      "On production run: npx wrangler secret put GOOGLE_PLACES_API_KEY."
+    );
+  }
+  if (status === 403) {
+    return " Check billing is enabled on the Google Cloud project and the key is unrestricted or allows Places API (New).";
+  }
+  return "";
+}
+
 export async function syncGoogleReviewsFromPlaces(
   env: AppEnv,
 ): Promise<{ ok: boolean; message: string; count?: number }> {
@@ -72,20 +92,21 @@ export async function syncGoogleReviewsFromPlaces(
 
   if (!apiKey) {
     return {
-      ok: true,
+      ok: false,
       message:
-        "No GOOGLE_PLACES_API_KEY set. Keeping cached reviews (free). Add a Places API key to refresh nightly within Google free monthly quota.",
+        "GOOGLE_PLACES_API_KEY is not set on this environment. Add it to .dev.vars locally or run npx wrangler secret put GOOGLE_PLACES_API_KEY for production, then Sync again.",
     };
   }
 
-  if (!meta.place_id) {
+  const placeId = normalizePlaceId(meta.place_id);
+  if (!placeId) {
     return {
       ok: false,
       message: "Set a Google Place ID in Admin Settings to sync live reviews.",
     };
   }
 
-  const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(meta.place_id)}`;
+  const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`;
   const res = await fetch(url, {
     headers: {
       "X-Goog-Api-Key": apiKey,
@@ -95,7 +116,11 @@ export async function syncGoogleReviewsFromPlaces(
 
   if (!res.ok) {
     const body = await res.text();
-    return { ok: false, message: `Places API error ${res.status}: ${body.slice(0, 200)}` };
+    const hint = placesErrorHint(res.status, body);
+    return {
+      ok: false,
+      message: `Places API error ${res.status}: ${body.slice(0, 280)}${hint}`,
+    };
   }
 
   const data = (await res.json()) as {
@@ -139,6 +164,7 @@ export async function syncGoogleReviewsFromPlaces(
 
   const nextMeta: GoogleReviewsMeta = {
     ...meta,
+    place_id: placeId,
     rating: typeof data.rating === "number" ? data.rating : meta.rating,
     review_count:
       typeof data.userRatingCount === "number" ? data.userRatingCount : meta.review_count,

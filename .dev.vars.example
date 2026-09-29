@@ -15,10 +15,16 @@ TWILIO_FROM_NUMBER=
 
 # Optional email delivery (gift certificates + booking notices)
 # Prefer Worker EMAIL binding. Fallback: Cloudflare Email Sending REST API token
-# with Email Sending Edit permission, or Resend.
+# with Email Sending Edit permission, Resend, or Brevo (Sendinblue).
 CLOUDFLARE_API_TOKEN=
 RESEND_API_KEY=
-MAIL_FROM=appointments@consultifyit.com
+BREVO_API_KEY=
+# Outbound From addresses (domain must be onboarded on Cloudflare Email Sending)
+MAIL_FROM=appointments@mifamilysalon.com
+MAIL_FROM_APPOINTMENTS=appointments@mifamilysalon.com
+MAIL_FROM_GIFTS=gifts@mifamilysalon.com
+# Optional: internal alerts to admin@mifamilysalon.com (defaults to appointments@)
+# MAIL_FROM_STAFF=appointments@mifamilysalon.com
 MAIL_FROM_NAME=Family Hair Salon & Wellness Spa
 
 # Instagram: no secret needed here.

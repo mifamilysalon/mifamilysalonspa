@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
 import {
+  formatGiftAmount,
+  giftCertificateBalanceCents,
   isStaffPortalRole,
+  listGiftCertificateRedemptions,
   redeemGiftCertificate,
   validateGiftCertificateCode,
 } from "@/lib/gift-certificates";
@@ -11,6 +14,8 @@ const bodySchema = z.object({
   code: z.string().trim().min(4).max(40),
   action: z.enum(["lookup", "redeem"]).default("lookup"),
   note: z.string().trim().max(500).optional(),
+  /** Dollars to apply; defaults to full remaining balance */
+  amount_dollars: z.number().positive().max(10000).optional(),
 });
 
 export async function GET(request: Request) {
@@ -26,7 +31,11 @@ export async function GET(request: Request) {
     }
 
     const validation = await validateGiftCertificateCode(code);
-    return NextResponse.json({ validation });
+    const redemptions =
+      validation.certificate != null
+        ? await listGiftCertificateRedemptions(validation.certificate.id)
+        : [];
+    return NextResponse.json({ validation, redemptions });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: "Validation failed" }, { status: 500 });
@@ -51,20 +60,33 @@ export async function POST(request: Request) {
 
     if (parsed.data.action === "lookup") {
       const validation = await validateGiftCertificateCode(parsed.data.code);
-      return NextResponse.json({ validation });
+      const redemptions =
+        validation.certificate != null
+          ? await listGiftCertificateRedemptions(validation.certificate.id)
+          : [];
+      return NextResponse.json({ validation, redemptions });
     }
 
-    const certificate = await redeemGiftCertificate(
-      parsed.data.code,
-      user,
-      parsed.data.note,
-    );
+    const certificate = await redeemGiftCertificate(parsed.data.code, user, {
+      note: parsed.data.note,
+      amount_dollars: parsed.data.amount_dollars,
+    });
     const validation = await validateGiftCertificateCode(certificate.code);
+    const redemptions = await listGiftCertificateRedemptions(certificate.id);
+    const remaining = giftCertificateBalanceCents(certificate);
+    const appliedCents =
+      parsed.data.amount_dollars != null
+        ? Math.round(parsed.data.amount_dollars * 100)
+        : certificate.amount_cents - remaining;
 
     return NextResponse.json({
       validation,
       certificate,
-      message: `Redeemed ${certificate.code}. This code cannot be used again.`,
+      redemptions,
+      message:
+        remaining > 0
+          ? `Applied ${formatGiftAmount(appliedCents)}. ${formatGiftAmount(remaining)} remaining — code can be used again until balance is zero.`
+          : `Applied ${formatGiftAmount(appliedCents)}. Certificate fully redeemed; no balance remaining.`,
     });
   } catch (err) {
     console.error(err);

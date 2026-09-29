@@ -7,14 +7,50 @@ export type EmailPayload = {
   html?: string;
 };
 
-function fromAddress(env: Awaited<ReturnType<typeof getEnv>>): {
-  email: string;
-  name: string;
-} {
-  return {
-    email: env.MAIL_FROM || "appointments@consultifyit.com",
-    name: env.MAIL_FROM_NAME || env.SALON_NAME || "Family Hair Salon & Wellness Spa",
-  };
+/** Which From address to use (same domain, different mailboxes). */
+export type OutboundEmailKind = "appointment" | "gift_certificate" | "staff";
+
+export function resolveOutboundFrom(
+  env: Awaited<ReturnType<typeof getEnv>>,
+  kind: OutboundEmailKind,
+): { email: string; name: string } {
+  const name =
+    env.MAIL_FROM_NAME || env.SALON_NAME || "Family Hair Salon & Wellness Spa";
+  const legacy = env.MAIL_FROM;
+
+  switch (kind) {
+    case "gift_certificate":
+      return {
+        email:
+          env.MAIL_FROM_GIFTS || legacy || "gifts@mifamilysalon.com",
+        name,
+      };
+    case "staff":
+      return {
+        email:
+          env.MAIL_FROM_STAFF ||
+          env.MAIL_FROM_APPOINTMENTS ||
+          legacy ||
+          "appointments@mifamilysalon.com",
+        name,
+      };
+    case "appointment":
+    default:
+      return {
+        email:
+          env.MAIL_FROM_APPOINTMENTS ||
+          legacy ||
+          "appointments@mifamilysalon.com",
+        name,
+      };
+  }
+}
+
+function fromAddress(
+  env: Awaited<ReturnType<typeof getEnv>>,
+  kind: OutboundEmailKind,
+): { email: string; name: string } {
+  return resolveOutboundFrom(env, kind);
 }
 
 function errorDetail(err: unknown): string {
@@ -157,13 +193,52 @@ async function sendViaCloudflareRest(
   }
 }
 
+async function sendViaBrevo(
+  env: Awaited<ReturnType<typeof getEnv>>,
+  payload: EmailPayload,
+  from: { email: string; name: string },
+): Promise<{ ok: boolean; detail?: string }> {
+  const apiKey = env.BREVO_API_KEY;
+  if (!apiKey) return { ok: false, detail: "BREVO_API_KEY not set" };
+
+  try {
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": apiKey,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        sender: { name: from.name, email: from.email },
+        to: [{ email: payload.to }],
+        subject: payload.subject,
+        textContent: payload.text,
+        htmlContent: payload.html || undefined,
+      }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      console.error("Brevo email failed", res.status, body);
+      return { ok: false, detail: `Brevo ${res.status}: ${body}` };
+    }
+    return { ok: true };
+  } catch (err) {
+    console.error("Brevo email error", err);
+    return { ok: false, detail: errorDetail(err) };
+  }
+}
+
 export async function sendEmail(
   payload: EmailPayload,
+  options?: { kind?: OutboundEmailKind },
 ): Promise<{ ok: boolean; detail?: string }> {
   if (!payload.to) return { ok: false, detail: "missing recipient" };
 
   const env = await getEnv();
-  const from = fromAddress(env);
+  const kind = options?.kind ?? "appointment";
+  const from = fromAddress(env, kind);
 
   const viaBinding = await sendViaCloudflareBinding(env, payload, from);
   if (viaBinding.ok) return { ok: true, detail: "email-binding" };
@@ -174,14 +249,24 @@ export async function sendEmail(
   const viaResend = await sendViaResend(env, payload, from);
   if (viaResend.ok) return { ok: true, detail: "resend" };
 
+  const viaBrevo = await sendViaBrevo(env, payload, from);
+  if (viaBrevo.ok) return { ok: true, detail: "brevo" };
+
   // Local / unbound: log only — do not pretend production delivery succeeded
   const isDev = (env.ENVIRONMENT || "").toLowerCase() !== "production";
-  console.log("[email:dev]", payload.subject, "->", payload.to, payload.text);
+  console.log(
+    "[email:dev]",
+    from.email,
+    payload.subject,
+    "->",
+    payload.to,
+    payload.text,
+  );
   if (isDev) return { ok: true, detail: "dev-log" };
 
   return {
     ok: false,
-    detail: [viaBinding.detail, viaRest.detail, viaResend.detail]
+    detail: [viaBinding.detail, viaRest.detail, viaResend.detail, viaBrevo.detail]
       .filter(Boolean)
       .join(" | "),
   };
