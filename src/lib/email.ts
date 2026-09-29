@@ -156,7 +156,8 @@ async function sendViaCloudflareRest(
   from: { email: string; name: string },
 ): Promise<{ ok: boolean; detail?: string }> {
   const token = env.CLOUDFLARE_API_TOKEN || env.CF_API_TOKEN;
-  const accountId = env.CLOUDFLARE_ACCOUNT_ID || "9c767ec1aaffb8ef43e273152b199945";
+  const accountId =
+    env.CLOUDFLARE_ACCOUNT_ID || "b51ded38b292d1a89fdd26e99e1bb7e9";
   if (!token) return { ok: false, detail: "CLOUDFLARE_API_TOKEN not set" };
 
   try {

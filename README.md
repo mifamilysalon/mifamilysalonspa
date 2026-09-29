@@ -9,7 +9,7 @@ Luxury website and appointment system for **Family Hair Salon & Wellness Spa** (
 
 - Next.js 15 App Router
 - Cloudflare Workers via `@opennextjs/cloudflare`
-- D1, KV on ConsultifyIT Cloudflare account (R2 deferred until admin media uploads)
+- D1, KV, and R2 (`MEDIA` → `familysalonspa-media`) on the Cloudflare account
 
 ## Local development
 

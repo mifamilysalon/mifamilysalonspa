@@ -25,6 +25,12 @@
       "id": "b5bde43a058d411283500560970aefa0"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "familysalonspa-media"
+    }
+  ],
   "send_email": [
     {
       "name": "EMAIL"

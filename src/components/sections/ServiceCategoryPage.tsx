@@ -10,14 +10,14 @@ import { getServices } from "@/lib/site";
 
 const CATEGORY_ART: Record<string, IllustrationId> = {
   hair: "hair",
-  skin: "skin",
+  skin: "facial",
   facials: "facial",
   nails: "nails",
-  threading: "skin",
+  threading: "face-mapping",
   waxing: "wax",
-  lashes: "skin",
-  makeup: "skin",
-  henna: "skin",
+  lashes: "facial",
+  makeup: "wash",
+  henna: "polish",
   wellness: "wellness",
 };
 
@@ -70,7 +70,7 @@ export default async function ServiceCategoryPage({
 
       <div className="mt-12 space-y-10">
         {services.map((s) => {
-          const sid = illustrationForService(s.id, s.category);
+          const sid = illustrationForService(s.id, s.category, s.name);
           return (
             <article
               key={s.id}

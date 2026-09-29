@@ -79,10 +79,10 @@ export default async function HomePage() {
       art: "hair",
     },
     {
-      title: "Skin Care",
-      href: "/skin-care",
+      title: "Facials",
+      href: "/facials",
       body: "Dermatological facials planned after face mapping skin analysis for your skin type.",
-      art: "skin",
+      art: "facial",
     },
     {
       title: "Nail Care",

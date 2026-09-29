@@ -61,7 +61,7 @@ export async function notifyBookingConfirmed(opts: {
   });
 
   if (opts.clientEmail) {
-    await sendEmail(
+    const sent = await sendEmail(
       {
         to: opts.clientEmail,
         subject: "Appointment confirmed - Family Hair Salon",
@@ -69,6 +69,9 @@ export async function notifyBookingConfirmed(opts: {
       },
       { kind: "appointment" },
     );
+    if (!sent.ok) {
+      console.error("booking confirmation email failed", opts.clientEmail, sent.detail);
+    }
   }
 
   if (opts.smsEnabled && opts.smsOptIn) {
@@ -93,7 +96,7 @@ export async function notifyBookingRequest(opts: {
   const staffEmail = SITE_ADMIN_EMAIL;
 
   if (opts.clientEmail) {
-    await sendEmail(
+    const sent = await sendEmail(
       {
         to: opts.clientEmail,
         subject: "We received your appointment request",
@@ -106,6 +109,9 @@ export async function notifyBookingRequest(opts: {
       },
       { kind: "appointment" },
     );
+    if (!sent.ok) {
+      console.error("booking request email failed", opts.clientEmail, sent.detail);
+    }
   }
 
   await sendEmail(

@@ -20,7 +20,8 @@ Already done on the client account (Familysalonspa@gmail.com):
 | D1 `familysalonspa-db` | Created — id `28a7d7aa-7558-4aab-8370-502517ca5375` |
 | KV `CACHE` | Created — id `b5bde43a058d411283500560970aefa0` |
 
-R2 is **not** wired in Wrangler yet (hero/gallery use D1 URLs and static assets). Re-add an `MEDIA` R2 binding when admin uploads ship.
+R2 bucket `familysalonspa-media` is bound as `MEDIA` for admin image uploads
+(`/api/admin/media`) and public serving (`/api/media/...`).
 
 ### Enable Workers.dev (first deploy on this account)
 

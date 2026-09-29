@@ -3,6 +3,7 @@
 export type AppEnv = {
   DB: D1Database;
   CACHE: KVNamespace;
+  MEDIA?: R2Bucket;
   ASSETS?: Fetcher;
   SESSION_SECRET?: string;
   GOOGLE_PLACES_API_KEY?: string;

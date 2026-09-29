@@ -75,7 +75,7 @@ export const ILLUSTRATION_SRC: Record<IllustrationId, string> = {
   massage: "/illustrations/massage.png",
 };
 
-/** Map service id -> illustration (seeded catalog). */
+/** Legacy seed ids 1–15 (inactive); kept for any historical pages. */
 export const SERVICE_ILLUSTRATION: Record<number, IllustrationId> = {
   1: "cut",
   2: "color",
@@ -94,17 +94,120 @@ export const SERVICE_ILLUSTRATION: Record<number, IllustrationId> = {
   15: "private",
 };
 
+export function illustrationForCategory(category?: string): IllustrationId {
+  switch (category) {
+    case "hair":
+      return "hair";
+    case "nails":
+      return "nails";
+    case "facials":
+    case "skin":
+      return "facial";
+    case "waxing":
+      return "wax";
+    case "wellness":
+      return "wellness";
+    case "threading":
+      return "face-mapping";
+    case "lashes":
+      return "facial";
+    case "makeup":
+      return "wash";
+    case "henna":
+      return "polish";
+    default:
+      return "interior";
+  }
+}
+
+/** Match brochure service names to the closest available illustration. */
 export function illustrationForService(
   serviceId: number,
   category?: string,
+  name?: string,
 ): IllustrationId {
   if (SERVICE_ILLUSTRATION[serviceId]) return SERVICE_ILLUSTRATION[serviceId];
-  if (category === "hair") return "hair";
-  if (category === "skin" || category === "facials") return "facial";
-  if (category === "nails") return "nails";
-  if (category === "waxing") return "wax";
+
+  const n = (name || "").toLowerCase();
+
+  if (n.includes("private suite")) return "private";
+
+  // Hair
+  if (n.includes("extension")) return "extensions";
+  if (n.includes("highlight")) return "highlights";
+  if (n.includes("perm") && !n.includes("permanent straighten")) return "perm";
+  if (
+    n.includes("straighten") ||
+    n.includes("keratin") ||
+    n.includes("rebond") ||
+    n.includes("flat iron")
+  ) {
+    return "straighten";
+  }
+  if (
+    n.includes("haircut") ||
+    n.includes("cut & style") ||
+    n.includes("cut and style") ||
+    (n.includes("cut") && category === "hair")
+  ) {
+    return "cut";
+  }
+  if (
+    n.includes("color") ||
+    n.includes("toner") ||
+    (n.includes("henna treatment") && category === "hair")
+  ) {
+    return "color";
+  }
+  if (
+    n.includes("shampoo") ||
+    n.includes("blow dry") ||
+    n.includes("curling") ||
+    n.includes("roller") ||
+    n.includes("updo") ||
+    n.includes("conditioning") ||
+    n.includes("hot oil") ||
+    n.includes("protein")
+  ) {
+    return "hair";
+  }
+
+  // Nails
+  if (n.includes("pedicure")) return "pedicure";
+  if (n.includes("shellac")) return "shellac";
+  if (n.includes("polish") && category === "nails") return "polish";
+  if (n.includes("manicure") || n.includes("nail shape")) return "manicure";
+
+  // Face / skin
+  if (n.includes("face mapping") || n.includes("mapping")) return "face-mapping";
+  if (
+    n.includes("facial") ||
+    n.includes("bleach") ||
+    n.includes("cleansing") ||
+    n.includes("hydrafacial")
+  ) {
+    return "facial";
+  }
+
+  // Waxing / threading / lashes
+  if (category === "waxing" || n.includes("wax")) return "wax";
+  if (category === "threading" || n.includes("threading")) return "face-mapping";
+  if (category === "lashes" || n.includes("lash") || n.includes("tinting")) {
+    return "facial";
+  }
+
+  // Makeup / henna
+  if (category === "makeup" || n.includes("makeup") || n.includes("saree") || n.includes("dupatta")) {
+    return "wash";
+  }
+  if (category === "henna" || (n.includes("henna") && category !== "hair")) {
+    return "polish";
+  }
+
+  // Wellness
+  if (n.includes("massage")) return "massage";
+  if (n.includes("body polish") || n.includes("back polish")) return "spa";
   if (category === "wellness") return "wellness";
-  if (category === "threading" || category === "lashes" || category === "makeup" || category === "henna")
-    return "skin";
-  return "interior";
+
+  return illustrationForCategory(category);
 }

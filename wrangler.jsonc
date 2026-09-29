@@ -26,6 +26,13 @@
       "preview_id": "9f53ab5190744b21978cd24c5d8474fb"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "familysalonspa-media",
+      "preview_bucket_name": "familysalonspa-media"
+    }
+  ],
   "send_email": [
     {
       "name": "EMAIL"
@@ -66,6 +73,13 @@
           "binding": "CACHE",
           "id": "0739077f49164194b6dc1d2c264aee41",
           "preview_id": "9f53ab5190744b21978cd24c5d8474fb"
+        }
+      ],
+      "r2_buckets": [
+        {
+          "binding": "MEDIA",
+          "bucket_name": "familysalonspa-media",
+          "preview_bucket_name": "familysalonspa-media"
         }
       ],
       "send_email": [

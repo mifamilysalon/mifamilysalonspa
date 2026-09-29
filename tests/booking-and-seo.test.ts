@@ -110,3 +110,24 @@ describe("service name cleanup map", () => {
     assert.equal(RENAMES["Antitan Facial"], "Anti-Tan Facial");
   });
 });
+
+describe("illustrationForService matching", () => {
+  it("maps active brochure services to related art", async () => {
+    const { illustrationForService, illustrationForCategory } = await import(
+      "../src/components/illustrations/types"
+    );
+    assert.equal(illustrationForService(18, "hair", "Women's Haircut"), "cut");
+    assert.equal(illustrationForService(30, "hair", "Women's Hair Color"), "color");
+    assert.equal(illustrationForService(32, "hair", "Highlights Cap or Foil"), "highlights");
+    assert.equal(illustrationForService(40, "nails", "Pedicure"), "pedicure");
+    assert.equal(illustrationForService(43, "nails", "Shellac Manicure"), "shellac");
+    assert.equal(illustrationForService(45, "threading", "Eyebrow Threading"), "face-mapping");
+    assert.equal(illustrationForService(67, "waxing", "Brazilian"), "wax");
+    assert.equal(illustrationForService(72, "facials", "Diamond Facial"), "facial");
+    assert.equal(illustrationForService(87, "wellness", "Body Massage (1 hr)"), "massage");
+    assert.equal(illustrationForService(91, "makeup", "Party Makeup"), "wash");
+    assert.equal(illustrationForService(96, "henna", "Henna per Hand"), "polish");
+    assert.equal(illustrationForCategory("henna"), "polish");
+    assert.equal(illustrationForCategory("threading"), "face-mapping");
+  });
+});

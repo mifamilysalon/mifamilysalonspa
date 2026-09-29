@@ -256,6 +256,62 @@ export default function AdminSettingsPage() {
             className="mt-1 block w-full min-h-11 border border-salon-border bg-salon-panel px-3 text-salon-heading"
           />
         </label>
+        <label className="mt-3 block text-sm text-salon-body">
+          Or upload a photo to R2
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            disabled={saving}
+            className="mt-1 block w-full text-sm"
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (!file || !settings) return;
+              setSaving(true);
+              setMessage(null);
+              try {
+                const body = new FormData();
+                body.append("file", file);
+                body.append("alt", "Homepage hero");
+                const uploadRes = await fetch("/api/admin/media", {
+                  method: "POST",
+                  body,
+                });
+                const uploadData = (await uploadRes.json()) as {
+                  error?: string;
+                  asset?: { url: string };
+                };
+                if (!uploadRes.ok || !uploadData.asset?.url) {
+                  throw new Error(uploadData.error || "Upload failed");
+                }
+                const url = uploadData.asset.url;
+                const saveRes = await fetch("/api/admin/settings", {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    media: {
+                      ...settings.media,
+                      hero_image: url,
+                    },
+                  }),
+                });
+                if (!saveRes.ok) {
+                  throw new Error("Uploaded, but failed to save hero setting");
+                }
+                setHeroImageDraft(url);
+                const refreshed = await fetch("/api/admin/settings");
+                setSettings((await refreshed.json()) as SettingsData);
+                setMessage("Hero image uploaded to R2 and saved.");
+              } catch (err) {
+                setMessage(
+                  err instanceof Error ? err.message : "Upload failed",
+                );
+              } finally {
+                setSaving(false);
+              }
+            }}
+          />
+        </label>
         <button
           type="button"
           disabled={saving}

@@ -66,7 +66,13 @@ const googleReviewsSchema = z.object({
 });
 
 const mediaSchema = z.object({
-  hero_image: z.union([z.string().url().max(500), z.literal("")]).optional(),
+  hero_image: z
+    .union([
+      z.string().url().max(500),
+      z.string().regex(/^\/api\/media\/.+/).max(500),
+      z.literal(""),
+    ])
+    .optional(),
   hero_tone: heroToneSchema.optional(),
 });
 
