@@ -21,12 +21,14 @@ TWILIO_FROM_NUMBER=
 CLOUDFLARE_API_TOKEN=
 RESEND_API_KEY=
 BREVO_API_KEY=
-# Outbound From addresses (domain must be onboarded on Cloudflare Email Sending)
-MAIL_FROM=appointments@mifamilysalon.com
-MAIL_FROM_APPOINTMENTS=appointments@mifamilysalon.com
-MAIL_FROM_GIFTS=gifts@mifamilysalon.com
-# Optional: internal alerts to admin@mifamilysalon.com (defaults to appointments@)
-# MAIL_FROM_STAFF=appointments@mifamilysalon.com
+# Outbound From addresses.
+# Until mifamilysalon.com DNS + Brevo/Resend domain verification are live,
+# production uses the verified Brevo sender familysalonspa@gmail.com.
+MAIL_FROM=familysalonspa@gmail.com
+MAIL_FROM_APPOINTMENTS=familysalonspa@gmail.com
+MAIL_FROM_GIFTS=familysalonspa@gmail.com
+# Optional: internal alerts to admin@mifamilysalon.com (defaults to appointments From)
+# MAIL_FROM_STAFF=familysalonspa@gmail.com
 MAIL_FROM_NAME=Family Hair Salon & Wellness Spa
 
 # Instagram: no secret needed here.

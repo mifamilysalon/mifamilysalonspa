@@ -22,7 +22,7 @@ export function resolveOutboundFrom(
     case "gift_certificate":
       return {
         email:
-          env.MAIL_FROM_GIFTS || legacy || "gifts@mifamilysalon.com",
+          env.MAIL_FROM_GIFTS || legacy || "familysalonspa@gmail.com",
         name,
       };
     case "staff":
@@ -31,7 +31,7 @@ export function resolveOutboundFrom(
           env.MAIL_FROM_STAFF ||
           env.MAIL_FROM_APPOINTMENTS ||
           legacy ||
-          "appointments@mifamilysalon.com",
+          "familysalonspa@gmail.com",
         name,
       };
     case "appointment":
@@ -40,7 +40,7 @@ export function resolveOutboundFrom(
         email:
           env.MAIL_FROM_APPOINTMENTS ||
           legacy ||
-          "appointments@mifamilysalon.com",
+          "familysalonspa@gmail.com",
         name,
       };
   }
