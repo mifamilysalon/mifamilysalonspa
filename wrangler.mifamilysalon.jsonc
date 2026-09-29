@@ -19,12 +19,6 @@
       "database_id": "28a7d7aa-7558-4aab-8370-502517ca5375"
     }
   ],
-  "r2_buckets": [
-    {
-      "binding": "MEDIA",
-      "bucket_name": "familysalonspa-media"
-    }
-  ],
   "kv_namespaces": [
     {
       "binding": "CACHE",
@@ -45,6 +39,7 @@
     "MAIL_FROM": "appointments@mifamilysalon.com",
     "MAIL_FROM_APPOINTMENTS": "appointments@mifamilysalon.com",
     "MAIL_FROM_GIFTS": "gifts@mifamilysalon.com",
-    "MAIL_FROM_NAME": "Family Hair Salon & Wellness Spa"
+    "MAIL_FROM_NAME": "Family Hair Salon & Wellness Spa",
+    "GOOGLE_PLACE_ID": "ChIJY5sJBbCxJIgRljxES6_nwbQ"
   }
 }

@@ -4,6 +4,8 @@ import {
   illustrationForService,
   type IllustrationId,
 } from "@/components/illustrations";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { absoluteUrl, SITE_NAME } from "@/lib/seo";
 import { getServices } from "@/lib/site";
 
 const CATEGORY_ART: Record<string, IllustrationId> = {
@@ -23,16 +25,37 @@ export default async function ServiceCategoryPage({
   title,
   category,
   intro,
+  path,
 }: {
   title: string;
   category: string;
   intro: string;
+  path?: string;
 }) {
   const services = await getServices(category);
   const artId = CATEGORY_ART[category] || "interior";
+  const pagePath = path || `/${category === "hair" ? "hair-care" : category === "nails" ? "nail-care" : category === "skin" ? "skin-care" : category}`;
+
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name: `${title} at ${SITE_NAME}`,
+    description: intro,
+    provider: {
+      "@type": "BeautySalon",
+      name: SITE_NAME,
+      url: absoluteUrl("/"),
+    },
+    areaServed: {
+      "@type": "City",
+      name: "Farmington, MI",
+    },
+    url: absoluteUrl(pagePath),
+  };
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
+      <JsonLd data={serviceSchema} />
       <div className="grid items-end gap-10 md:grid-cols-[1.1fr_0.9fr]">
         <div>
           <p className="text-sm uppercase tracking-[0.18em] text-salon-primary">
@@ -80,7 +103,14 @@ export default async function ServiceCategoryPage({
         })}
         {services.length === 0 && (
           <p className="border-t border-salon-border py-10 text-salon-body">
-            Services will appear here once the database is connected.
+            No services are listed in this category right now. Call us or{" "}
+            <Link
+              href="/appointments"
+              className="text-salon-heading underline underline-offset-4 hover:text-salon-primary"
+            >
+              request an appointment
+            </Link>{" "}
+            and we can help you choose.
           </p>
         )}
       </div>
@@ -93,7 +123,7 @@ export default async function ServiceCategoryPage({
           Book an appointment
         </Link>
         <p className="text-sm text-salon-body">
-          Current rates are available in salon - ask at the desk.
+          Current rates are available in the salon. Ask at the desk for our pricing brochure.
         </p>
       </div>
     </div>

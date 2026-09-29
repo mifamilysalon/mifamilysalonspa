@@ -13,7 +13,48 @@ export const BROCHURE_CATEGORIES = [
 
 export type BrochureCategoryKey = (typeof BROCHURE_CATEGORIES)[number]["key"];
 
-/** Primary header nav — service links follow brochure chapters. */
+/** Primary header links (Services mega-menu holds service pages). */
+export const SITE_HEADER_PRIMARY_NAV = [
+  { href: "/", label: "Home" },
+  { href: "/private-area", label: "Private Suite" },
+  { href: "/gallery", label: "Gallery" },
+  { href: "/offers", label: "Offers" },
+  { href: "/contact", label: "Contact" },
+] as const;
+
+/** Services mega-menu columns — existing routes only. */
+export const SITE_HEADER_SERVICE_GROUPS = [
+  {
+    heading: "Hair",
+    links: [{ href: "/hair-care", label: "Hair Care" }],
+  },
+  {
+    heading: "Face & Skin",
+    links: [
+      { href: "/facials", label: "Facials" },
+      { href: "/threading", label: "Threading" },
+      { href: "/waxing", label: "Waxing" },
+      { href: "/lashes", label: "Lashes" },
+      { href: "/makeup", label: "Make-Up" },
+    ],
+  },
+  {
+    heading: "Nails & Art",
+    links: [
+      { href: "/nail-care", label: "Nail Care" },
+      { href: "/henna", label: "Henna Tattoos" },
+    ],
+  },
+  {
+    heading: "Wellness",
+    links: [
+      { href: "/wellness", label: "Wellness" },
+      { href: "/gift-certificates", label: "Gift Certificates" },
+    ],
+  },
+] as const;
+
+/** Flat list kept for any legacy imports; prefer PRIMARY + SERVICE_GROUPS. */
 export const SITE_HEADER_NAV = [
   { href: "/", label: "Home" },
   ...BROCHURE_CATEGORIES.map((c) => ({ href: c.href, label: c.label })),

@@ -12,6 +12,7 @@ import {
   type SocialLinks,
 } from "./media";
 import { isPaletteId, type PaletteId } from "./palettes";
+import { LOCAL_BUSINESS, SITE_NAME, SITE_URL } from "./seo";
 
 export type BusinessInfo = {
   name: string;
@@ -19,6 +20,8 @@ export type BusinessInfo = {
   phone_secondary: string;
   address: string;
   hours: string;
+  website: string;
+  maps_url: string;
 };
 
 export type Service = {
@@ -40,12 +43,15 @@ export type StaffProfile = {
   is_bookable: number;
 };
 
-const DEFAULT_BUSINESS: BusinessInfo = {
-  name: "Family Hair Salon & Wellness Spa",
-  phone_primary: "(248) 474-6520",
-  phone_secondary: "(248) 635-5127",
-  address: "34777 Grand River Ave, Farmington, MI 48335",
-  hours: "Mon-Fri 9am-6pm, Sat 9am-5pm, Sun Closed",
+/** Single source defaults aligned with LOCAL_BUSINESS / SEO config. */
+export const DEFAULT_BUSINESS: BusinessInfo = {
+  name: SITE_NAME,
+  phone_primary: LOCAL_BUSINESS.telephoneDisplay[0],
+  phone_secondary: LOCAL_BUSINESS.telephoneDisplay[1],
+  address: `${LOCAL_BUSINESS.streetAddress}, ${LOCAL_BUSINESS.addressLocality}, ${LOCAL_BUSINESS.addressRegion} ${LOCAL_BUSINESS.postalCode}`,
+  hours: LOCAL_BUSINESS.hoursDisplay,
+  website: SITE_URL,
+  maps_url: LOCAL_BUSINESS.mapsUrl,
 };
 
 export async function getBusinessInfo(): Promise<BusinessInfo> {
@@ -55,7 +61,8 @@ export async function getBusinessInfo(): Promise<BusinessInfo> {
       .prepare("SELECT value_json FROM site_settings WHERE key = 'business'")
       .first<{ value_json: string }>();
     if (!row) return DEFAULT_BUSINESS;
-    return { ...DEFAULT_BUSINESS, ...JSON.parse(row.value_json) };
+    const parsed = JSON.parse(row.value_json) as Partial<BusinessInfo>;
+    return { ...DEFAULT_BUSINESS, ...parsed };
   } catch {
     return DEFAULT_BUSINESS;
   }

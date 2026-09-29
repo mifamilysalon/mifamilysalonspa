@@ -98,11 +98,14 @@ export async function syncGoogleReviewsFromPlaces(
     };
   }
 
-  const placeId = normalizePlaceId(meta.place_id);
+  const placeId = normalizePlaceId(
+    meta.place_id || env.GOOGLE_PLACE_ID || "",
+  );
   if (!placeId) {
     return {
       ok: false,
-      message: "Set a Google Place ID in Admin Settings to sync live reviews.",
+      message:
+        "Set a Google Place ID in Admin Settings (or GOOGLE_PLACE_ID in .dev.vars / Wrangler vars) to sync live reviews.",
     };
   }
 

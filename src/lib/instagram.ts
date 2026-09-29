@@ -1,6 +1,8 @@
 import type { AppEnv } from "../../cloudflare-env";
 
 export type InstagramFeedSettings = {
+  /** When false, the public Instagram section is hidden. */
+  enabled: boolean;
   handle: string;
   profile_url: string;
   /** Free Behold JSON feed URL — preferred for custom-styled grid + nightly sync */
@@ -21,6 +23,7 @@ export type InstagramPost = {
 };
 
 export const DEFAULT_INSTAGRAM_FEED: InstagramFeedSettings = {
+  enabled: false,
   handle: "familysalonandspa",
   profile_url: "https://www.instagram.com/familysalonandspa/",
   behold_feed_url: "",
@@ -76,6 +79,7 @@ export async function getInstagramFeedSettings(
     return {
       ...DEFAULT_INSTAGRAM_FEED,
       ...parsed,
+      enabled: parsed.enabled === true,
       handle,
       profile_url:
         parsed.profile_url?.trim() ||

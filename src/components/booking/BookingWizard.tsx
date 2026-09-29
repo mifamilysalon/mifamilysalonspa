@@ -4,6 +4,7 @@ import { format, parseISO } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Service, StaffProfile } from "@/lib/site";
+import { BROCHURE_CATEGORY_LABELS } from "@/lib/service-categories";
 
 type TimeSlot = { start: string; end: string };
 
@@ -23,6 +24,11 @@ function formatDuration(minutes: number): string {
   return `${minutes} min`;
 }
 
+function formatCategory(category: string): string {
+  const key = category as keyof typeof BROCHURE_CATEGORY_LABELS;
+  return BROCHURE_CATEGORY_LABELS[key] || category;
+}
+
 export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -36,6 +42,7 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<BookingResult | null>(null);
+  const [invalidService, setInvalidService] = useState(false);
 
   const [step, setStep] = useState<StepId>("service");
   const [service, setService] = useState<Service | null>(null);
@@ -67,15 +74,21 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
       try {
         const servicesRes = await fetch("/api/services");
         const servicesData = (await servicesRes.json()) as { services?: Service[] };
-        setServices(servicesData.services || []);
+        const list = servicesData.services || [];
+        setServices(list);
 
         if (preselectedServiceId) {
-          const match = (servicesData.services || []).find(
+          const match = list.find(
             (s: Service) => String(s.id) === preselectedServiceId,
           );
           if (match) {
+            setInvalidService(false);
             setService(match);
             setStep(match.booking_type === "instant" ? "staff" : "datetime");
+          } else {
+            setInvalidService(true);
+            setService(null);
+            setStep("service");
           }
         }
       } catch {
@@ -234,26 +247,81 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
     return (
       <div className="editorial-panel mx-auto max-w-2xl p-8 text-center fade-in">
         <h2 className="font-serif text-2xl text-salon-heading">
-          {confirmed ? "Appointment confirmed" : "Request received"}
+          {confirmed ? "Appointment confirmed" : "Appointment request received"}
         </h2>
         <p className="mt-4 text-salon-body">
           {confirmed
-            ? "Your appointment is booked. We sent a confirmation to your email if provided."
-            : "We received your request and will confirm your appointment soon."}
+            ? "Your appointment is booked. We sent a confirmation to your email if you provided one."
+            : "Thanks! We've received your appointment request. Our team will review it and contact you to confirm."}
         </p>
-        <button
-          type="button"
-          onClick={() => router.push("/")}
-          className="mt-8 min-h-12 bg-salon-primary px-8 py-3 text-white transition hover:bg-salon-hover"
-        >
-          Back to home
-        </button>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="min-h-12 bg-salon-primary px-8 py-3 text-white transition hover:bg-salon-hover"
+          >
+            Back to home
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/contact")}
+            className="min-h-12 border border-salon-border px-6 py-3 text-salon-heading transition hover:border-salon-primary"
+          >
+            Contact us
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (invalidService) {
+    return (
+      <div className="editorial-panel mx-auto max-w-2xl p-8 text-center fade-in">
+        <h2 className="font-serif text-2xl text-salon-heading">
+          We couldn&apos;t find that service
+        </h2>
+        <p className="mt-4 text-salon-body">
+          Please choose another service from our menu, or call us if you need help.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              setInvalidService(false);
+              setStep("service");
+              router.replace("/appointments?intent=appointment");
+            }}
+            className="min-h-12 bg-salon-primary px-8 py-3 text-white transition hover:bg-salon-hover"
+          >
+            Choose a service
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/hair-care")}
+            className="min-h-12 border border-salon-border px-6 py-3 text-salon-heading transition hover:border-salon-primary"
+          >
+            View services
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-2xl">
+      {service && (
+        <div className="mb-6 text-center md:text-left">
+          <h2 className="font-serif text-2xl text-salon-heading md:text-3xl">
+            {isInstant ? "Book" : "Request"} {service.name}
+          </h2>
+          <p className="mt-2 text-sm text-salon-body">
+            {formatDuration(service.duration_minutes)}
+            {service.category ? ` · ${formatCategory(service.category)}` : ""}
+            {isInstant ? " · instant confirmation" : " · we will confirm availability"}
+          </p>
+        </div>
+      )}
+
       <div className="mb-6">
         <div className="mb-2 flex justify-between text-sm text-salon-body">
           <span>
@@ -278,14 +346,17 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
 
       <div className="editorial-panel p-6 md:p-8">
         {error && (
-          <p className="mb-4 border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p
+            role="alert"
+            className="mb-4 border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+          >
             {error}
           </p>
         )}
 
         {step === "service" && (
           <div>
-            <h2 className="font-serif text-2xl text-salon-heading">Choose a service</h2>
+            <h3 className="font-serif text-2xl text-salon-heading">Choose a service</h3>
             <p className="mt-2 text-sm text-salon-body">
               Select the service you would like to book.
             </p>
@@ -322,9 +393,9 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
 
         {step === "staff" && service && (
           <div>
-            <h2 className="font-serif text-2xl text-salon-heading">Choose your stylist</h2>
+            <h3 className="font-serif text-2xl text-salon-heading">Choose your stylist</h3>
             <p className="mt-2 text-sm text-salon-body">
-              Booking: {service.name}
+              Service: {service.name}
             </p>
             <ul className="mt-6 divide-y divide-salon-border">
               {staff.length === 0 && (
@@ -358,13 +429,13 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
 
         {step === "datetime" && service && (
           <div>
-            <h2 className="font-serif text-2xl text-salon-heading">
+            <h3 className="font-serif text-2xl text-salon-heading">
               {isInstant ? "Pick a date and time" : "Preferred date and time"}
-            </h2>
+            </h3>
             <p className="mt-2 text-sm text-salon-body">
               {isInstant
-                ? "Choose an open slot with your stylist."
-                : "Tell us when you would like to come in. We will confirm availability."}
+                ? `Choose an open slot for ${service.name}.`
+                : `Submit your preferred date and time for ${service.name}. Our team will confirm availability.`}
             </p>
 
             {isInstant ? (
@@ -431,7 +502,10 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
 
         {step === "contact" && (
           <div>
-            <h2 className="font-serif text-2xl text-salon-heading">Your contact details</h2>
+            <h3 className="font-serif text-2xl text-salon-heading">Your contact details</h3>
+            {service && (
+              <p className="mt-2 text-sm text-salon-body">Service: {service.name}</p>
+            )}
             <div className="mt-6 space-y-4">
               <label className="block">
                 <span className="mb-2 block text-sm font-medium text-salon-heading">
@@ -493,7 +567,9 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
 
         {step === "confirm" && service && (
           <div>
-            <h2 className="font-serif text-2xl text-salon-heading">Review and confirm</h2>
+            <h3 className="font-serif text-2xl text-salon-heading">
+              {isInstant ? "Review and confirm" : "Review your request"}
+            </h3>
             <dl className="mt-6 space-y-3 text-salon-body">
               <div className="flex justify-between border-b border-salon-border pb-2">
                 <dt>Service</dt>
@@ -589,7 +665,13 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
               disabled={submitting}
               className="min-h-12 bg-salon-primary px-8 py-3 text-white transition hover:bg-salon-hover disabled:opacity-60"
             >
-              {submitting ? "Booking..." : isInstant ? "Confirm booking" : "Submit request"}
+              {submitting
+                ? isInstant
+                  ? "Booking..."
+                  : "Submitting..."
+                : isInstant
+                  ? "Confirm booking"
+                  : "Submit request"}
             </button>
           )}
         </div>

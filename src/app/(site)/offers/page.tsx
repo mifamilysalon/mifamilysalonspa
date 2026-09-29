@@ -3,16 +3,20 @@ import Link from "next/link";
 import { formatPromoDate } from "@/lib/promos-shared";
 import { getActivePromos } from "@/lib/promos";
 import { buildPageMetadata } from "@/lib/seo";
+import { getBusinessInfo } from "@/lib/site";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Current Offers",
+  title: "Current Offers in Farmington, MI",
   description:
-    "Current promotions and specials at Family Hair Salon & Wellness Spa in Farmington, MI.",
+    "Current promotions and specials at Family Hair Salon & Wellness Spa in Farmington, MI. Check back for seasonal offers or call the salon.",
   path: "/offers",
 });
 
 export default async function OffersPage() {
-  const promos = await getActivePromos({ placement: "list" });
+  const [promos, business] = await Promise.all([
+    getActivePromos({ placement: "list" }),
+    getBusinessInfo(),
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 md:px-6 md:py-24">
@@ -26,16 +30,29 @@ export default async function OffersPage() {
       </p>
 
       {promos.length === 0 ? (
-        <p className="mt-12 border-t border-salon-border pt-10 text-salon-body">
-          No active offers right now. Check back soon, or{" "}
-          <Link
-            href="/appointments"
-            className="text-salon-heading underline underline-offset-4 hover:text-salon-primary"
-          >
-            book an appointment
-          </Link>
-          .
-        </p>
+        <div className="mt-12 border-t border-salon-border pt-10">
+          <h2 className="font-serif text-2xl text-salon-heading">
+            No current specials
+          </h2>
+          <p className="mt-4 text-salon-body">
+            We don&apos;t have a published special right now. Check back for
+            seasonal offers, or contact us to ask about current services.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/appointments"
+              className="inline-flex min-h-12 items-center bg-salon-primary px-5 text-sm font-medium text-white hover:bg-salon-hover"
+            >
+              Book an appointment
+            </Link>
+            <a
+              href={`tel:${business.phone_primary.replace(/\D/g, "")}`}
+              className="inline-flex min-h-12 items-center border border-salon-border px-5 text-sm font-medium text-salon-heading hover:border-salon-primary"
+            >
+              Call {business.phone_primary}
+            </a>
+          </div>
+        </div>
       ) : (
         <ul className="mt-12 space-y-10">
           {promos.map((promo) => {

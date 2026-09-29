@@ -6,7 +6,7 @@ import { buildBreadcrumbJsonLd, buildPageMetadata, SITE_FAQS } from "@/lib/seo";
 import { FaqSection } from "@/components/seo/FaqSection";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Private Women's Suite",
+  title: "Private Women's Suite in Farmington, MI",
   description:
     "Private women's suite in Farmington, MI for female clientele who prefer complete privacy, including women who wear hijab. Book at Family Hair Salon & Wellness Spa.",
   path: "/private-area",
@@ -50,7 +50,7 @@ export default function PrivateAreaPage() {
               href="/appointments"
               className="mt-10 inline-block bg-salon-primary px-6 py-3 text-sm font-medium text-white hover:bg-salon-hover"
             >
-              Request a suite appointment
+              Request a private appointment
             </Link>
           </div>
           <IllustrationPanel id="private" title="Private women's suite" />

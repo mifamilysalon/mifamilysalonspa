@@ -35,10 +35,10 @@ export const LOCAL_BUSINESS = {
   longitude: -83.3763,
   /** Schema.org OpeningHoursSpecification */
   openingHours: [
-    { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "09:00", closes: "18:00" },
-    { days: ["Saturday"], opens: "09:00", closes: "17:00" },
+    { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "10:00", closes: "18:00" },
+    { days: ["Saturday"], opens: "10:00", closes: "17:00" },
   ],
-  hoursDisplay: "Mon–Fri 9am–6pm, Sat 9am–5pm, Sun Closed",
+  hoursDisplay: "Mon-Fri 10am-6pm, Sat 10am-5pm, Sun Closed",
   areaServed: [
     "Farmington, MI",
     "Farmington Hills, MI",
@@ -247,7 +247,7 @@ export const SITE_FAQS: Array<{ question: string; answer: string }> = [
   {
     question: "What are your hours?",
     answer:
-      "Monday through Friday 9am to 6pm, Saturday 9am to 5pm. We are closed on Sunday.",
+      "Monday through Friday 10am to 6pm, Saturday 10am to 5pm. We are closed on Sunday.",
   },
   {
     question: "Do you take walk-ins in Farmington?",
@@ -267,7 +267,7 @@ export const SITE_FAQS: Array<{ question: string; answer: string }> = [
   {
     question: "How much do services cost?",
     answer:
-      "Current rates are available in the salon. Ask at the front desk for our service menu — your stylist will confirm pricing before your service begins.",
+      "Current rates are available in the salon. Ask at the front desk for our pricing brochure. Your stylist will confirm pricing before your service begins.",
   },
   {
     question: "What services do you offer?",

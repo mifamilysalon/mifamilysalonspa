@@ -5,9 +5,9 @@ import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
 import { getSmsSettings } from "@/lib/site";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Book Appointments & Walk-ins",
+  title: "Book an Appointment",
   description:
-    "Book ahead or join the walk-in list at Family Hair Salon & Wellness Spa in Farmington, MI. Instant book or request-to-confirm services online.",
+    "Request an appointment or join the walk-in list at Family Hair Salon & Wellness Spa in Farmington, MI. Instant book or request-to-confirm services online.",
   path: "/appointments",
   keywords: [
     "book hair salon Farmington",
@@ -29,7 +29,7 @@ export default async function AppointmentsPage() {
       />
       <div className="mb-8 text-center md:mb-10">
         <h1 className="font-serif text-3xl text-salon-heading md:text-4xl">
-          Appointments & walk-ins
+          Appointments &amp; walk-ins
         </h1>
         <p className="mx-auto mt-3 max-w-xl text-salon-body">
           Book a future visit, or check in as a walk-in for today. Walk-ins are our most common

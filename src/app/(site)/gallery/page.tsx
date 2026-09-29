@@ -15,7 +15,7 @@ import { buildPageMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Gallery",
   description:
-    "Illustrated looks and Instagram moments from Family Hair Salon & Wellness Spa in Farmington, MI — hair, skin, nails, and wellness.",
+    "Illustrated looks and Instagram moments from Family Hair Salon & Wellness Spa in Farmington, MI. Hair, skin, nails, and wellness.",
   path: "/gallery",
 });
 
@@ -71,7 +71,9 @@ export default async function GalleryPage() {
           ))}
         </div>
       </div>
-      <InstagramFeedSection settings={instagram} posts={posts} compact />
+      {instagram.enabled ? (
+        <InstagramFeedSection settings={instagram} posts={posts} compact />
+      ) : null}
     </div>
   );
 }

@@ -349,19 +349,23 @@ export default function AdminSettingsPage() {
       <section className="editorial-panel mt-6 p-6">
         <h2 className="font-serif text-lg text-salon-heading">Instagram feed</h2>
         <p className="mt-2 text-sm text-salon-body">
-          Free Instagram post sync — no Trustindex required. Preferred:{" "}
-          <a
-            href="https://behold.so/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2"
-          >
-            Behold
-          </a>{" "}
-          JSON feed (custom grid on our site, nightly sync). Trustindex is only an optional
-          alternate if you already use it.
+          Hidden on the public site until you turn it on below and add a free Behold
+          JSON feed (preferred) or Trustindex widget ID.
         </p>
-        <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm text-salon-body">
+        <label className="mt-4 flex min-h-12 cursor-pointer items-center gap-3">
+          <input
+            type="checkbox"
+            checked={instagramDraft.enabled === true}
+            onChange={(e) =>
+              setInstagramDraft((prev) => ({ ...prev, enabled: e.target.checked }))
+            }
+            className="h-5 w-5 accent-salon-primary"
+          />
+          <span className="text-sm text-salon-heading">
+            Show Instagram section on the website
+          </span>
+        </label>
+        <ol className="mt-4 list-decimal space-y-1 pl-5 text-sm text-salon-body">
           <li>
             Create a free{" "}
             <a
@@ -384,6 +388,7 @@ export default function AdminSettingsPage() {
             .
           </li>
           <li>Add a JSON feed, copy the URL (feeds.behold.so/…), paste below, save, then Sync.</li>
+          <li>Turn on &quot;Show Instagram section&quot; when you are ready for guests to see it.</li>
           <li>Optional: leave Trustindex widget ID blank unless you prefer that provider.</li>
         </ol>
         <label className="mt-4 block text-sm text-salon-body">
@@ -435,6 +440,7 @@ export default function AdminSettingsPage() {
             onClick={() =>
               save({
                 instagram_feed: {
+                  enabled: instagramDraft.enabled === true,
                   handle: instagramDraft.handle.trim(),
                   behold_feed_url: instagramDraft.behold_feed_url.trim(),
                   trustindex_widget_id: instagramDraft.trustindex_widget_id.trim(),

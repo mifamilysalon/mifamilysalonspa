@@ -19,7 +19,8 @@ Already done on the client account (Familysalonspa@gmail.com):
 |----------|--------|
 | D1 `familysalonspa-db` | Created — id `28a7d7aa-7558-4aab-8370-502517ca5375` |
 | KV `CACHE` | Created — id `b5bde43a058d411283500560970aefa0` |
-| R2 `familysalonspa-media` | **Enable R2 in dashboard first**, then run below |
+
+R2 is **not** wired in Wrangler yet (hero/gallery use D1 URLs and static assets). Re-add an `MEDIA` R2 binding when admin uploads ship.
 
 ### Enable Workers.dev (first deploy on this account)
 
@@ -28,16 +29,6 @@ The client Cloudflare account must register a **workers.dev** subdomain once:
 https://dash.cloudflare.com/b51ded38b292d1a89fdd26e99e1bb7e9/workers/onboarding
 
 Then re-run `npm run deploy:mifamilysalon`. Alternatively, attach **www.mifamilysalon.com** as a Worker custom domain first (see below) and deploy to that route.
-
-### Enable R2 (required for admin media uploads)
-
-1. Log in as **Familysalonspa@gmail.com** → Cloudflare Dashboard.
-2. **R2** → enable / accept terms.
-3. From the project folder:
-
-```bash
-npx wrangler r2 bucket create familysalonspa-media --config wrangler.mifamilysalon.jsonc
-```
 
 ### Email Sending (optional but recommended)
 
@@ -66,7 +57,7 @@ Use the **same** Places key after **Places API (New)** is enabled on the Google 
 
 1. Push this repo to **`mifamilysalon/mifamilysalonspa`** (`git push origin master`).
 2. On GitHub → **Settings → Secrets and variables → Actions**, add:
-   - `CLOUDFLARE_API_TOKEN` — API token with **Workers + D1 + KV + R2** edit (Account → Cloudflare Workers → Edit, D1, etc.)
+   - `CLOUDFLARE_API_TOKEN` — API token with **Workers + D1 + KV** edit (Account → Cloudflare Workers → Edit, D1, etc.)
    - `CLOUDFLARE_ACCOUNT_ID` — `b51ded38b292d1a89fdd26e99e1bb7e9`
 3. **Actions → Deploy to Cloudflare (Mi Family Salon) → Run workflow** (or push to `master`).
 

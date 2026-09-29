@@ -16,7 +16,12 @@ export default async function SiteLayout({
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
-      <SiteHeader phone={business.phone_primary} salonName={business.name} />
+      <SiteHeader
+        phone={business.phone_primary}
+        salonName={business.name}
+        address={business.address}
+        hours={business.hours}
+      />
       <main id="main-content" className="pb-16 md:pb-0">
         {children}
       </main>

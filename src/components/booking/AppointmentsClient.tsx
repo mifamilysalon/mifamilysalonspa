@@ -1,13 +1,22 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { BookingWizard } from "@/components/booking/BookingWizard";
 import { WalkInForm } from "@/components/booking/WalkInForm";
 
 type Intent = "choose" | "appointment" | "walk_in";
 
+function initialIntent(searchParams: URLSearchParams): Intent {
+  const intent = searchParams.get("intent");
+  if (intent === "walk_in") return "walk_in";
+  if (intent === "appointment" || searchParams.get("service")) return "appointment";
+  return "choose";
+}
+
 function AppointmentsContent({ smsEnabled }: { smsEnabled: boolean }) {
-  const [intent, setIntent] = useState<Intent>("choose");
+  const searchParams = useSearchParams();
+  const [intent, setIntent] = useState<Intent>(() => initialIntent(searchParams));
 
   if (intent === "appointment") {
     return (
@@ -55,10 +64,10 @@ function AppointmentsContent({ smsEnabled }: { smsEnabled: boolean }) {
           Plan ahead
         </p>
         <h2 className="mt-3 font-serif text-2xl text-salon-heading">
-          Book an appointment
+          Request an appointment
         </h2>
         <p className="mt-3 text-sm text-salon-body">
-          Pick a service, stylist, and time. Instant services confirm right
+          Pick a service and preferred time. Instant services confirm right
           away; others are reviewed by the team.
         </p>
       </button>

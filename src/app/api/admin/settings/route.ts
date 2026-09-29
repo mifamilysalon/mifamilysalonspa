@@ -79,6 +79,7 @@ const socialSchema = z.object({
 });
 
 const instagramFeedSchema = z.object({
+  enabled: z.boolean().optional(),
   handle: z.string().max(80).optional(),
   profile_url: z.string().max(300).optional(),
   behold_feed_url: z.string().max(300).optional(),
@@ -240,6 +241,10 @@ export async function PUT(request: Request) {
       await upsertSetting(db, "instagram_feed", {
         ...current,
         ...parsed.data.instagram_feed,
+        enabled:
+          typeof parsed.data.instagram_feed.enabled === "boolean"
+            ? parsed.data.instagram_feed.enabled
+            : current.enabled,
         handle,
         profile_url,
         behold_feed_url:

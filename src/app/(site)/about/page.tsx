@@ -9,7 +9,7 @@ import { getBusinessInfo } from "@/lib/site";
 export const metadata: Metadata = buildPageMetadata({
   title: "About Our Farmington Salon & Spa",
   description:
-    "Learn about Family Hair Salon & Wellness Spa on Grand River Ave in Farmington, MI — hair, skin, nails, wellness, and a private women's suite.",
+    "Learn about Family Hair Salon & Wellness Spa on Grand River Ave in Farmington, MI. Hair, skin, nails, wellness, and a private women's suite.",
   path: "/about",
   keywords: ["about Family Hair Salon", "Farmington spa", "Grand River Ave salon"],
 });
@@ -32,7 +32,7 @@ export default async function AboutPage() {
             <p className="mt-8 text-lg text-salon-body">
               {business.name} is a full-service salon and wellness spa at{" "}
               {business.address}. Our team helps Farmington and nearby Metro
-              Detroit clients with hair, skin, nails, and wellness - whether you
+              Detroit clients with hair, skin, nails, and wellness, whether you
               walk in for a trim or book time in our private women&apos;s suite.
             </p>
             <p className="mt-5 text-salon-body">
@@ -67,7 +67,7 @@ export default async function AboutPage() {
           {
             question: "Who is Family Hair Salon & Wellness Spa for?",
             answer:
-              "We serve individuals and families in Farmington, MI and nearby cities who want hair, skin, nail, and wellness care — including guests who prefer our private women's suite.",
+              "We serve individuals and families in Farmington, MI and nearby cities who want hair, skin, nail, and wellness care, including guests who prefer our private women's suite.",
           },
           {
             question: "How long has the salon been on Grand River Ave?",

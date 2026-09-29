@@ -91,8 +91,8 @@ export function InstagramFeedSection({
         ) : (
           <div className="mt-10 border border-dashed border-salon-border bg-salon-panel/60 px-6 py-12 text-center">
             <p className="text-salon-body">
-              Live posts appear here after the free Instagram feed is connected in
-              Admin → Settings.
+              New posts from the chair will show here soon. In the meantime,
+              follow @{handle} on Instagram for daily updates.
             </p>
           </div>
         )}

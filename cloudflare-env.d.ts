@@ -2,7 +2,6 @@
 
 export type AppEnv = {
   DB: D1Database;
-  MEDIA: R2Bucket;
   CACHE: KVNamespace;
   ASSETS?: Fetcher;
   SESSION_SECRET?: string;
@@ -28,6 +27,7 @@ export type AppEnv = {
   CLOUDFLARE_API_TOKEN?: string;
   CF_API_TOKEN?: string;
   CLOUDFLARE_ACCOUNT_ID?: string;
+  GOOGLE_PLACE_ID?: string;
 };
 
 export {};

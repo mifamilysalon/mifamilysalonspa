@@ -22,9 +22,8 @@ export default async function GiftCertificatesPage() {
         <h1 className="font-serif text-4xl md:text-5xl">Gift certificates</h1>
         <p className="mt-8 text-lg text-salon-body">
           Gift certificates are available in person at the salon or by phone. We
-          do not process gift certificate payments online. After purchase, staff
-          or admin fill the designed certificate and email it to the customer —
-          staff submissions require admin approval first.
+          do not process gift certificate payments online. After purchase, the
+          salon can email a designed certificate to the recipient.
         </p>
         <p className="mt-5 text-salon-body">
           Call {business.phone_primary} or {business.phone_secondary} to
@@ -44,8 +43,8 @@ export default async function GiftCertificatesPage() {
           Certificate design
         </p>
         <p className="mt-2 max-w-2xl text-salon-body">
-          Blank print template below. For emailed certificates, use Staff or
-          Admin portals after the purchase is taken in salon.
+          Blank print template below. Ask at the desk if you would like a
+          certificate emailed after you purchase.
         </p>
       </div>
 

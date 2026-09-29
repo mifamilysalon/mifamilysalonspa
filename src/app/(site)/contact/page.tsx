@@ -5,13 +5,14 @@ import {
   buildBreadcrumbJsonLd,
   buildLocalBusinessJsonLd,
   buildPageMetadata,
+  LOCAL_BUSINESS,
 } from "@/lib/seo";
 import { getBusinessInfo, getSocialLinks } from "@/lib/site";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Contact & Hours — Farmington, MI",
+  title: "Contact Family Hair Salon & Wellness Spa",
   description:
-    "Visit Family Hair Salon & Wellness Spa at 34777 Grand River Ave, Farmington, MI 48335. Hours Mon–Fri 9–6, Sat 9–5. Call (248) 474-6520.",
+    "Visit Family Hair Salon & Wellness Spa at 34777 Grand River Ave, Farmington, MI 48335. Hours Mon-Fri 10-6, Sat 10-5. Call (248) 474-6520.",
   path: "/contact",
   keywords: [
     "salon near me Farmington MI",
@@ -38,7 +39,7 @@ export default async function ContactPage() {
       <h1 className="font-serif text-4xl md:text-5xl">Contact</h1>
       <p className="mt-5 max-w-2xl text-lg text-salon-body">
         Find us on Grand River Ave in Farmington. Call, book online, or stop in
-        during open hours — walk-ins are welcome for many services.
+        during open hours. Walk-ins are welcome for many services.
       </p>
       <div className="mt-12 grid gap-12 md:grid-cols-2">
         <div className="space-y-6">
@@ -50,6 +51,14 @@ export default async function ContactPage() {
             <p className="mt-2 text-sm text-salon-body">
               Serving Farmington, Farmington Hills, Livonia, West Bloomfield, and Novi.
             </p>
+            <a
+              href={business.maps_url || LOCAL_BUSINESS.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-block text-sm text-salon-primary underline underline-offset-4 hover:text-salon-hover"
+            >
+              Get directions
+            </a>
           </div>
           <div>
             <p className="text-sm uppercase tracking-[0.18em] text-salon-primary">
@@ -84,7 +93,7 @@ export default async function ContactPage() {
         <div className="editorial-panel overflow-hidden">
           <iframe
             title="Map to Family Hair Salon & Wellness Spa at 34777 Grand River Ave, Farmington, MI"
-            className="h-80 w-full border-0 md:h-full min-h-[320px]"
+            className="h-80 w-full min-h-[320px] border-0 md:h-full"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             src="https://www.google.com/maps?q=34777+Grand+River+Ave,+Farmington,+MI+48335&output=embed"

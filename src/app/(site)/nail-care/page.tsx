@@ -3,7 +3,7 @@ import ServiceCategoryPage from "@/components/sections/ServiceCategoryPage";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Nail Care in Farmington, MI",
+  title: "Nail Services in Farmington, MI",
   description:
     "Manicures, pedicures, shellac, and polish changes from Farmington nail technicians. Book at Family Hair Salon & Wellness Spa.",
   path: "/nail-care",
@@ -15,7 +15,8 @@ export default function NailCarePage() {
     <ServiceCategoryPage
       title="Nail Care"
       category="nails"
-      intro="Manicures, pedicures, shellac, and polish changes from Farmington nail technicians. Walk in when seats are open, or book ahead for a set time."
+      path="/nail-care"
+      intro="Manicures, pedicures, shellac, and polish changes. Walk in when seats are open, or book ahead for a set time."
     />
   );
 }

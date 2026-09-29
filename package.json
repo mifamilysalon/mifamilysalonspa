@@ -5,6 +5,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev --turbopack",
+    "test": "npx --yes tsx --test tests/**/*.test.ts",
     "db:migrate:local": "wrangler d1 migrations apply familysalonspa-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply familysalonspa-db --remote",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",

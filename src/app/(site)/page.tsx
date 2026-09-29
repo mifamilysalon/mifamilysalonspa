@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { IllustrationPanel } from "@/components/illustrations";
 import type { IllustrationId } from "@/components/illustrations";
@@ -22,18 +23,23 @@ import {
 } from "@/lib/seo";
 import { getBusinessInfo, getMediaSettings, getSocialLinks } from "@/lib/site";
 
-export const metadata = buildPageMetadata({
-  title: "Hair Salon & Spa in Farmington, MI",
-  description:
-    "Family Hair Salon & Wellness Spa in Farmington, MI — hair, skin, nails, wellness, and a private women's suite. Walk in or book online. Call (248) 474-6520.",
-  path: "/",
-  keywords: [
-    "hair salon Farmington MI",
-    "spa Farmington Michigan",
-    "walk in haircut Farmington",
-    "private suite salon Farmington",
-  ],
-});
+export const metadata: Metadata = {
+  ...buildPageMetadata({
+    title: "Hair Salon & Spa in Farmington, MI",
+    description:
+      "Family Hair Salon & Wellness Spa in Farmington, MI. Hair, skin, nails, wellness, and a private women's suite. Walk in or book online. Call (248) 474-6520.",
+    path: "/",
+    keywords: [
+      "hair salon Farmington MI",
+      "spa Farmington Michigan",
+      "walk in haircut Farmington",
+      "private suite salon Farmington",
+    ],
+  }),
+  title: {
+    absolute: "Family Hair Salon & Wellness Spa | Farmington, MI",
+  },
+};
 
 export default async function HomePage() {
   const business = await getBusinessInfo();
@@ -110,8 +116,7 @@ export default async function HomePage() {
             Established care for your hair, skin, and nails
           </h2>
           <p className="mt-5 text-salon-body">
-            Our wide range of services includes the latest trends and techniques
-            in creative styling, coloring, extensions, permanent waving,
+            Creative styling, coloring, extensions, permanent waving,
             straightening, and rebonding. Skin therapists suggest treatments
             only after examining your skin type. Nail technicians offer
             manicures, pedicures, shellac, and polish changes.
@@ -151,7 +156,9 @@ export default async function HomePage() {
         <GoogleReviewsSection meta={reviewsMeta} reviews={reviews} />
       )}
 
-      <InstagramFeedSection settings={instagram} posts={instagramPosts} />
+      {instagram.enabled ? (
+        <InstagramFeedSection settings={instagram} posts={instagramPosts} />
+      ) : null}
 
       <section className="bg-salon-light">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-20 md:grid-cols-2 md:px-6 md:py-28">

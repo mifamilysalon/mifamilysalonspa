@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const parsed = bookAppointmentSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid booking data", details: parsed.error.flatten() },
+        { error: "Please check your booking details and try again." },
         { status: 400 },
       );
     }
@@ -83,7 +83,10 @@ export async function POST(request: Request) {
       }>();
 
     if (!service || !service.is_active) {
-      return NextResponse.json({ error: "Service not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "We couldn't find that service. Please choose another service." },
+        { status: 404 },
+      );
     }
 
     if (service.booking_type === "instant") {

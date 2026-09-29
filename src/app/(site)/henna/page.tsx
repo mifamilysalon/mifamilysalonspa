@@ -3,7 +3,7 @@ import ServiceCategoryPage from "@/components/sections/ServiceCategoryPage";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Henna Tattoos in Farmington",
+  title: "Henna Services in Farmington, MI",
   description:
     "Henna for hands, bridal, and events at Family Hair Salon & Wellness Spa in Farmington, MI.",
   path: "/henna",
@@ -14,7 +14,8 @@ export default function HennaPage() {
     <ServiceCategoryPage
       title="Henna Tattoos"
       category="henna"
-      intro="Henna for hands, bridal, and special events."
+      path="/henna"
+      intro="Henna for hands, bridal, and special events. Request a time in advance for larger bridal designs."
     />
   );
 }
