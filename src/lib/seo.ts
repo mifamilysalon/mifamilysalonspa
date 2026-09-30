@@ -46,7 +46,7 @@ export const LOCAL_BUSINESS = {
     "West Bloomfield, MI",
     "Novi, MI",
   ],
-  defaultImage: `${SITE_URL}/opengraph-image`,
+  defaultImage: `${SITE_URL}/og-image.jpg`,
   mapsUrl:
     "https://www.google.com/maps/search/?api=1&query=Family+Hair+Salon+%26+Wellness+Spa+34777+Grand+River+Ave+Farmington+MI",
 } as const;

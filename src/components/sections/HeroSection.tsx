@@ -121,6 +121,7 @@ export function HeroSection({
             priority
             title="Stylist cutting hair in the salon"
             className="md:aspect-[4/3]"
+            objectPosition="center 35%"
           />
         </div>
       </div>

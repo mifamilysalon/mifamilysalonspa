@@ -19,12 +19,14 @@ export function Illustration({
   title,
   priority = false,
   sizes = "(max-width: 768px) 100vw, 50vw",
+  objectPosition = "center",
 }: {
   id: IllustrationId;
   className?: string;
   title?: string;
   priority?: boolean;
   sizes?: string;
+  objectPosition?: string;
 }) {
   return (
     <Image
@@ -32,8 +34,9 @@ export function Illustration({
       alt={title || ILLUSTRATION_LABELS[id]}
       fill
       priority={priority}
-      className={`object-cover object-center ${className}`}
+      className={`object-cover ${className}`}
       sizes={sizes}
+      style={{ objectPosition }}
     />
   );
 }
@@ -45,12 +48,14 @@ export function IllustrationPanel({
   title,
   aspect = "4/3",
   priority = false,
+  objectPosition,
 }: {
   id: IllustrationId;
   className?: string;
   title?: string;
   aspect?: "4/3" | "3/4" | "1/1" | "16/9";
   priority?: boolean;
+  objectPosition?: string;
 }) {
   const aspectClass =
     aspect === "3/4"
@@ -65,7 +70,12 @@ export function IllustrationPanel({
     <div
       className={`illustration-panel relative overflow-hidden ${aspectClass} ${className}`}
     >
-      <Illustration id={id} title={title} priority={priority} />
+      <Illustration
+        id={id}
+        title={title}
+        priority={priority}
+        objectPosition={objectPosition}
+      />
     </div>
   );
 }

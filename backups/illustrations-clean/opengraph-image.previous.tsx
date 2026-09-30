@@ -1,4 +1,4 @@
-import { ImageResponse } from "next/og";
+﻿import { ImageResponse } from "next/og";
 
 export const alt = "Family Hair Salon & Wellness Spa in Farmington, MI";
 export const size = { width: 1200, height: 630 };
@@ -44,7 +44,7 @@ export default function OpenGraphImage() {
             maxWidth: 900,
           }}
         >
-          Hair · Skin · Nails · Wellness · Private women&apos;s suite
+          Hair ┬╖ Skin ┬╖ Nails ┬╖ Wellness ┬╖ Private women&apos;s suite
         </div>
       </div>
     ),

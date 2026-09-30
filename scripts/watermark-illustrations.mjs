@@ -18,7 +18,16 @@ const root = path.resolve(__dirname, "..");
 const cleanDir = path.join(root, "backups", "illustrations-clean");
 const publicDir = path.join(root, "public", "illustrations");
 
+/** Client-owned / do-not-watermark masters (e.g. photo-based hero). */
+const SKIP_WATERMARK = new Set(["hero.png"]);
+
 const restoreClean = process.argv.includes("--clean");
+
+function listCleanPngs() {
+  return fs
+    .readdirSync(cleanDir)
+    .filter((f) => f.endsWith(".png") && !f.startsWith("_") && !f.includes("-previous"));
+}
 
 function watermarkSvg(width) {
   // Scale mark with image width; stays small (~10% of width, max 200px)
@@ -36,7 +45,7 @@ function watermarkSvg(width) {
 }
 
 async function restore() {
-  const files = fs.readdirSync(cleanDir).filter((f) => f.endsWith(".png"));
+  const files = listCleanPngs();
   for (const file of files) {
     fs.copyFileSync(path.join(cleanDir, file), path.join(publicDir, file));
     console.log(`restored clean: ${file}`);
@@ -44,7 +53,7 @@ async function restore() {
 }
 
 async function watermark() {
-  const files = fs.readdirSync(cleanDir).filter((f) => f.endsWith(".png"));
+  const files = listCleanPngs();
   if (files.length === 0) {
     throw new Error(`No clean masters in ${cleanDir}`);
   }
@@ -52,6 +61,13 @@ async function watermark() {
   for (const file of files) {
     const input = path.join(cleanDir, file);
     const output = path.join(publicDir, file);
+
+    if (SKIP_WATERMARK.has(file)) {
+      fs.copyFileSync(input, output);
+      console.log(`copied without watermark (client-owned): ${file}`);
+      continue;
+    }
+
     const meta = await sharp(input).metadata();
     const width = meta.width || 1200;
     const height = meta.height || 900;

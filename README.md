@@ -125,7 +125,7 @@ Implemented for local search + answer engines (desktop & mobile):
 | Feature | Location |
 |---------|----------|
 | `metadataBase`, canonicals, Open Graph, Twitter cards | `src/app/layout.tsx`, `src/lib/seo.ts` |
-| Dynamic OG image + favicon | `src/app/opengraph-image.tsx`, `src/app/icon.tsx` |
+| OG share image + favicon | `public/og-image.jpg`, `src/app/icon.tsx` |
 | `robots.txt` (blocks `/admin`, `/staff`, `/api`) | `src/app/robots.ts` |
 | Sitemap | `src/app/sitemap.ts` → `/sitemap.xml` |
 | LocalBusiness / HairSalon JSON-LD (NAP, geo, hours, sameAs, aggregateRating) | Home + Contact |
