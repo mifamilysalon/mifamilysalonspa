@@ -20,10 +20,12 @@ const jakarta = Plus_Jakarta_Sans({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  /* Align with default farmington-rose-gold / PWA manifest theme_color */
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f0f3" },
+    { media: "(prefers-color-scheme: light)", color: "#B86B74" },
     { media: "(prefers-color-scheme: dark)", color: "#1a0a14" },
   ],
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
@@ -50,6 +52,14 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: SITE_URL,
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Family Salon",
+    statusBarStyle: "default",
+  },
+  icons: {
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
     type: "website",
@@ -94,6 +104,7 @@ export const metadata: Metadata = {
     "geo.placename": "Farmington",
     "geo.position": `${LOCAL_BUSINESS.latitude};${LOCAL_BUSINESS.longitude}`,
     ICBM: `${LOCAL_BUSINESS.latitude}, ${LOCAL_BUSINESS.longitude}`,
+    "mobile-web-app-capable": "yes",
   },
 };
 
