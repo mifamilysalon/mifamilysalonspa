@@ -5,7 +5,7 @@ export function PrintButton({ label = "Print" }: { label?: string }) {
     <button
       type="button"
       onClick={() => window.print()}
-      className="brochure-print-btn print:hidden"
+      className="brochure-btn brochure-btn-ghost print:hidden"
     >
       {label}
     </button>

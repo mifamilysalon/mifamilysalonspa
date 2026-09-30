@@ -25,5 +25,11 @@ export default async function ObscurePriceListPage({
     getServices(),
   ]);
 
-  return <PriceBrochure salonName={business.name} services={services} />;
+  return (
+    <PriceBrochure
+      salonName={business.name}
+      services={services}
+      business={business}
+    />
+  );
 }

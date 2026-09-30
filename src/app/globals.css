@@ -814,176 +814,154 @@ textarea:focus-visible {
 }
 
 /* ——— In-salon price brochure (QR) ——— */
-/* Own surface (not site palette) so desk QR stays readable even if admin theme is dark. */
+/* Follows active salon palette; dark hero/footer stay high-contrast for desk use. */
 .brochure-root {
-  --brochure-bg: #f6f1ea;
-  --brochure-ink: #2a2420;
-  --brochure-muted: #6a5f56;
-  --brochure-gold: #9a7b4a;
-  --brochure-line: rgba(42, 36, 32, 0.12);
-  --brochure-wash: #ebe3d6;
+  --brochure-ink: #0d0b10;
+  --brochure-line: #2a2431;
+  --brochure-pink: var(--salon-accent);
+  --brochure-pink-d: var(--salon-accent-hover);
+  --brochure-bg: var(--salon-bg-main);
+  --brochure-card: var(--salon-bg-panel);
+  --brochure-text: var(--salon-text-heading);
+  --brochure-muted: var(--salon-text-body);
+  --brochure-rule: var(--salon-border);
+  --brochure-dot: color-mix(in srgb, var(--salon-border) 55%, var(--salon-text-body));
+  --brochure-hero-muted: color-mix(in srgb, #cfc7d9 70%, var(--salon-accent-subtle));
+  --brochure-kicker: color-mix(in srgb, var(--salon-accent) 55%, white);
   position: relative;
-  color: var(--brochure-muted);
-  background:
-    radial-gradient(90% 55% at 0% 0%, rgba(154, 123, 74, 0.16), transparent 58%),
-    radial-gradient(70% 45% at 100% 8%, rgba(235, 227, 214, 0.95), transparent 52%),
-    linear-gradient(180deg, #faf6f0 0%, var(--brochure-bg) 38%, var(--brochure-wash) 100%);
+  color: var(--brochure-text);
+  background: var(--brochure-bg);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html:has(.brochure-root) {
+  scroll-padding-top: 150px;
 }
 
 .brochure-topbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 5;
   display: flex;
   justify-content: flex-end;
-  padding: 1rem 1.25rem 0;
+  padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1.25rem 0;
 }
 
 .brochure-site-link {
-  font-size: 0.7rem;
-  letter-spacing: 0.16em;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--brochure-muted);
-  opacity: 0.75;
-  transition: opacity 0.2s ease, color 0.2s ease;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s ease;
 }
 
 .brochure-site-link:hover {
-  opacity: 1;
-  color: var(--brochure-gold);
+  color: #fff;
 }
 
 .brochure-shell {
   position: relative;
-  isolation: isolate;
   z-index: 1;
-  margin: 0 auto;
-  max-width: 42rem;
-  padding: 1.25rem 1.25rem 7.5rem;
-}
-
-@media (min-width: 768px) {
-  .brochure-shell {
-    max-width: 48rem;
-    padding: 2rem 1.5rem 8rem;
-  }
-}
-
-.brochure-atmosphere {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  opacity: 0.12;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
-  mix-blend-mode: multiply;
 }
 
 .brochure-hero {
-  position: relative;
-  padding: 0.5rem 0 2.5rem;
+  background: var(--brochure-ink);
+  color: #fff;
+  text-align: center;
+  padding: calc(3.4rem + env(safe-area-inset-top, 0px)) 1.5rem 2.85rem;
 }
 
 .brochure-kicker {
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--brochure-gold);
+  color: var(--brochure-kicker);
 }
 
 .brochure-brand {
-  margin-top: 0.75rem;
-  max-width: 12ch;
+  margin: 0.75rem auto 0.65rem;
+  max-width: 18ch;
   font-family: var(--font-playfair), Georgia, serif;
-  font-size: clamp(2.5rem, 9vw, 4rem);
+  font-size: clamp(1.9rem, 5vw, 3rem);
   font-weight: 500;
-  line-height: 1.02;
-  color: var(--brochure-ink);
-  letter-spacing: -0.025em;
+  line-height: 1.12;
+  color: #fff;
+}
+
+.brochure-hero-bar {
+  width: 3rem;
+  height: 2px;
+  margin: 0 auto 1rem;
+  background: var(--brochure-pink);
 }
 
 .brochure-lede {
-  margin-top: 1.1rem;
-  max-width: 32ch;
+  margin: 0 auto;
+  max-width: 54ch;
   font-size: 0.95rem;
-  line-height: 1.65;
-  color: var(--brochure-muted);
+  line-height: 1.55;
+  color: var(--brochure-hero-muted);
 }
 
 .brochure-hero-actions {
   margin-top: 1.35rem;
-}
-
-.brochure-print-btn {
-  min-height: 2.5rem;
-  border: none;
-  background: transparent;
-  padding: 0 0 0.2rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--brochure-ink);
-  border-bottom: 1px solid rgba(154, 123, 74, 0.55);
-  transition: color 0.2s ease, border-color 0.2s ease;
-}
-
-.brochure-print-btn:hover {
-  color: var(--brochure-gold);
-  border-color: var(--brochure-gold);
-}
-
-.brochure-menu {
   display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-  min-height: 40vh;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
 }
 
-.brochure-menu-print {
-  display: none;
+.brochure-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.7rem 1.35rem;
+  border-radius: 4px;
+  border: none;
+  background: var(--brochure-pink);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-@media print {
-  .brochure-menu-print {
-    display: flex !important;
-    flex-direction: column;
-    gap: 1.35rem;
-  }
+.brochure-btn:hover {
+  background: var(--brochure-pink-d);
+}
 
-  .brochure-tabs {
-    display: none !important;
-  }
+.brochure-btn-ghost {
+  background: transparent;
+  border: 1px solid #6b5a75;
+  color: #fff;
+}
+
+.brochure-btn-ghost:hover {
+  border-color: var(--brochure-pink);
+  background: transparent;
+  color: #fff;
 }
 
 .brochure-tabs {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 50;
-  padding: 0.65rem 0.75rem calc(0.65rem + env(safe-area-inset-bottom, 0px));
-  background:
-    linear-gradient(
-      180deg,
-      transparent 0%,
-      rgba(246, 241, 234, 0.72) 28%,
-      rgba(246, 241, 234, 0.96) 100%
-    );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  /* Keep category taps usable while momentum-scrolling the menu. */
-  touch-action: manipulation;
-  pointer-events: auto;
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--brochure-bg);
+  border-bottom: 1px solid var(--brochure-rule);
 }
 
 .brochure-tabs-inner {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(4.5rem, 1fr);
-  gap: 0.45rem;
-  max-width: 48rem;
+  display: flex;
+  gap: 0.5rem;
+  max-width: 65rem;
   margin: 0 auto;
+  padding: 0.75rem 1.5rem;
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .brochure-tabs-inner::-webkit-scrollbar {
@@ -991,273 +969,288 @@ textarea:focus-visible {
 }
 
 .brochure-tab {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.15rem;
-  min-height: 3.85rem;
-  padding: 0.55rem 0.65rem;
-  border: 1px solid rgba(42, 36, 32, 0.1);
-  border-radius: 0.85rem;
-  background: rgba(255, 252, 247, 0.92);
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--brochure-rule);
+  border-radius: 999px;
+  background: var(--brochure-card);
   color: var(--brochure-muted);
-  text-align: left;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 8px 24px rgba(42, 36, 32, 0.06);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
   transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
 }
 
-.brochure-tab:active {
-  transform: scale(0.97);
+.brochure-tab:hover {
+  border-color: var(--brochure-pink);
+  color: var(--brochure-text);
 }
 
 .brochure-tab.is-active {
   background: var(--brochure-ink);
   border-color: var(--brochure-ink);
-  color: #f7f1e8;
-  box-shadow: 0 10px 28px rgba(42, 36, 32, 0.18);
+  color: #fff;
 }
 
-.brochure-tab-index {
-  font-family: var(--font-playfair), Georgia, serif;
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  opacity: 0.7;
-}
-
-.brochure-tab.is-active .brochure-tab-index {
-  color: rgba(247, 241, 232, 0.7);
-}
-
-.brochure-tab-label {
-  font-size: 0.92rem;
-  font-weight: 600;
-  line-height: 1.15;
-  color: var(--brochure-ink);
-}
-
-.brochure-tab.is-active .brochure-tab-label {
-  color: #f7f1e8;
-}
-
-.brochure-tab-count {
-  margin-top: 0.1rem;
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.65;
-}
-
-.brochure-footer {
-  position: relative;
-  z-index: 1;
+.brochure-body {
+  max-width: 65rem;
   margin: 0 auto;
-  max-width: 48rem;
-  padding: 0 1.25rem calc(6.5rem + env(safe-area-inset-bottom, 0px));
-  text-align: left;
+  padding: 0 1.5rem calc(5.5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.brochure-note {
+  margin: 1.75rem 0 0;
+  padding: 0.9rem 1.15rem;
+  background: var(--brochure-card);
+  border: 1px solid var(--brochure-rule);
+  border-left: 3px solid var(--brochure-pink);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  line-height: 1.55;
   color: var(--brochure-muted);
 }
 
-.brochure-chapter-head {
+.brochure-menu {
   display: flex;
-  align-items: baseline;
-  gap: 0.75rem;
-  margin-bottom: 0.15rem;
+  flex-direction: column;
 }
 
-.brochure-chapter-index {
-  font-family: var(--font-playfair), Georgia, serif;
-  font-size: 0.9rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--brochure-gold);
+.brochure-chapter {
+  padding: 2.75rem 0 0.35rem;
 }
 
 .brochure-chapter-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin: 0 0 0.35rem;
   font-family: var(--font-playfair), Georgia, serif;
-  font-size: clamp(1.85rem, 5.5vw, 2.5rem);
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
   font-weight: 500;
-  letter-spacing: -0.015em;
-  color: var(--brochure-ink);
+  color: var(--brochure-text);
+}
+
+.brochure-chapter-index {
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--brochure-pink);
+}
+
+.brochure-chapter-count {
+  margin: 0 0 0.9rem;
+  font-size: 0.8rem;
+  color: var(--brochure-muted);
 }
 
 .brochure-list {
   list-style: none;
   margin: 0;
-  padding: 0.5rem 0 0;
+  padding: 0;
+  border-top: 2px solid var(--brochure-pink);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 3rem;
 }
 
 .brochure-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.65rem 1.1rem;
-  align-items: start;
-  padding: 1rem 0;
-  border-top: 1px solid var(--brochure-line);
-  animation: brochureRowIn 0.55s ease-out both;
-}
-
-.brochure-row:first-child {
-  border-top-color: rgba(154, 123, 74, 0.35);
+  display: flex;
+  align-items: baseline;
+  gap: 0.65rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--brochure-rule);
 }
 
 .brochure-service-name {
-  font-size: 1.02rem;
+  font-size: 0.97rem;
   font-weight: 500;
   line-height: 1.35;
-  color: var(--brochure-ink);
+  color: var(--brochure-text);
 }
 
-.brochure-service-desc {
-  margin-top: 0.3rem;
-  font-size: 0.86rem;
-  line-height: 1.5;
-  color: var(--brochure-muted);
+.brochure-leader {
+  flex: 1;
+  min-width: 0.9rem;
+  border-bottom: 1px dotted var(--brochure-dot);
+  transform: translateY(-0.25rem);
 }
 
-.brochure-service-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem 0.8rem;
-  margin-top: 0.4rem;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
+.brochure-duration {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
   color: var(--brochure-muted);
-  opacity: 0.8;
+  white-space: nowrap;
 }
 
 .brochure-price {
+  flex: 0 0 auto;
   font-family: var(--font-playfair), Georgia, serif;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
+  font-weight: 500;
   font-variant-numeric: tabular-nums;
-  line-height: 1.15;
-  color: var(--brochure-ink);
-  letter-spacing: -0.01em;
-}
-
-.brochure-closing {
-  margin-top: 2.75rem;
-  max-width: 26ch;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: var(--brochure-muted);
+  color: var(--brochure-text);
+  white-space: nowrap;
 }
 
 .brochure-empty {
-  padding: 2rem 0;
-}
-
-.brochure-footer-address {
-  font-size: 0.875rem;
-  color: var(--brochure-ink);
-}
-
-.brochure-footer-phones {
-  margin-top: 0.35rem;
-  font-size: 0.875rem;
-}
-
-.brochure-footer-phones a {
+  max-width: 65rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
   color: var(--brochure-muted);
-  transition: color 0.2s ease;
 }
 
-.brochure-footer-phones a:hover {
-  color: var(--brochure-gold);
+.brochure-footer {
+  margin-top: 3.4rem;
+  background: var(--brochure-ink);
+  color: var(--brochure-hero-muted);
+  padding: 2.4rem 1.5rem calc(5.6rem + env(safe-area-inset-bottom, 0px));
 }
 
-.brochure-footer-dot {
-  margin: 0 0.4rem;
-  opacity: 0.5;
-}
-
-.brochure-footer-hours {
-  margin-top: 0.75rem;
-  list-style: none;
-  padding: 0;
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.75;
+.brochure-footer-grid {
+  max-width: 65rem;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 1.6rem;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
   line-height: 1.55;
 }
 
-@keyframes brochureRowIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
+.brochure-footer-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #fff;
+}
+
+.brochure-footer a {
+  color: #fff;
+  text-decoration: underline;
+  text-decoration-color: var(--brochure-pink);
+  text-underline-offset: 3px;
+}
+
+.brochure-footer a:hover {
+  color: var(--brochure-kicker);
+}
+
+.brochure-sticky {
+  display: none;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--brochure-line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.brochure-sticky a {
+  background: var(--brochure-ink);
+  color: #fff;
+  text-align: center;
+  padding: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.brochure-sticky-book {
+  background: var(--brochure-pink) !important;
+}
+
+@media (max-width: 760px) {
+  .brochure-list {
+    grid-template-columns: 1fr;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  .brochure-sticky {
+    display: grid;
+  }
+
+  html:has(.brochure-root) {
+    scroll-padding-top: 130px;
+  }
+
+  .brochure-body {
+    padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .brochure-footer {
+    padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .brochure-row,
-  .brochure-shell .fade-in {
-    animation: none !important;
+  html:has(.brochure-root) {
+    scroll-behavior: auto;
   }
 }
 
 @media print {
-  header a[href="/"],
+  .brochure-topbar,
+  .brochure-tabs,
+  .brochure-sticky,
+  .brochure-hero-actions,
   .print\:hidden {
     display: none !important;
   }
 
-  body {
-    background: white;
-    color: black;
-  }
-
-  a {
-    text-decoration: none;
-    color: inherit;
-  }
-
   .brochure-root {
-    background: white;
-    color: black;
+    background: #fff;
+    color: #000;
   }
 
-  .brochure-atmosphere {
-    display: none;
+  .brochure-hero,
+  .brochure-footer {
+    background: #fff;
+    color: #000;
+    padding: 0.9rem 0;
   }
 
-  .brochure-brand {
-    font-size: 1.75rem;
-    max-width: none;
-    color: black;
+  .brochure-brand,
+  .brochure-footer-label,
+  .brochure-footer a {
+    color: #000;
   }
 
-  .brochure-hero {
-    padding-bottom: 1rem;
+  .brochure-kicker {
+    color: var(--brochure-pink-d);
   }
 
-  .brochure-menu {
-    gap: 1.35rem;
+  .brochure-lede,
+  .brochure-footer-grid {
+    color: #333;
+  }
+
+  .brochure-body {
+    padding: 0;
+  }
+
+  .brochure-chapter {
+    break-inside: avoid-page;
+    padding-top: 1.35rem;
+  }
+
+  .brochure-list {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 2rem;
   }
 
   .brochure-row {
-    padding: 0.4rem 0;
-    animation: none;
+    padding: 0.45rem 0;
     break-inside: avoid;
   }
 
-  .brochure-price {
-    font-size: 1.1rem;
-  }
-
-  .brochure-footer {
-    padding-top: 1rem;
-    border-top: 1px solid #ddd;
+  .brochure-note {
+    border-color: #ddd;
   }
 }

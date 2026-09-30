@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import Link from "next/link";
 import {
   BROCHURE_CATEGORY_LABELS,
   BROCHURE_CATEGORY_ORDER,
   type BrochureCategoryKey,
 } from "@/lib/service-categories";
-import type { Service } from "@/lib/site";
+import type { BusinessInfo, Service } from "@/lib/site";
+import { formatHoursLines } from "@/lib/site";
 import { PrintButton } from "@/components/brochure/PrintButton";
 
 type CategoryGroup = {
@@ -19,6 +27,13 @@ type CategoryGroup = {
 function formatPrice(price: number | null): string {
   if (price == null || price <= 0) return "Ask";
   return `$${price.toFixed(0)}`;
+}
+
+function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} min`;
+  const hr = Math.floor(minutes / 60);
+  const rem = minutes % 60;
+  return rem ? `${hr} hr ${rem} min` : `${hr} hr`;
 }
 
 function groupByCategory(services: Service[]): CategoryGroup[] {
@@ -41,8 +56,7 @@ function groupByCategory(services: Service[]): CategoryGroup[] {
     .filter((c) => map.has(c))
     .map((c, index) => ({
       key: c,
-      label:
-        (BROCHURE_CATEGORY_LABELS as Record<string, string>)[c] || c,
+      label: (BROCHURE_CATEGORY_LABELS as Record<string, string>)[c] || c,
       index: index + 1,
       services: map.get(c)!,
     }));
@@ -53,19 +67,12 @@ function ServiceList({ services }: { services: Service[] }) {
     <ul className="brochure-list">
       {services.map((s) => (
         <li key={s.id} className="brochure-row">
-          <div className="brochure-row-main">
-            <p className="brochure-service-name">{s.name}</p>
-            {s.description ? (
-              <p className="brochure-service-desc">{s.description}</p>
-            ) : null}
-            <p className="brochure-service-meta">
-              <span>{s.duration_minutes} min</span>
-              {s.booking_type === "request" ? (
-                <span>Request to confirm</span>
-              ) : null}
-            </p>
-          </div>
-          <p className="brochure-price">{formatPrice(s.price)}</p>
+          <span className="brochure-service-name">{s.name}</span>
+          <span className="brochure-leader" aria-hidden />
+          <span className="brochure-duration">
+            {formatDuration(s.duration_minutes)}
+          </span>
+          <span className="brochure-price">{formatPrice(s.price)}</span>
         </li>
       ))}
     </ul>
@@ -75,49 +82,66 @@ function ServiceList({ services }: { services: Service[] }) {
 export function PriceBrochure({
   salonName,
   services,
+  business,
 }: {
   salonName: string;
   services: Service[];
+  business: BusinessInfo;
 }) {
   const groups = useMemo(() => groupByCategory(services), [services]);
   const [activeKey, setActiveKey] = useState(groups[0]?.key ?? "");
   const tablistId = useId();
-  const menuRef = useRef<HTMLDivElement>(null);
-  const skipScrollOnMount = useRef(true);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const phonePrimaryDigits = business.phone_primary.replace(/\D/g, "");
+  const phoneSecondaryDigits = business.phone_secondary.replace(/\D/g, "");
+  const hoursLines = formatHoursLines(business.hours);
 
   useEffect(() => {
-    if (!groups.some((g) => g.key === activeKey) && groups[0]) {
-      setActiveKey(groups[0].key);
-    }
-  }, [activeKey, groups]);
+    if (!groups.length) return;
 
-  // After a category change, snap the chapter into view. Smooth scroll + shorter
-  // lists used to leave you stranded below the new content until you scrolled up.
-  useLayoutEffect(() => {
-    if (skipScrollOnMount.current) {
-      skipScrollOnMount.current = false;
-      return;
-    }
-    const el = menuRef.current;
-    if (!el) return;
-    const top = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 12);
-    window.scrollTo({ top, behavior: "auto" });
-  }, [activeKey]);
+    const sections = groups
+      .map((g) => document.getElementById(`brochure-${g.key}`))
+      .filter((el): el is HTMLElement => !!el);
 
-  const active = groups.find((g) => g.key === activeKey) ?? groups[0];
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const id = entry.target.id.replace(/^brochure-/, "");
+          setActiveKey(id);
+          const tab = tabsRef.current?.querySelector<HTMLElement>(
+            `[data-brochure-tab="${id}"]`,
+          );
+          if (tab && tabsRef.current) {
+            tabsRef.current.scrollTo({
+              left: Math.max(0, tab.offsetLeft - 24),
+              behavior: "smooth",
+            });
+          }
+        }
+      },
+      { rootMargin: "-30% 0px -60% 0px", threshold: 0 },
+    );
+
+    sections.forEach((s) => observer.observe(s));
+    return () => observer.disconnect();
+  }, [groups]);
 
   return (
     <div className="brochure-shell">
-      <div className="brochure-atmosphere" aria-hidden />
-
-      <header className="brochure-hero fade-in">
-        <p className="brochure-kicker">In salon / Farmington</p>
+      <header className="brochure-hero">
+        <p className="brochure-kicker">In salon · Farmington</p>
         <h1 className="brochure-brand">{salonName}</h1>
+        <div className="brochure-hero-bar" aria-hidden />
         <p className="brochure-lede">
-          Current rates. Length, texture, and add-ons may adjust the final
-          amount - your stylist confirms before we begin.
+          Hair, skin, nails, and wellness under one roof. Walk-ins welcome.
         </p>
         <div className="brochure-hero-actions print:hidden">
+          <a className="brochure-btn" href={`tel:${phonePrimaryDigits}`}>
+            Call {business.phone_primary}
+          </a>
           <PrintButton label="Print rates" />
         </div>
       </header>
@@ -126,84 +150,98 @@ export function PriceBrochure({
         <p className="brochure-empty">No services listed yet.</p>
       ) : (
         <>
-          <div className="brochure-menu print:hidden" ref={menuRef}>
-            {active ? (
-              <section
-                className="brochure-chapter fade-in"
-                key={active.key}
-                id={active.key}
-                aria-labelledby={`${tablistId}-${active.key}-label`}
-              >
-                <header className="brochure-chapter-head">
-                  <span className="brochure-chapter-index" aria-hidden>
-                    {String(active.index).padStart(2, "0")}
-                  </span>
-                  <h2
-                    className="brochure-chapter-title"
-                    id={`${tablistId}-${active.key}-label`}
-                  >
-                    {active.label}
-                  </h2>
-                </header>
-                <ServiceList services={active.services} />
-              </section>
-            ) : null}
-          </div>
-
-          <div className="brochure-menu brochure-menu-print" aria-hidden="true">
-            {groups.map((group) => (
-              <section
-                key={group.key}
-                className="brochure-chapter break-inside-avoid"
-                id={`print-${group.key}`}
-              >
-                <header className="brochure-chapter-head">
-                  <span className="brochure-chapter-index" aria-hidden>
-                    {String(group.index).padStart(2, "0")}
-                  </span>
-                  <h2 className="brochure-chapter-title">{group.label}</h2>
-                </header>
-                <ServiceList services={group.services} />
-              </section>
-            ))}
-          </div>
-
           <nav
             className="brochure-tabs print:hidden"
             aria-label="Service categories"
           >
-            <div className="brochure-tabs-inner" role="tablist">
+            <div
+              className="brochure-tabs-inner"
+              ref={tabsRef}
+              id={tablistId}
+            >
               {groups.map((group) => {
-                const selected = group.key === active?.key;
+                const selected = group.key === activeKey;
                 return (
-                  <button
+                  <a
                     key={group.key}
-                    type="button"
-                    role="tab"
-                    id={`${tablistId}-${group.key}`}
-                    aria-selected={selected}
-                    aria-controls={group.key}
+                    href={`#brochure-${group.key}`}
+                    data-brochure-tab={group.key}
                     className={`brochure-tab${selected ? " is-active" : ""}`}
-                    onClick={() => setActiveKey(group.key)}
+                    aria-current={selected ? "true" : undefined}
                   >
-                    <span className="brochure-tab-index" aria-hidden>
-                      {String(group.index).padStart(2, "0")}
-                    </span>
-                    <span className="brochure-tab-label">{group.label}</span>
-                    <span className="brochure-tab-count">
-                      {group.services.length}
-                    </span>
-                  </button>
+                    {group.label}
+                  </a>
                 );
               })}
             </div>
           </nav>
+
+          <div className="brochure-body">
+            <p className="brochure-note">
+              Current rates. Length, texture, and add-ons may change the final
+              amount. Your stylist will confirm the price before we begin.
+            </p>
+
+            <div className="brochure-menu">
+              {groups.map((group) => (
+                <section
+                  key={group.key}
+                  className="brochure-chapter"
+                  id={`brochure-${group.key}`}
+                  aria-labelledby={`${tablistId}-${group.key}-label`}
+                >
+                  <h2
+                    className="brochure-chapter-title"
+                    id={`${tablistId}-${group.key}-label`}
+                  >
+                    <span className="brochure-chapter-index" aria-hidden>
+                      {String(group.index).padStart(2, "0")}
+                    </span>
+                    {group.label}
+                  </h2>
+                  <p className="brochure-chapter-count">
+                    {group.services.length}{" "}
+                    {group.services.length === 1 ? "service" : "services"}
+                  </p>
+                  <ServiceList services={group.services} />
+                </section>
+              ))}
+            </div>
+          </div>
         </>
       )}
 
-      <p className="brochure-closing fade-in print:hidden">
-        Questions about a service or package? Ask at the front desk.
-      </p>
+      <footer className="brochure-footer">
+        <div className="brochure-footer-grid">
+          <div>
+            <b className="brochure-footer-label">{salonName}</b>
+            <p>{business.address}</p>
+          </div>
+          <div>
+            <b className="brochure-footer-label">Call us</b>
+            <p>
+              <a href={`tel:${phonePrimaryDigits}`}>{business.phone_primary}</a>
+              <br />
+              <a href={`tel:${phoneSecondaryDigits}`}>
+                {business.phone_secondary}
+              </a>
+            </p>
+          </div>
+          <div>
+            <b className="brochure-footer-label">Hours</b>
+            {hoursLines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        </div>
+      </footer>
+
+      <nav className="brochure-sticky print:hidden" aria-label="Quick actions">
+        <a href={`tel:${phonePrimaryDigits}`}>Call</a>
+        <Link href="/appointments" className="brochure-sticky-book">
+          Book
+        </Link>
+      </nav>
     </div>
   );
 }
