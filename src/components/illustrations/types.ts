@@ -50,7 +50,7 @@ export const ILLUSTRATION_LABELS: Record<IllustrationId, string> = {
 };
 
 export const ILLUSTRATION_SRC: Record<IllustrationId, string> = {
-  hero: "/illustrations/hero.png",
+  hero: "/illustrations/hero-salon.png",
   hair: "/illustrations/hair.png",
   skin: "/illustrations/skin.png",
   nails: "/illustrations/nails.png",

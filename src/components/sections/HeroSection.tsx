@@ -120,8 +120,7 @@ export function HeroSection({
             aspect="16/9"
             priority
             title="Stylist cutting hair in the salon"
-            className="md:aspect-[4/3]"
-            objectPosition="center 35%"
+            objectPosition="center center"
           />
         </div>
       </div>
