@@ -1,25 +1,18 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SITE_APEX_HOST, SITE_HOST, SITE_URL } from "@/lib/seo";
-
-/** Production workers.dev hostname — always bounce to the canonical www site. */
-const PRODUCTION_WORKERS_HOST = "mifamilysalonspa.familysalonspa.workers.dev";
+import { SITE_APEX_HOST, SITE_URL } from "@/lib/seo";
 
 /**
  * Canonical host is always https://www.mifamilysalon.com
- * - apex → www (301)
- * - production workers.dev → www (301)
- * Preview / local hosts are left unchanged.
+ * - apex (mifamilysalon.com) → www (301)
+ * Preview / workers.dev / local hosts are left unchanged so the site stays
+ * reachable while DNS for www is still propagating on some networks.
  */
 export function middleware(request: NextRequest) {
   const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
-  if (host === SITE_APEX_HOST || host === PRODUCTION_WORKERS_HOST) {
-    const url = request.nextUrl.clone();
-    url.protocol = "https:";
-    url.host = SITE_HOST;
-    // Ensure absolute redirect target uses SITE_URL origin for clarity
+  if (host === SITE_APEX_HOST) {
     const dest = new URL(
-      `${url.pathname}${url.search}${url.hash}`,
+      `${request.nextUrl.pathname}${request.nextUrl.search}${request.nextUrl.hash}`,
       SITE_URL,
     );
     return NextResponse.redirect(dest, 301);

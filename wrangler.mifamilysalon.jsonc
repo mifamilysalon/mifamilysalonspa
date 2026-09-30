@@ -5,6 +5,7 @@
   "main": "./worker.ts",
   "compatibility_date": "2026-07-22",
   "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
   "triggers": {
     "crons": ["0 4 * * *"]
   },
