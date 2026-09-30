@@ -6,8 +6,11 @@ import {
   absoluteUrl,
   buildBreadcrumbJsonLd,
   buildFaqJsonLd,
+  buildHomeWebPageJsonLd,
+  buildLocalBusinessJsonLd,
   SITE_URL,
 } from "../src/lib/seo";
+import { SITEMAP_CONTENT_LASTMOD, SITEMAP_ROUTES } from "../src/lib/sitemap-routes";
 
 describe("bookAppointmentSchema", () => {
   it("accepts a valid request booking payload", () => {
@@ -83,6 +86,37 @@ describe("seo helpers", () => {
       { question: "Where are you?", answer: "Farmington, MI" },
     ]);
     assert.equal(faq["@type"], "FAQPage");
+  });
+
+  it("builds LocalBusiness and WebPage JSON-LD for AEO entity clarity", () => {
+    const biz = buildLocalBusinessJsonLd({ rating: 4.4, reviewCount: 100 });
+    assert.equal((biz["@type"] as string[])[0], "HairSalon");
+    assert.equal(biz.priceRange, "$$");
+    assert.ok(biz.hasOfferCatalog);
+    assert.ok(biz.aggregateRating);
+
+    const page = buildHomeWebPageJsonLd();
+    assert.equal(page["@type"], "WebPage");
+    assert.ok(page.speakable);
+  });
+
+  it("lists public sitemap routes with a fresh lastmod", () => {
+    assert.ok(SITEMAP_ROUTES.length >= 15);
+    assert.ok(SITEMAP_ROUTES.every((r) => !r.path.includes("skin-care")));
+    assert.match(SITEMAP_CONTENT_LASTMOD, /^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("builds sitemap XML with all route locs", async () => {
+    const { buildSitemapXml } = await import("../src/lib/sitemap-routes");
+    const xml = buildSitemapXml();
+    assert.match(xml, /^<\?xml version="1\.0"/);
+    assert.match(xml, /<\/urlset>\s*$/);
+    for (const route of SITEMAP_ROUTES) {
+      const loc = route.path
+        ? `${SITE_URL}${route.path}`
+        : SITE_URL;
+      assert.ok(xml.includes(`<loc>${loc}</loc>`), loc);
+    }
   });
 });
 

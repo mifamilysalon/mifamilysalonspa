@@ -19,6 +19,7 @@ import { getGoogleReviewsMeta, listCachedGoogleReviews } from "@/lib/reviews";
 import {
   buildLocalBusinessJsonLd,
   buildWebsiteJsonLd,
+  buildHomeWebPageJsonLd,
   buildPageMetadata,
 } from "@/lib/seo";
 import { getBusinessInfo, getMediaSettings, getSocialLinks } from "@/lib/site";
@@ -217,6 +218,7 @@ export default async function HomePage() {
             social,
           }),
           buildWebsiteJsonLd(),
+          buildHomeWebPageJsonLd(),
         ]}
       />
     </>

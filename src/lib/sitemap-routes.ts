@@ -1,13 +1,18 @@
-import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/lib/seo";
-
-type RouteConfig = {
+/** Public indexable routes for sitemap.xml (no redirects / noindex). */
+export type SitemapRoute = {
   path: string;
-  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+  changeFrequency:
+    | "always"
+    | "hourly"
+    | "daily"
+    | "weekly"
+    | "monthly"
+    | "yearly"
+    | "never";
   priority: number;
 };
 
-const ROUTES: RouteConfig[] = [
+export const SITEMAP_ROUTES: SitemapRoute[] = [
   { path: "", changeFrequency: "weekly", priority: 1 },
   { path: "/appointments", changeFrequency: "weekly", priority: 0.95 },
   { path: "/hair-care", changeFrequency: "monthly", priority: 0.9 },
@@ -28,14 +33,33 @@ const ROUTES: RouteConfig[] = [
   { path: "/products", changeFrequency: "monthly", priority: 0.65 },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  // Stable lastModified for crawlers (update when major content ships)
-  const lastModified = new Date("2026-07-22");
+/** Bump when major public content ships so crawlers see a fresh lastmod.
+ * Keep `public/sitemap.xml` in sync (static asset — Google-fetchable on Cloudflare).
+ */
+export const SITEMAP_CONTENT_LASTMOD = "2026-09-30";
 
-  return ROUTES.map(({ path, changeFrequency, priority }) => ({
-    url: path ? `${SITE_URL}${path}` : SITE_URL,
-    lastModified,
-    changeFrequency,
-    priority,
-  }));
+/** Build sitemap XML body for `public/sitemap.xml` / tests. */
+export function buildSitemapXml(
+  siteUrl = "https://www.mifamilysalon.com",
+  lastmod = SITEMAP_CONTENT_LASTMOD,
+): string {
+  const urls = SITEMAP_ROUTES.map(({ path, changeFrequency, priority }) => {
+    const loc = path ? `${siteUrl}${path}` : siteUrl;
+    return [
+      "  <url>",
+      `    <loc>${loc}</loc>`,
+      `    <lastmod>${lastmod}</lastmod>`,
+      `    <changefreq>${changeFrequency}</changefreq>`,
+      `    <priority>${priority}</priority>`,
+      "  </url>",
+    ].join("\n");
+  }).join("\n");
+
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    urls,
+    "</urlset>",
+    "",
+  ].join("\n");
 }

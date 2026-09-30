@@ -1,0 +1,34 @@
+# Family Hair Salon & Wellness Spa
+
+> Hair, skin, nails, and wellness salon in Farmington, Michigan. Walk-ins welcome; book online for a set time. Private women's suite available.
+
+## Business facts
+
+- Name: Family Hair Salon & Wellness Spa
+- Address: 34777 Grand River Ave, Farmington, MI 48335, United States
+- Phones: (248) 474-6520, (248) 635-5127
+- Email: info@mifamilysalon.com
+- Hours: Mon-Fri 10am-6pm, Sat 10am-5pm, Sun closed
+- Website: https://www.mifamilysalon.com
+- Book: https://www.mifamilysalon.com/appointments
+- Area served: Farmington, Farmington Hills, Livonia, West Bloomfield, Novi
+
+## Services
+
+- Hair care: https://www.mifamilysalon.com/hair-care
+- Facials: https://www.mifamilysalon.com/facials
+- Nail care: https://www.mifamilysalon.com/nail-care
+- Threading: https://www.mifamilysalon.com/threading
+- Waxing: https://www.mifamilysalon.com/waxing
+- Lashes: https://www.mifamilysalon.com/lashes
+- Make-up: https://www.mifamilysalon.com/makeup
+- Henna: https://www.mifamilysalon.com/henna
+- Wellness: https://www.mifamilysalon.com/wellness
+- Private women's suite: https://www.mifamilysalon.com/private-area
+- Gift certificates: https://www.mifamilysalon.com/gift-certificates
+
+## Optional
+
+- Contact: https://www.mifamilysalon.com/contact
+- About: https://www.mifamilysalon.com/about
+- Sitemap: https://www.mifamilysalon.com/sitemap.xml

@@ -5,7 +5,12 @@ import {
   type IllustrationId,
 } from "@/components/illustrations";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { absoluteUrl, SITE_NAME } from "@/lib/seo";
+import {
+  absoluteUrl,
+  buildBreadcrumbJsonLd,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/seo";
 import { getServices } from "@/lib/site";
 
 const CATEGORY_ART: Record<string, IllustrationId> = {
@@ -41,11 +46,7 @@ export default async function ServiceCategoryPage({
     "@type": "Service",
     name: `${title} at ${SITE_NAME}`,
     description: intro,
-    provider: {
-      "@type": "BeautySalon",
-      name: SITE_NAME,
-      url: absoluteUrl("/"),
-    },
+    provider: { "@id": `${SITE_URL}/#business` },
     areaServed: {
       "@type": "City",
       name: "Farmington, MI",
@@ -55,7 +56,15 @@ export default async function ServiceCategoryPage({
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
-      <JsonLd data={serviceSchema} />
+      <JsonLd
+        data={[
+          buildBreadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: title, path: pagePath },
+          ]),
+          serviceSchema,
+        ]}
+      />
       <div className="grid items-end gap-10 md:grid-cols-[1.1fr_0.9fr]">
         <div>
           <p className="text-sm uppercase tracking-[0.18em] text-salon-primary">

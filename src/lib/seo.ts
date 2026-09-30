@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DEFAULT_SOCIAL, type SocialLinks } from "@/lib/media";
+import { BROCHURE_CATEGORIES } from "@/lib/service-categories";
 
 /** Canonical production origin (always www — used for OG / sitemap / JSON-LD) */
 export const SITE_URL = "https://www.mifamilysalon.com";
@@ -39,6 +40,19 @@ export const LOCAL_BUSINESS = {
     { days: ["Saturday"], opens: "10:00", closes: "17:00" },
   ],
   hoursDisplay: "Mon-Fri 10am-6pm, Sat 10am-5pm, Sun Closed",
+  priceRange: "$$",
+  paymentAccepted: ["Cash", "Credit Card", "Debit Card"],
+  currenciesAccepted: "USD",
+  knowsAbout: [
+    "Hair salon Farmington MI",
+    "Hair coloring and highlights",
+    "Facials and face mapping",
+    "Manicure and pedicure",
+    "Eyebrow threading",
+    "Waxing",
+    "Private women's salon suite",
+    "Hijab-friendly salon Farmington",
+  ],
   areaServed: [
     "Farmington, MI",
     "Farmington Hills, MI",
@@ -127,8 +141,13 @@ export function buildLocalBusinessJsonLd(input?: {
     legalName: LOCAL_BUSINESS.legalName,
     description: LOCAL_BUSINESS.description,
     url: SITE_URL,
-    telephone: LOCAL_BUSINESS.telephoneDisplay[0],
+    telephone: LOCAL_BUSINESS.telephoneDisplay,
+    email: LOCAL_BUSINESS.email,
     image: input?.image || LOCAL_BUSINESS.defaultImage,
+    priceRange: LOCAL_BUSINESS.priceRange,
+    paymentAccepted: [...LOCAL_BUSINESS.paymentAccepted],
+    currenciesAccepted: LOCAL_BUSINESS.currenciesAccepted,
+    knowsAbout: [...LOCAL_BUSINESS.knowsAbout],
     address: {
       "@type": "PostalAddress",
       streetAddress: LOCAL_BUSINESS.streetAddress,
@@ -155,15 +174,23 @@ export function buildLocalBusinessJsonLd(input?: {
         closes: block.closes,
       })),
     ),
-    contactPoint: [
-      {
-        "@type": "ContactPoint",
-        telephone: LOCAL_BUSINESS.telephone[0],
-        contactType: "customer service",
-        areaServed: "US",
-        availableLanguage: ["English"],
-      },
-    ],
+    contactPoint: LOCAL_BUSINESS.telephone.map((tel, i) => ({
+      "@type": "ContactPoint",
+      telephone: tel,
+      contactType: i === 0 ? "customer service" : "reservations",
+      areaServed: "US",
+      availableLanguage: ["English"],
+    })),
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "Salon & spa services",
+      itemListElement: BROCHURE_CATEGORIES.map((cat, index) => ({
+        "@type": "OfferCatalog",
+        position: index + 1,
+        name: cat.label,
+        url: absoluteUrl(cat.href),
+      })),
+    },
   };
 
   if (sameAs.length) schema.sameAs = sameAs;
@@ -201,6 +228,26 @@ export function buildWebsiteJsonLd() {
         "@type": "Reservation",
         name: "Salon appointment",
       },
+    },
+  };
+}
+
+/** Homepage WebPage + speakable passages for voice / answer engines */
+export function buildHomeWebPageJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${SITE_URL}/#webpage`,
+    url: SITE_URL,
+    name: `${SITE_NAME} | Farmington, MI`,
+    description: LOCAL_BUSINESS.description,
+    isPartOf: { "@id": `${SITE_URL}/#website` },
+    about: { "@id": `${SITE_URL}/#business` },
+    primaryImageOfPage: LOCAL_BUSINESS.defaultImage,
+    inLanguage: "en-US",
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: ["h1", "#faq-heading", "section[aria-labelledby='faq-heading'] dt", "section[aria-labelledby='faq-heading'] dd"],
     },
   };
 }
@@ -273,5 +320,15 @@ export const SITE_FAQS: Array<{ question: string; answer: string }> = [
     question: "What services do you offer?",
     answer:
       "Hair care (cuts, color, highlights, extensions, perm, straightening), skin care (facials and face mapping), nail care (manicures, pedicures, shellac), wellness treatments, and gift certificates.",
+  },
+  {
+    question: "Is Family Hair Salon & Wellness Spa hijab-friendly?",
+    answer:
+      "Yes. Our private women's suite in Farmington is designed for female clientele who prefer complete privacy, including women who wear hijab.",
+  },
+  {
+    question: "Which cities near Farmington do you serve?",
+    answer:
+      "We serve clients from Farmington, Farmington Hills, Livonia, West Bloomfield, and Novi, Michigan, from our salon at 34777 Grand River Ave.",
   },
 ];
