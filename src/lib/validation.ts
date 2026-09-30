@@ -5,6 +5,20 @@ export const loginSchema = z.object({
   password: z.string().min(6),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(32).max(128),
+  password: z.string().min(8).max(200),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1).max(200),
+  newPassword: z.string().min(8).max(200),
+});
+
 export const pinLoginSchema = z.object({
   staffId: z.number().int().positive(),
   pin: z.string().min(4).max(6),

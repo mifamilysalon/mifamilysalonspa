@@ -60,6 +60,13 @@ export default function AdminSettingsPage() {
   const [socialDraft, setSocialDraft] = useState<SocialLinks>(DEFAULT_SOCIAL);
   const [instagramDraft, setInstagramDraft] =
     useState<InstagramFeedSettings>(DEFAULT_INSTAGRAM_FEED);
+  const [hoursDraft, setHoursDraft] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -72,6 +79,13 @@ export default function AdminSettingsPage() {
         setHeroImageDraft(data.media?.hero_image || DEFAULT_MEDIA.hero_image);
         setSocialDraft(data.social || DEFAULT_SOCIAL);
         setInstagramDraft(data.instagram_feed || DEFAULT_INSTAGRAM_FEED);
+        setHoursDraft(
+          (data.business?.hours || "")
+            .split(/\r?\n|,/)
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .join("\n"),
+        );
       } finally {
         setLoading(false);
       }
@@ -98,11 +112,56 @@ export default function AdminSettingsPage() {
         setHeroImageDraft(data.media?.hero_image || DEFAULT_MEDIA.hero_image);
         setSocialDraft(data.social || DEFAULT_SOCIAL);
         setInstagramDraft(data.instagram_feed || DEFAULT_INSTAGRAM_FEED);
+        setHoursDraft(
+          (data.business?.hours || "")
+            .split(/\r?\n|,/)
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .join("\n"),
+        );
       } else {
         setMessage("Failed to save settings.");
       }
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function changePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPasswordMessage(null);
+    setPasswordError(null);
+    if (newPassword !== confirmPassword) {
+      setPasswordError("New passwords do not match.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters.");
+      return;
+    }
+    setPasswordSaving(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword,
+          newPassword,
+        }),
+      });
+      const data = (await res.json()) as { error?: string; message?: string };
+      if (!res.ok) {
+        setPasswordError(data.error || "Could not change password.");
+        return;
+      }
+      setPasswordMessage(data.message || "Password updated.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch {
+      setPasswordError("Could not change password. Please try again.");
+    } finally {
+      setPasswordSaving(false);
     }
   }
 
@@ -162,6 +221,74 @@ export default function AdminSettingsPage() {
           {message}
         </p>
       )}
+
+      <section className="editorial-panel mt-8 p-6">
+        <h2 className="font-serif text-lg text-salon-heading">Admin password</h2>
+        <p className="mt-2 text-sm text-salon-body">
+          Change the password for the account you are signed in with. Need a
+          reset email instead? Use Forgot password on the login page.
+        </p>
+        <form onSubmit={changePassword} className="mt-4 max-w-md space-y-4">
+          {passwordMessage && (
+            <p className="border border-salon-border bg-salon-light px-4 py-3 text-sm">
+              {passwordMessage}
+            </p>
+          )}
+          {passwordError && (
+            <p className="border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+              {passwordError}
+            </p>
+          )}
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-salon-heading">
+              Current password
+            </span>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              className="min-h-12 w-full border border-salon-border bg-salon-panel px-4"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-salon-heading">
+              New password
+            </span>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              className="min-h-12 w-full border border-salon-border bg-salon-panel px-4"
+            />
+          </label>
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-salon-heading">
+              Confirm new password
+            </span>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete="new-password"
+              className="min-h-12 w-full border border-salon-border bg-salon-panel px-4"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={passwordSaving}
+            className="min-h-12 bg-salon-primary px-6 py-3 text-sm font-medium text-white transition hover:bg-salon-hover disabled:opacity-60"
+          >
+            {passwordSaving ? "Saving..." : "Update password"}
+          </button>
+        </form>
+      </section>
 
       <section className="editorial-panel mt-8 p-6">
         <h2 className="font-serif text-lg text-salon-heading">Color palette</h2>
@@ -551,8 +678,10 @@ export default function AdminSettingsPage() {
       <section className="editorial-panel mt-6 p-6">
         <h2 className="font-serif text-lg text-salon-heading">Google reviews</h2>
         <p className="mt-2 text-sm text-salon-body">
-          Homepage review module. Optional Place ID enables nightly refresh when an API key is
-          configured.
+          Homepage review module. Sync pulls up to 5 reviews from Google Places each time,
+          keeps unique ones in D1 (so the cache can grow as Google rotates results), and drops
+          placeholder/test reviews. Nightly cron
+          refreshes when an API key is configured.
         </p>
         <dl className="mt-4 grid gap-2 text-sm text-salon-body sm:grid-cols-2">
           <div>
@@ -652,11 +781,40 @@ export default function AdminSettingsPage() {
             <dt className="font-medium text-salon-heading">Address</dt>
             <dd>{settings.business.address}</dd>
           </div>
-          <div>
-            <dt className="font-medium text-salon-heading">Hours</dt>
-            <dd>{settings.business.hours}</dd>
-          </div>
         </dl>
+        <label className="mt-6 block text-sm text-salon-body">
+          Hours (one group per line)
+          <textarea
+            value={hoursDraft}
+            onChange={(e) => setHoursDraft(e.target.value)}
+            rows={4}
+            className="mt-1 block w-full border border-salon-border bg-salon-panel px-3 py-2 text-salon-heading"
+            placeholder={"Mon-Fri 10am-6pm\nSat 10am-5pm\nSun Closed"}
+          />
+        </label>
+        <p className="mt-2 text-xs text-salon-body">
+          Shown as separate rows in the footer and contact page. Example: Mon-Fri,
+          then Sat, then Sun.
+        </p>
+        <button
+          type="button"
+          disabled={saving || !hoursDraft.trim()}
+          onClick={() =>
+            save({
+              business: {
+                ...settings.business,
+                hours: hoursDraft
+                  .split(/\r?\n|,/)
+                  .map((line) => line.trim())
+                  .filter(Boolean)
+                  .join("\n"),
+              },
+            })
+          }
+          className="mt-4 min-h-11 bg-salon-primary px-4 text-sm text-white hover:bg-salon-hover disabled:opacity-50"
+        >
+          Save hours
+        </button>
       </section>
     </div>
   );

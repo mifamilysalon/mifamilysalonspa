@@ -13,21 +13,26 @@ type SessionUser = {
 const NAV = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/appointments", label: "Appointments" },
+  { href: "/admin/staff", label: "Staff" },
   { href: "/admin/gift-certificates", label: "Gift certificates" },
   { href: "/admin/promos", label: "Promos" },
   { href: "/admin/services", label: "Services" },
   { href: "/admin/settings", label: "Settings" },
+  { href: "/admin/system", label: "System" },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const isLogin = pathname === "/admin/login";
+  const isPublicAuth =
+    pathname === "/admin/login" ||
+    pathname === "/admin/forgot-password" ||
+    pathname.startsWith("/admin/reset-password");
   const [user, setUser] = useState<SessionUser | null>(null);
-  const [checking, setChecking] = useState(!isLogin);
+  const [checking, setChecking] = useState(!isPublicAuth);
 
   useEffect(() => {
-    if (isLogin) return;
+    if (isPublicAuth) return;
 
     async function checkAuth() {
       try {
@@ -50,7 +55,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     }
 
     checkAuth();
-  }, [isLogin, router]);
+  }, [isPublicAuth, router]);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -58,7 +63,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     router.refresh();
   }
 
-  if (isLogin) {
+  if (isPublicAuth) {
     return <>{children}</>;
   }
 
@@ -83,9 +88,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               key={item.href}
               href={item.href}
               className={`min-h-12 whitespace-nowrap px-4 py-3 text-sm transition md:border-t md:border-salon-border ${
-                pathname === item.href
-                  ? "bg-salon-light text-salon-heading"
-                  : "text-salon-body hover:text-salon-primary"
+                item.href === "/admin"
+                  ? pathname === "/admin"
+                    ? "bg-salon-light text-salon-heading"
+                    : "text-salon-body hover:text-salon-primary"
+                  : pathname === item.href || pathname.startsWith(`${item.href}/`)
+                    ? "bg-salon-light text-salon-heading"
+                    : "text-salon-body hover:text-salon-primary"
               }`}
             >
               {item.label}
