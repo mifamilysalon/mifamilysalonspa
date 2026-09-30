@@ -86,11 +86,13 @@ Worker name: **`mifamilysalonspa`**. Default URL after deploy:
 
 ## Custom domain (www.mifamilysalon.com)
 
-1. Add **mifamilysalon.com** to the **client** Cloudflare account (or transfer DNS).
-2. **Workers & Pages → mifamilysalonspa → Settings → Domains & routes** → add:
-   - `www.mifamilysalon.com`
-   - `mifamilysalon.com` (redirect to www is also handled in app middleware)
-3. Re-run deploy if needed.
+Zone `mifamilysalon.com` is on the **client** Cloudflare account. Wrangler
+attaches Worker custom domains for `www.mifamilysalon.com` (canonical) and
+`mifamilysalon.com` (apex). Apex and the production `*.workers.dev` host both
+301 to https://www.mifamilysalon.com via app middleware.
+
+Deploy with `npm run deploy:mifamilysalon` creates/updates those custom domains
+and DNS automatically.
 
 ---
 
