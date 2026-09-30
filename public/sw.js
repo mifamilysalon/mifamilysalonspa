@@ -1,4 +1,4 @@
-/* Family Salon — lightweight app-shell SW (not offline-first). */
+/* Family Salon - lightweight app-shell SW (not offline-first). */
 const CACHE_NAME = "family-salon-shell-v1";
 const PRECACHE_URLS = [
   "/icons/icon-192.png",
