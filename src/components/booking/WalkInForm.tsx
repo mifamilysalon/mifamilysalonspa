@@ -1,8 +1,13 @@
 "use client";
 
 import { format, parseISO } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Service, StaffProfile } from "@/lib/site";
+import {
+  BROCHURE_CATEGORY_LABELS,
+  BROCHURE_CATEGORY_ORDER,
+  type BrochureCategoryKey,
+} from "@/lib/service-categories";
 
 const ARRIVAL_OPTIONS = [
   { minutes: 0, label: "I'm here now" },
@@ -11,6 +16,16 @@ const ARRIVAL_OPTIONS = [
   { minutes: 45, label: "In about 45 minutes" },
   { minutes: 60, label: "In about 1 hour" },
 ] as const;
+
+function formatCategory(category: string): string {
+  const key = category as keyof typeof BROCHURE_CATEGORY_LABELS;
+  return BROCHURE_CATEGORY_LABELS[key] || category;
+}
+
+function categorySortIndex(category: string): number {
+  const idx = BROCHURE_CATEGORY_ORDER.indexOf(category as BrochureCategoryKey);
+  return idx === -1 ? BROCHURE_CATEGORY_ORDER.length : idx;
+}
 
 export function WalkInForm({
   smsEnabled = false,
@@ -26,6 +41,7 @@ export function WalkInForm({
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ id: number; startDatetime?: string } | null>(null);
 
+  const [category, setCategory] = useState("");
   const [serviceId, setServiceId] = useState<number | "">("");
   const [staffId, setStaffId] = useState<number | "">("");
   const [arriveInMinutes, setArriveInMinutes] = useState(0);
@@ -34,6 +50,25 @@ export function WalkInForm({
   const [clientEmail, setClientEmail] = useState("");
   const [notes, setNotes] = useState("");
   const [smsOptIn, setSmsOptIn] = useState(false);
+
+  const categoryOptions = useMemo(() => {
+    const keys = new Set(services.map((s) => s.category || "other"));
+    return [...keys]
+      .map((key) => ({ key, label: formatCategory(key) }))
+      .sort(
+        (a, b) =>
+          categorySortIndex(a.key) - categorySortIndex(b.key) ||
+          a.label.localeCompare(b.label),
+      );
+  }, [services]);
+
+  const servicesInCategory = useMemo(() => {
+    if (!category) return [];
+    return services
+      .filter((s) => (s.category || "other") === category)
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [services, category]);
 
   useEffect(() => {
     async function load() {
@@ -168,15 +203,39 @@ export function WalkInForm({
       )}
 
       <label className="mt-6 block text-sm text-salon-body">
+        Category
+        <select
+          required
+          value={category}
+          onChange={(e) => {
+            setCategory(e.target.value);
+            setServiceId("");
+            setStaffId("");
+          }}
+          className="mt-1 block w-full min-h-12 border border-salon-border bg-salon-panel px-3 text-salon-heading"
+        >
+          <option value="">Choose a category...</option>
+          {categoryOptions.map((cat) => (
+            <option key={cat.key} value={cat.key}>
+              {cat.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="mt-4 block text-sm text-salon-body">
         Service
         <select
           required
           value={serviceId}
+          disabled={!category}
           onChange={(e) => setServiceId(e.target.value ? Number(e.target.value) : "")}
-          className="mt-1 block w-full min-h-12 border border-salon-border bg-salon-panel px-3 text-salon-heading"
+          className="mt-1 block w-full min-h-12 border border-salon-border bg-salon-panel px-3 text-salon-heading disabled:opacity-60"
         >
-          <option value="">Choose a service...</option>
-          {services.map((s) => (
+          <option value="">
+            {category ? "Choose a service..." : "Choose a category first"}
+          </option>
+          {servicesInCategory.map((s) => (
             <option key={s.id} value={s.id}>
               {s.name} ({s.duration_minutes} min)
             </option>

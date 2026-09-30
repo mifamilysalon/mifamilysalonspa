@@ -65,7 +65,7 @@ export default async function ServiceCategoryPage({
           <p className="mt-6 max-w-2xl text-lg text-salon-body">{intro}</p>
           <hr className="gold-rule mt-10 max-w-xs" />
         </div>
-        <IllustrationPanel id={artId} title={`${title} illustration`} />
+        <IllustrationPanel id={artId} title={title} />
       </div>
 
       <div className="mt-12 space-y-10">

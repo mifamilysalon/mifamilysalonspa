@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HoursLines } from "@/components/layout/HoursLines";
 import { SOCIAL_LABELS, type SocialLinks } from "@/lib/media";
 import { LOCAL_BUSINESS } from "@/lib/seo";
 import { BROCHURE_CATEGORIES } from "@/lib/service-categories";
@@ -127,7 +128,21 @@ export function SiteFooter({
           <p className="text-sm font-medium uppercase tracking-wide text-salon-heading">
             Hours
           </p>
-          <p className="mt-3 text-sm text-salon-body">{hours}</p>
+          <HoursLines hours={hours} />
+          <div className="mt-6 flex flex-wrap gap-4 text-sm">
+            <Link
+              href="/staff/login"
+              className="text-salon-body/70 hover:text-salon-primary"
+            >
+              Staff
+            </Link>
+            <Link
+              href="/admin/login"
+              className="text-salon-body/70 hover:text-salon-primary"
+            >
+              Admin
+            </Link>
+          </div>
         </div>
       </div>
       <div className="border-t border-salon-border px-4 py-5 text-center text-xs text-salon-body/70">

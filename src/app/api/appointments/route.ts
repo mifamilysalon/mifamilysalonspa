@@ -47,11 +47,14 @@ export async function POST(request: Request) {
 
       const when = format(parseISO(result.startDatetime), "EEE, MMM d 'at' h:mm a");
       await notifyBookingConfirmed({
+        bookingId: result.id,
         clientName: data.clientName,
         clientEmail,
         clientPhone: data.clientPhone,
         serviceName: result.serviceName,
         when,
+        startIso: result.startDatetime,
+        durationMinutes: result.durationMinutes,
         smsOptIn: data.smsOptIn,
         smsEnabled: smsSettings.enabled,
       });
@@ -125,11 +128,14 @@ export async function POST(request: Request) {
       const when = format(parseISO(data.startDatetime!), "EEE, MMM d 'at' h:mm a");
 
       await notifyBookingConfirmed({
+        bookingId: result.id,
         clientName: data.clientName,
         clientEmail,
         clientPhone: data.clientPhone,
         serviceName: service.name,
         when,
+        startIso: data.startDatetime!,
+        durationMinutes: service.duration_minutes,
         staffName: staff?.display_name,
         smsOptIn: data.smsOptIn,
         smsEnabled: smsSettings.enabled,
@@ -167,11 +173,14 @@ export async function POST(request: Request) {
     const when = format(parseISO(data.startDatetime!), "EEE, MMM d 'at' h:mm a");
 
     await notifyBookingRequest({
+      bookingId: result.id,
       clientName: data.clientName,
       clientEmail,
       clientPhone: data.clientPhone,
       serviceName: service.name,
       when,
+      startIso: data.startDatetime!,
+      durationMinutes: service.duration_minutes,
       smsOptIn: data.smsOptIn,
       smsEnabled: smsSettings.enabled,
     });

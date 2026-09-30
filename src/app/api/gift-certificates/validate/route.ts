@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getCurrentUser } from "@/lib/auth";
+import { sendGiftCertificateEmail } from "@/lib/gift-certificate-email";
 import {
   formatGiftAmount,
   giftCertificateBalanceCents,
@@ -79,13 +80,35 @@ export async function POST(request: Request) {
         ? Math.round(parsed.data.amount_dollars * 100)
         : certificate.amount_cents - remaining;
 
+    let balanceEmailSent = false;
+    if (remaining > 0 && certificate.customer_email?.trim()) {
+      const emailResult = await sendGiftCertificateEmail(certificate, {
+        reason: "balance_update",
+      });
+      balanceEmailSent = emailResult.ok;
+      if (!emailResult.ok) {
+        console.error(
+          "gift certificate balance update email failed",
+          certificate.code,
+          emailResult.detail,
+        );
+      }
+    }
+
     return NextResponse.json({
       validation,
       certificate,
       redemptions,
+      balanceEmailSent,
       message:
         remaining > 0
-          ? `Applied ${formatGiftAmount(appliedCents)}. ${formatGiftAmount(remaining)} remaining — code can be used again until balance is zero.`
+          ? `Applied ${formatGiftAmount(appliedCents)}. ${formatGiftAmount(remaining)} remaining — code can be used again until balance is zero.${
+              balanceEmailSent
+                ? " Updated certificate emailed to the customer."
+                : certificate.customer_email?.trim()
+                  ? " Could not email the updated balance; ask the desk to resend if needed."
+                  : ""
+            }`
           : `Applied ${formatGiftAmount(appliedCents)}. Certificate fully redeemed; no balance remaining.`,
     });
   } catch (err) {

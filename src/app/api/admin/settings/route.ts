@@ -44,7 +44,7 @@ const businessSchema = z.object({
   phone_primary: z.string().min(7).max(30),
   phone_secondary: z.string().max(30).optional(),
   address: z.string().min(5).max(300),
-  hours: z.string().min(3).max(300),
+  hours: z.string().min(3).max(500),
 });
 
 const smsSchema = z.object({
@@ -205,7 +205,8 @@ export async function PUT(request: Request) {
     }
 
     if (parsed.data.business) {
-      await upsertSetting(db, "business", parsed.data.business);
+      const current = await getBusinessInfo();
+      await upsertSetting(db, "business", { ...current, ...parsed.data.business });
     }
 
     if (parsed.data.sms) {

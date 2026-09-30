@@ -4,7 +4,11 @@ import { format, parseISO } from "date-fns";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Service, StaffProfile } from "@/lib/site";
-import { BROCHURE_CATEGORY_LABELS } from "@/lib/service-categories";
+import {
+  BROCHURE_CATEGORY_LABELS,
+  BROCHURE_CATEGORY_ORDER,
+  type BrochureCategoryKey,
+} from "@/lib/service-categories";
 
 type TimeSlot = { start: string; end: string };
 
@@ -29,6 +33,11 @@ function formatCategory(category: string): string {
   return BROCHURE_CATEGORY_LABELS[key] || category;
 }
 
+function categorySortIndex(category: string): number {
+  const idx = BROCHURE_CATEGORY_ORDER.indexOf(category as BrochureCategoryKey);
+  return idx === -1 ? BROCHURE_CATEGORY_ORDER.length : idx;
+}
+
 export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -45,6 +54,7 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
   const [invalidService, setInvalidService] = useState(false);
 
   const [step, setStep] = useState<StepId>("service");
+  const [serviceCategory, setServiceCategory] = useState<string | null>(null);
   const [service, setService] = useState<Service | null>(null);
   const [selectedStaff, setSelectedStaff] = useState<StaffProfile | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
@@ -57,6 +67,29 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
   const [smsOptIn, setSmsOptIn] = useState(false);
 
   const isInstant = service?.booking_type === "instant";
+
+  const categoryOptions = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const s of services) {
+      const key = s.category || "other";
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+    return [...counts.entries()]
+      .map(([key, count]) => ({
+        key,
+        label: formatCategory(key),
+        count,
+      }))
+      .sort((a, b) => categorySortIndex(a.key) - categorySortIndex(b.key) || a.label.localeCompare(b.label));
+  }, [services]);
+
+  const servicesInCategory = useMemo(() => {
+    if (!serviceCategory) return [];
+    return services
+      .filter((s) => (s.category || "other") === serviceCategory)
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [services, serviceCategory]);
 
   const steps: StepId[] = useMemo(() => {
     if (!service) return ["service"];
@@ -84,10 +117,12 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
           if (match) {
             setInvalidService(false);
             setService(match);
+            setServiceCategory(match.category || null);
             setStep(match.booking_type === "instant" ? "staff" : "datetime");
           } else {
             setInvalidService(true);
             setService(null);
+            setServiceCategory(null);
             setStep("service");
           }
         }
@@ -356,38 +391,93 @@ export function BookingWizard({ smsEnabled = false }: { smsEnabled?: boolean }) 
 
         {step === "service" && (
           <div>
-            <h3 className="font-serif text-2xl text-salon-heading">Choose a service</h3>
-            <p className="mt-2 text-sm text-salon-body">
-              Select the service you would like to book.
-            </p>
-            <ul className="mt-6 divide-y divide-salon-border">
-              {services.map((s) => (
-                <li key={s.id}>
+            {!serviceCategory ? (
+              <>
+                <h3 className="font-serif text-2xl text-salon-heading">
+                  Choose a category
+                </h3>
+                <p className="mt-2 text-sm text-salon-body">
+                  Pick a service type first, then choose the exact service.
+                </p>
+                <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {categoryOptions.map((cat) => (
+                    <li key={cat.key}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setServiceCategory(cat.key);
+                          setService(null);
+                          setError(null);
+                        }}
+                        className="flex min-h-14 w-full items-center justify-between border border-salon-border px-4 py-3 text-left transition hover:border-salon-primary hover:bg-salon-light/40"
+                      >
+                        <span className="font-medium text-salon-heading">{cat.label}</span>
+                        <span className="text-sm text-salon-body">
+                          {cat.count} service{cat.count === 1 ? "" : "s"}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <h3 className="font-serif text-2xl text-salon-heading">
+                      {formatCategory(serviceCategory)}
+                    </h3>
+                    <p className="mt-2 text-sm text-salon-body">
+                      Select the service you would like to book.
+                    </p>
+                  </div>
                   <button
                     type="button"
                     onClick={() => {
-                      setService(s);
-                      setSelectedStaff(null);
-                      setSelectedDate("");
-                      setSelectedSlot(null);
-                      setPreferredDatetime("");
-                      setStep(s.booking_type === "instant" ? "staff" : "datetime");
+                      setServiceCategory(null);
+                      setService(null);
                       setError(null);
                     }}
-                    className="flex min-h-12 w-full flex-col items-start gap-1 py-4 text-left transition hover:bg-salon-light/40 md:flex-row md:items-center md:justify-between"
+                    className="min-h-11 text-sm text-salon-primary underline underline-offset-4 hover:text-salon-hover"
                   >
-                    <span>
-                      <span className="block font-medium text-salon-heading">{s.name}</span>
-                      <span className="text-sm text-salon-body">
-                        {formatDuration(s.duration_minutes)} ·{" "}
-                        {s.booking_type === "instant" ? "Instant book" : "Request"}
-                      </span>
-                    </span>
-                    <span className="text-sm text-salon-primary">Select</span>
+                    Change category
                   </button>
-                </li>
-              ))}
-            </ul>
+                </div>
+                <ul className="mt-6 divide-y divide-salon-border">
+                  {servicesInCategory.length === 0 && (
+                    <li className="py-4 text-salon-body">
+                      No services in this category right now.
+                    </li>
+                  )}
+                  {servicesInCategory.map((s) => (
+                    <li key={s.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setService(s);
+                          setSelectedStaff(null);
+                          setSelectedDate("");
+                          setSelectedSlot(null);
+                          setPreferredDatetime("");
+                          setStep(s.booking_type === "instant" ? "staff" : "datetime");
+                          setError(null);
+                        }}
+                        className="flex min-h-12 w-full flex-col items-start gap-1 py-4 text-left transition hover:bg-salon-light/40 md:flex-row md:items-center md:justify-between"
+                      >
+                        <span>
+                          <span className="block font-medium text-salon-heading">{s.name}</span>
+                          <span className="text-sm text-salon-body">
+                            {formatDuration(s.duration_minutes)} ·{" "}
+                            {s.booking_type === "instant" ? "Instant book" : "Request"}
+                          </span>
+                        </span>
+                        <span className="text-sm text-salon-primary">Select</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
         )}
 

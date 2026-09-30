@@ -4,7 +4,7 @@ import { IllustrationPanel } from "@/components/illustrations";
 import { FaqSection } from "@/components/seo/FaqSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd, buildPageMetadata } from "@/lib/seo";
-import { getBusinessInfo } from "@/lib/site";
+import { getBusinessInfo, formatHoursInline } from "@/lib/site";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "About Our Farmington Salon & Spa",
@@ -42,7 +42,7 @@ export default async function AboutPage() {
               you need to reset.
             </p>
             <p className="mt-5 text-salon-body">
-              Hours: {business.hours}. Call {business.phone_primary} or{" "}
+              Hours: {formatHoursInline(business.hours)}. Call {business.phone_primary} or{" "}
               {business.phone_secondary}, or{" "}
               <Link
                 href="/appointments"

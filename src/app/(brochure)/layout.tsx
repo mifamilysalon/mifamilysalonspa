@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HoursLines } from "@/components/layout/HoursLines";
 import { getBusinessInfo } from "@/lib/site";
 
 /** Minimal chrome for desk QR price brochure — not linked from the public site. */
@@ -30,7 +31,7 @@ export default async function BrochureLayout({
             {business.phone_secondary}
           </a>
         </p>
-        <p className="brochure-footer-hours">{business.hours}</p>
+        <HoursLines hours={business.hours} className="brochure-footer-hours" />
       </footer>
     </div>
   );

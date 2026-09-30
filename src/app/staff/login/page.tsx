@@ -16,7 +16,7 @@ export default function StaffLoginPage() {
   useEffect(() => {
     async function loadStaff() {
       try {
-        const res = await fetch("/api/staff");
+        const res = await fetch("/api/staff?forLogin=1");
         const d = (await res.json()) as {
           staff?: StaffProfile[];
           pinLength?: 4 | 6;

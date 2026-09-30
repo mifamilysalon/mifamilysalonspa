@@ -23,6 +23,14 @@ Already done on the client account (Familysalonspa@gmail.com):
 R2 bucket `familysalonspa-media` is bound as `MEDIA` for admin image uploads
 (`/api/admin/media`) and public serving (`/api/media/...`).
 
+### Analytics (visitors) — free
+
+The zone `mifamilysalon.com` is on the Free Website plan with proxied `www` / apex.
+
+1. In the client dashboard: **Web Analytics** → add `www.mifamilysalon.com`.
+2. Optionally paste the beacon token in **Admin → System** (see `docs/cloudflare-analytics-free-tier.md`).
+3. Use **Traffic**, **Worker metrics**, and **Admin → System** for free-tier health.
+
 ### Enable Workers.dev (first deploy on this account)
 
 The client Cloudflare account must register a **workers.dev** subdomain once:
@@ -34,6 +42,37 @@ Then re-run `npm run deploy:mifamilysalon`. Alternatively, attach **www.mifamily
 ### Email Sending (optional but recommended)
 
 On the **client** account: onboard **mifamilysalon.com** for Email Sending (same steps as ConsultifyIT).
+
+### Email Routing → Gmail (inbound)
+
+Cloudflare Email Routing is enabled for **mifamilysalon.com** so mail to salon addresses
+lands in **Familysalonspa@gmail.com**.
+
+**One-time verification (required before rules work):**
+
+1. Open **Familysalonspa@gmail.com**.
+2. Find Cloudflare’s “Verify destination address” email and click the link.
+3. Then run:
+
+```powershell
+powershell -File scripts/setup-email-routing.ps1
+```
+
+That creates forward rules for:
+
+| Address | Used for |
+|---------|----------|
+| `appointments@mifamilysalon.com` | Booking / appointment mail |
+| `gifts@mifamilysalon.com` | Gift certificates |
+| `info@mifamilysalon.com` | Public contact (SEO / site) |
+| `admin@mifamilysalon.com` | Admin / staff |
+| `support@mifamilysalon.com` | Support (Gmail Send as) |
+| `*@mifamilysalon.com` (catch-all) | Anything else |
+
+**Gmail “Send mail as”** (`support@`, `admin@`, etc.) is separate from routing.
+Routing only delivers *inbound* mail to Gmail. For Send as, finish Gmail’s SMTP
+wizard (e.g. Brevo SMTP if that is your outbound provider) and keep SPF/DKIM
+aligned for both Cloudflare routing and your send provider.
 
 ---
 

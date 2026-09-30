@@ -24,7 +24,15 @@ export async function createWalkInAppointment(input: {
   status?: "confirmed" | "in_progress";
   smsOptIn?: boolean;
 }): Promise<
-  | { id: number; status: string; bookingSource: "walk_in"; startDatetime: string; endDatetime: string; serviceName: string }
+  | {
+      id: number;
+      status: string;
+      bookingSource: "walk_in";
+      startDatetime: string;
+      endDatetime: string;
+      serviceName: string;
+      durationMinutes: number;
+    }
   | { error: string; status: number }
 > {
   const db = await getDb();
@@ -87,5 +95,6 @@ export async function createWalkInAppointment(input: {
     startDatetime,
     endDatetime,
     serviceName: service.name,
+    durationMinutes: service.duration_minutes,
   };
 }

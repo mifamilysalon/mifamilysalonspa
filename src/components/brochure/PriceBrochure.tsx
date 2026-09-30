@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   BROCHURE_CATEGORY_LABELS,
   BROCHURE_CATEGORY_ORDER,
@@ -82,12 +82,27 @@ export function PriceBrochure({
   const groups = useMemo(() => groupByCategory(services), [services]);
   const [activeKey, setActiveKey] = useState(groups[0]?.key ?? "");
   const tablistId = useId();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const skipScrollOnMount = useRef(true);
 
   useEffect(() => {
     if (!groups.some((g) => g.key === activeKey) && groups[0]) {
       setActiveKey(groups[0].key);
     }
   }, [activeKey, groups]);
+
+  // After a category change, snap the chapter into view. Smooth scroll + shorter
+  // lists used to leave you stranded below the new content until you scrolled up.
+  useLayoutEffect(() => {
+    if (skipScrollOnMount.current) {
+      skipScrollOnMount.current = false;
+      return;
+    }
+    const el = menuRef.current;
+    if (!el) return;
+    const top = Math.max(0, el.getBoundingClientRect().top + window.scrollY - 12);
+    window.scrollTo({ top, behavior: "auto" });
+  }, [activeKey]);
 
   const active = groups.find((g) => g.key === activeKey) ?? groups[0];
 
@@ -111,10 +126,11 @@ export function PriceBrochure({
         <p className="brochure-empty">No services listed yet.</p>
       ) : (
         <>
-          <div className="brochure-menu print:hidden" key={active?.key}>
+          <div className="brochure-menu print:hidden" ref={menuRef}>
             {active ? (
               <section
                 className="brochure-chapter fade-in"
+                key={active.key}
                 id={active.key}
                 aria-labelledby={`${tablistId}-${active.key}-label`}
               >
@@ -168,10 +184,7 @@ export function PriceBrochure({
                     aria-selected={selected}
                     aria-controls={group.key}
                     className={`brochure-tab${selected ? " is-active" : ""}`}
-                    onClick={() => {
-                      setActiveKey(group.key);
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
+                    onClick={() => setActiveKey(group.key)}
                   >
                     <span className="brochure-tab-index" aria-hidden>
                       {String(group.index).padStart(2, "0")}

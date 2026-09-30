@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { GiftCertificateIssueForm } from "@/components/gift/GiftCertificateIssueForm";
+import { GiftCertificateRowRedeem } from "@/components/gift/GiftCertificateRowRedeem";
 import { GiftCertificateValidatePanel } from "@/components/gift/GiftCertificateValidatePanel";
 import {
   formatGiftAmount,
   formatIssuedDate,
+  giftCertificateBalanceCents,
   giftCertificateStatusLabel,
   type GiftCertificate,
 } from "@/lib/gift-certificates-shared";
@@ -70,8 +72,8 @@ export default function StaffGiftCertificatesPage() {
     <div>
       <h1 className="font-serif text-2xl text-salon-heading">Gift certificates</h1>
       <p className="mt-2 text-sm text-salon-body">
-        Validate codes at the desk, request new certificates for admin approval,
-        and resend issued emails when needed.
+        Validate codes at the desk, apply full or partial redemptions, request new
+        certificates for admin approval, and resend issued emails when needed.
       </p>
 
       <div className="mt-8">
@@ -107,8 +109,13 @@ export default function StaffGiftCertificatesPage() {
                       {c.recipient_name}
                     </p>
                     <p className="mt-1 text-sm text-salon-body">
-                      {formatGiftAmount(c.amount_cents)} · {c.customer_email} ·
-                      issued {formatIssuedDate(c.issued_date)} · valid until{" "}
+                      Original {formatGiftAmount(c.amount_cents)}
+                      {c.status === "sent" &&
+                      giftCertificateBalanceCents(c) !== c.amount_cents
+                        ? ` · Remaining ${formatGiftAmount(giftCertificateBalanceCents(c))}`
+                        : ""}{" "}
+                      · {c.customer_email} · issued{" "}
+                      {formatIssuedDate(c.issued_date)} · valid until{" "}
                       {formatIssuedDate(c.valid_until_date)}
                     </p>
                     <p className="mt-1 text-xs uppercase tracking-wide text-salon-body/80">
@@ -126,6 +133,13 @@ export default function StaffGiftCertificatesPage() {
                     </button>
                   )}
                 </div>
+                <GiftCertificateRowRedeem
+                  certificate={c}
+                  onDone={async (message) => {
+                    setActionMsg(message);
+                    await load();
+                  }}
+                />
               </li>
             ))}
           </ul>

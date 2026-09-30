@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HoursLines } from "@/components/layout/HoursLines";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildBreadcrumbJsonLd,
@@ -81,7 +82,10 @@ export default async function ContactPage() {
             <p className="text-sm uppercase tracking-[0.18em] text-salon-primary">
               Hours
             </p>
-            <p className="mt-2 text-salon-body">{business.hours}</p>
+            <HoursLines
+              hours={business.hours}
+              className="mt-2 space-y-1 text-salon-body"
+            />
           </div>
           <Link
             href="/appointments"

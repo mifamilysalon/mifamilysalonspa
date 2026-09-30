@@ -15,7 +15,7 @@ import { buildPageMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildPageMetadata({
   title: "Gallery",
   description:
-    "Illustrated looks and Instagram moments from Family Hair Salon & Wellness Spa in Farmington, MI. Hair, skin, nails, and wellness.",
+    "Salon looks and Instagram moments from Family Hair Salon & Wellness Spa in Farmington, MI. Hair, skin, nails, and wellness.",
   path: "/gallery",
 });
 
@@ -48,7 +48,7 @@ export default async function GalleryPage() {
       <div className="mx-auto max-w-6xl px-4 py-16 md:px-6 md:py-24">
         <h1 className="font-serif text-4xl md:text-5xl">Gallery</h1>
         <p className="mt-5 max-w-2xl text-salon-body">
-          Custom illustrations of the salon experience, plus live posts from{" "}
+          Hair, skin, nails, and wellness from our Farmington salon. Follow{" "}
           <a
             href={instagram.profile_url}
             target="_blank"
@@ -56,8 +56,8 @@ export default async function GalleryPage() {
             className="font-medium text-salon-heading underline underline-offset-4 hover:text-salon-primary"
           >
             @{instagram.handle}
-          </a>
-          .
+          </a>{" "}
+          for more.
         </p>
         <div className="mt-12 columns-1 gap-4 sm:columns-2 lg:columns-3">
           {SCENES.map((scene) => (

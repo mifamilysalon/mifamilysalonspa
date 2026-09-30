@@ -29,16 +29,10 @@ export function GiftCertificateTemplate({
   return (
     <div className="gift-cert" id="gift-certificate">
       <div className="gift-cert-frame">
-        <div className="gift-cert-ornament gift-cert-ornament-tl" aria-hidden />
-        <div className="gift-cert-ornament gift-cert-ornament-tr" aria-hidden />
-        <div className="gift-cert-ornament gift-cert-ornament-bl" aria-hidden />
-        <div className="gift-cert-ornament gift-cert-ornament-br" aria-hidden />
-
-        <p className="gift-cert-kicker">A gift of care</p>
+        <p className="gift-cert-kicker">A Gift of Care</p>
         <h2 className="gift-cert-brand">{salonName}</h2>
-        <p className="gift-cert-title">Gift Certificate</p>
-
         <div className="gift-cert-rule" />
+        <p className="gift-cert-title">Gift Certificate</p>
 
         <dl className="gift-cert-fields">
           <div className="gift-cert-field">
@@ -61,12 +55,17 @@ export function GiftCertificateTemplate({
             <dt>Valid until</dt>
             <dd>{validUntilDate}</dd>
           </div>
+          <div className="gift-cert-field">
+            <dt>Certificate code</dt>
+            <dd>{certificateId}</dd>
+          </div>
         </dl>
 
         <p className="gift-cert-note">
           Redeemable for hair, skin, nail, and wellness services through the
-          valid-until date. Present the certificate code in salon for
-          single-use validation. Not redeemable for cash.
+          valid-until date. Show this certificate or give us the code at the
+          desk. Partial balances remain available until fully used. Not
+          redeemable for cash.
         </p>
 
         <div className="gift-cert-footer">

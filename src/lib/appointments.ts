@@ -146,10 +146,13 @@ async function notifyGuestOfAppointmentChanges(input: {
   if (changeLines.length === 0) return;
 
   const emailResult = await notifyAppointmentUpdated({
+    bookingId: after.id,
     clientName: after.client_name,
     clientEmail: after.client_email,
     serviceName: after.service_name,
     when: formatWhen(after.start_datetime),
+    startIso: after.start_datetime,
+    durationMinutes: after.duration_minutes,
     staffName: after.staff_name,
     changeLines,
   });

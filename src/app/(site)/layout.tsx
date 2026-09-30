@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { MobileStickyCta } from "@/components/layout/MobileStickyCta";
+import { CloudflareWebAnalytics } from "@/components/analytics/CloudflareWebAnalytics";
 import { getBusinessInfo, getSocialLinks } from "@/lib/site";
 
 export default async function SiteLayout({
@@ -34,6 +35,7 @@ export default async function SiteLayout({
         social={social}
       />
       <MobileStickyCta phone={business.phone_primary} />
+      <CloudflareWebAnalytics />
     </>
   );
 }

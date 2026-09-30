@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { GiftCertificateIssueForm } from "@/components/gift/GiftCertificateIssueForm";
+import { GiftCertificateRowRedeem } from "@/components/gift/GiftCertificateRowRedeem";
 import { GiftCertificateValidatePanel } from "@/components/gift/GiftCertificateValidatePanel";
 import {
   formatGiftAmount,
   formatIssuedDate,
+  giftCertificateBalanceCents,
   giftCertificateStatusLabel,
   type GiftCertificate,
   type GiftCertificateStatus,
@@ -92,8 +94,9 @@ export default function AdminGiftCertificatesPage() {
     <div>
       <h1 className="font-serif text-2xl text-salon-heading">Gift certificates</h1>
       <p className="mt-2 text-sm text-salon-body">
-        Issue, approve, resend, and redeem by code. Each code is single-use after
-        redemption.
+        Issue, approve, resend, and record full or partial redemptions. Staff and
+        admin can apply any amount up to the remaining balance; the recipient gets
+        an updated email when a balance remains.
       </p>
 
       <div className="mt-8">
@@ -157,8 +160,13 @@ export default function AdminGiftCertificatesPage() {
                       {c.recipient_name}
                     </p>
                     <p className="mt-1 text-sm text-salon-body">
-                      From {c.from_name} · {formatGiftAmount(c.amount_cents)} ·
-                      issued {formatIssuedDate(c.issued_date)} · valid until{" "}
+                      From {c.from_name} · Original{" "}
+                      {formatGiftAmount(c.amount_cents)}
+                      {c.status === "sent" &&
+                      giftCertificateBalanceCents(c) !== c.amount_cents
+                        ? ` · Remaining ${formatGiftAmount(giftCertificateBalanceCents(c))}`
+                        : ""}{" "}
+                      · issued {formatIssuedDate(c.issued_date)} · valid until{" "}
                       {formatIssuedDate(c.valid_until_date)}
                     </p>
                     <p className="mt-1 text-sm text-salon-body">
@@ -170,7 +178,7 @@ export default function AdminGiftCertificatesPage() {
                     </p>
                     {c.status === "redeemed" && (
                       <p className="mt-1 text-sm text-salon-heading">
-                        Redeemed
+                        Fully redeemed
                         {c.redeemed_at ? ` ${c.redeemed_at.slice(0, 10)}` : ""}
                         {c.redeemed_by_name ? ` by ${c.redeemed_by_name}` : ""}
                       </p>
@@ -227,6 +235,13 @@ export default function AdminGiftCertificatesPage() {
                     )}
                   </div>
                 </div>
+                <GiftCertificateRowRedeem
+                  certificate={c}
+                  onDone={async (message) => {
+                    setActionMsg(message);
+                    await load();
+                  }}
+                />
               </li>
             ))}
           </ul>

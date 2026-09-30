@@ -54,6 +54,24 @@ export const DEFAULT_BUSINESS: BusinessInfo = {
   maps_url: LOCAL_BUSINESS.mapsUrl,
 };
 
+/** Split stored hours into display rows (newlines and/or commas). */
+export function formatHoursLines(hours: string): string[] {
+  return hours
+    .split(/\r?\n|,/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+/** One-line hours for sentences / compact UI. */
+export function formatHoursInline(hours: string, separator = "; "): string {
+  return formatHoursLines(hours).join(separator);
+}
+
+/** Normalize admin textarea input into newline-separated rows. */
+export function normalizeHoursInput(hours: string): string {
+  return formatHoursLines(hours).join("\n");
+}
+
 export async function getBusinessInfo(): Promise<BusinessInfo> {
   try {
     const db = await getDb();
@@ -108,7 +126,11 @@ export async function getBookableStaff(): Promise<StaffProfile[]> {
     const db = await getDb();
     const res = await db
       .prepare(
-        "SELECT id, display_name, bio, photo_url, is_bookable FROM staff_profiles WHERE is_bookable = 1 ORDER BY display_name",
+        `SELECT sp.id, sp.display_name, sp.bio, sp.photo_url, sp.is_bookable
+         FROM staff_profiles sp
+         JOIN users u ON u.id = sp.user_id
+         WHERE sp.is_bookable = 1 AND u.is_active = 1
+         ORDER BY sp.display_name`,
       )
       .all<StaffProfile>();
     return res.results || [];

@@ -1,10 +1,22 @@
 import { getEnv } from "./db";
+import { leaveReviewText } from "./email-templates";
+
+export type EmailAttachment = {
+  filename: string;
+  /** Base64-encoded content */
+  content: string;
+  type: string;
+  disposition?: "attachment" | "inline";
+};
 
 export type EmailPayload = {
   to: string;
   subject: string;
   text: string;
   html?: string;
+  attachments?: EmailAttachment[];
+  /** Allowlisted or X- custom headers (Cloudflare Email Service). */
+  headers?: Record<string, string>;
 };
 
 /** Which From address to use (same domain, different mailboxes). */
@@ -77,6 +89,12 @@ async function sendViaCloudflareBinding(
     return { ok: false, detail: "EMAIL binding missing" };
   }
 
+  const extras: Record<string, unknown> = {};
+  if (payload.attachments?.length) extras.attachments = payload.attachments;
+  if (payload.headers && Object.keys(payload.headers).length) {
+    extras.headers = payload.headers;
+  }
+
   // Prefer structured from; fall back to string from (both supported by Workers API)
   const attempts: Array<Record<string, unknown>> = [
     {
@@ -85,6 +103,7 @@ async function sendViaCloudflareBinding(
       subject: payload.subject,
       text: payload.text,
       html: payload.html || `<pre>${payload.text}</pre>`,
+      ...extras,
     },
     {
       to: payload.to,
@@ -92,6 +111,7 @@ async function sendViaCloudflareBinding(
       subject: payload.subject,
       text: payload.text,
       html: payload.html || `<pre>${payload.text}</pre>`,
+      ...extras,
     },
   ];
 
@@ -131,6 +151,12 @@ async function sendViaResend(
         subject: payload.subject,
         text: payload.text,
         html: payload.html || undefined,
+        headers: payload.headers,
+        attachments: payload.attachments?.map((a) => ({
+          filename: a.filename,
+          content: a.content,
+          content_type: a.type,
+        })),
       }),
     });
 
@@ -175,6 +201,13 @@ async function sendViaCloudflareRest(
           subject: payload.subject,
           text: payload.text,
           html: payload.html || undefined,
+          headers: payload.headers,
+          attachments: payload.attachments?.map((a) => ({
+            content: a.content,
+            filename: a.filename,
+            type: a.type,
+            disposition: a.disposition || "attachment",
+          })),
         }),
       },
     );
@@ -216,6 +249,17 @@ async function sendViaBrevo(
         subject: payload.subject,
         textContent: payload.text,
         htmlContent: payload.html || undefined,
+        headers: payload.headers
+          ? Object.entries(payload.headers).map(([name, value]) => ({
+              name,
+              value,
+            }))
+          : undefined,
+        attachment: payload.attachments?.map((a) => ({
+          name: a.filename,
+          content: a.content,
+          type: a.type,
+        })),
       }),
     });
 
@@ -281,17 +325,21 @@ export function bookingConfirmationText(opts: {
   address: string;
   phone: string;
 }): string {
+  const first = opts.clientName.trim().split(/\s+/)[0] || opts.clientName;
   return [
-    `Hi ${opts.clientName},`,
+    `Hi ${first},`,
     "",
-    `Your appointment is confirmed.`,
-    `Service: ${opts.serviceName}`,
-    opts.staffName ? `With: ${opts.staffName}` : null,
+    `You're all set — we've saved your spot for ${opts.serviceName}.`,
+    opts.staffName ? `You'll be with ${opts.staffName}.` : null,
     `When: ${opts.when}`,
     `Where: ${opts.address}`,
     "",
-    `Questions? Call ${opts.phone}.`,
+    "We've attached a calendar invite so you can add a reminder on your phone.",
+    `Need to change anything? Just call us at ${opts.phone} — we're happy to help.`,
     "",
+    leaveReviewText(),
+    "",
+    "See you soon,",
     "Family Hair Salon & Wellness Spa",
   ]
     .filter(Boolean)
@@ -304,14 +352,28 @@ export function bookingAckText(opts: {
   when: string;
   phone: string;
 }): string {
+  const first = opts.clientName.trim().split(/\s+/)[0] || opts.clientName;
   return [
-    `Hi ${opts.clientName},`,
+    `Hi ${first},`,
     "",
-    `We received your appointment request for ${opts.serviceName} on ${opts.when}.`,
-    "We will confirm shortly.",
+    `Thanks for reaching out — we got your request for ${opts.serviceName} on ${opts.when}.`,
+    "Someone from the salon will confirm as soon as we check the book.",
     "",
-    `Questions? Call ${opts.phone}.`,
+    `Questions in the meantime? Call ${opts.phone}.`,
     "",
+    leaveReviewText(),
+    "",
+    "Talk soon,",
     "Family Hair Salon & Wellness Spa",
   ].join("\n");
+}
+
+/** Headers that help inbox providers treat salon mail as personal/transactional. */
+export function transactionalEmailHeaders(kind: OutboundEmailKind): Record<string, string> {
+  return {
+    "Auto-Submitted": "auto-generated",
+    Organization: "Family Hair Salon & Wellness Spa",
+    "X-Entity-Ref-ID": `mifamilysalon-${kind}-${Date.now()}`,
+    "X-Auto-Response-Suppress": "OOF, AutoReply",
+  };
 }

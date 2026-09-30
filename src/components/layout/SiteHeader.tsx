@@ -15,6 +15,7 @@ import {
   SITE_HEADER_PRIMARY_NAV,
   SITE_HEADER_SERVICE_GROUPS,
 } from "@/lib/service-categories";
+import { formatHoursInline } from "@/lib/site";
 
 const DESKTOP_MQ = "(min-width: 960px)";
 const CLOSE_DELAY_MS = 150;
@@ -357,7 +358,7 @@ export function SiteHeader({
               ))}
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 px-6 py-4 text-sm text-[#d9c8d4]">
-              <p>Walk-ins welcome for most services. {hours}.</p>
+              <p>Walk-ins welcome for most services. {formatHoursInline(hours)}.</p>
               <Link
                 href="/appointments"
                 className="font-medium text-[var(--salon-accent,#d946a8)] underline underline-offset-4 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--salon-accent,#d946a8)]"
@@ -474,7 +475,7 @@ export function SiteHeader({
 
             <div className="mt-auto border-t border-salon-border pt-6 text-sm text-salon-body">
               <p>{shortAddress}.</p>
-              <p className="mt-2">{hours}.</p>
+              <p className="mt-2">{formatHoursInline(hours)}.</p>
               <p className="mt-2">Walk-ins welcome.</p>
             </div>
           </nav>
